@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flashcard Practice - Chapter Wise</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="js/profile-manager.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  <link href="styles/duolingo-animations.css" rel="stylesheet">
+  <script src="js/duolingo-animations.js"></script>
+
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --bg-dark-3: #151515;
+      --teal-primary: #2C7A7B;
+      --text-faded: rgba(255, 255, 255, 0.5);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark-1);
+      color: white;
+    }
+
+    .scroll-hidden::-webkit-scrollbar { display: none; }
+    .scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .flashcard {
+      perspective: 1000px;
+      height: 280px;
+      cursor: pointer;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .flashcard.flipped .flashcard-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .flashcard-front {
+      background: linear-gradient(135deg, var(--glass-bg), rgba(44, 122, 123, 0.1));
+      border: 1px solid var(--glass-border);
+    }
+
+    .flashcard-back {
+      background: linear-gradient(135deg, rgba(44, 122, 123, 0.1), var(--glass-bg));
+      border: 1px solid var(--teal-primary);
+      transform: rotateY(180deg);
+    }
+
+    .confidence-btn {
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+
+    .confidence-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .confidence-easy {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+      border-color: #22c55e;
+    }
+
+    .confidence-medium {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      border-color: #fbbf24;
+    }
+
+    .confidence-hard {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border-color: #ef4444;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+      transition: stroke-dashoffset 0.35s;
+      transform-origin: 50% 50%;
+    }
+
+    .chapter-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .chapter-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--teal-primary);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-white antialiased scroll-hidden">
+  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+    
+    <!-- SIDEBAR -->
+    <aside class="hidden lg:flex flex-col w-[280px] bg-[var(--bg-dark-2)] p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+      <!-- Profile Section -->
+      <div class="flex items-center justify-between px-2 mb-10">
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <a href="profile.html" class="user-avatar block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+              <div id="user-initials" class="user-initials text-lg font-medium text-black">JD</div>
+            </a>
+            <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+              <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+              </span>
+            </button>
+          </div>
+          <div>
+            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-1.5 pt-10">
+        <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+        </a>
+        <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Learn</span>
+        </a>
+        <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Statistics</span>
+        </a>
+        <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI</div>
+          <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden">
+      <div class="max-w-7xl mx-auto">
+        
+        <!-- Chapter Selection View -->
+        <div id="chapter-selection" class="block">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h1 class="text-3xl lg:text-4xl font-semibold mb-2">Flashcard Practice</h1>
+              <p class="text-white/70">Choose a chapter to start studying with flashcards</p>
+            </div>
+            <div class="flex items-center gap-4">
+              <select id="subject-filter" class="bg-[var(--bg-dark-2)] border border-white/10 rounded-lg px-4 py-2 text-sm">
+                <option value="all">All Subjects</option>
+                <option value="polity">Polity & Governance</option>
+                <option value="economics">Economics</option>
+                <option value="history">History & Culture</option>
+                <option value="geography">Geography</option>
+                <option value="environment">Environment</option>
+                <option value="science">Science & Technology</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Chapters Grid -->
+          <div id="chapters-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Chapters will be populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Flashcard Practice View -->
+        <div id="flashcard-practice" class="hidden">
+          <!-- Practice Header -->
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <button id="back-to-chapters" class="p-2 rounded-lg hover:bg-white/10 transition">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+              </button>
+              <div>
+                <h2 id="practice-title" class="text-xl font-semibold">Chapter Flashcards</h2>
+                <p id="practice-subtitle" class="text-white/70 text-sm">Card 1 of 10</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-center">
+                <svg class="w-16 h-16 progress-ring">
+                  <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.1)" stroke-width="4" fill="none" />
+                  <circle id="progress-circle" cx="32" cy="32" r="28" stroke="var(--teal-primary)" stroke-width="4" fill="none" 
+                          stroke-dasharray="175.9" stroke-dashoffset="158.3" class="progress-ring-circle" />
+                </svg>
+                <div class="text-xs text-white/60 mt-1">Progress</div>
+              </div>
+              <button id="finish-practice" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm hover:bg-red-500/30 transition">
+                Finish
+              </button>
+            </div>
+          </div>
+
+          <!-- Flashcard -->
+          <div class="max-w-2xl mx-auto mb-8">
+            <div id="flashcard" class="flashcard" onclick="flipCard()">
+              <div class="flashcard-inner">
+                <div class="flashcard-front">
+                  <div class="text-center">
+                    <div class="text-sm text-white/60 mb-4">Question</div>
+                    <h3 id="card-question" class="text-lg font-medium">What is the fundamental structure doctrine?</h3>
+                    <div class="mt-6 text-sm text-white/50">
+                      <i data-lucide="mouse-pointer-click" class="w-4 h-4 inline mr-2"></i>
+                      Click to reveal answer
+                    </div>
+                  </div>
+                </div>
+                <div class="flashcard-back">
+                  <div class="text-center">
+                    <div class="text-sm text-[var(--teal-primary)] mb-4">Answer</div>
+                    <p id="card-answer" class="text-base leading-relaxed">The basic structure doctrine is a legal principle that certain fundamental features of the Constitution cannot be altered or destroyed through amendments by the Parliament.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Confidence Rating -->
+          <div id="confidence-section" class="hidden max-w-2xl mx-auto mb-8">
+            <div class="text-center mb-6">
+              <h4 class="text-lg font-medium mb-2">How well did you know this?</h4>
+              <p class="text-white/70 text-sm">Rate your confidence to help us show you the right cards</p>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+              <button onclick="rateConfidence('hard')" class="confidence-btn confidence-hard p-4 rounded-lg text-center">
+                <i data-lucide="frown" class="w-6 h-6 mx-auto mb-2"></i>
+                <div class="font-medium">Hard</div>
+                <div class="text-xs opacity-80">Show again soon</div>
+              </button>
+              <button onclick="rateConfidence('medium')" class="confidence-btn confidence-medium p-4 rounded-lg text-center">
+                <i data-lucide="meh" class="w-6 h-6 mx-auto mb-2"></i>
+                <div class="font-medium">Medium</div>
+                <div class="text-xs opacity-80">Show again later</div>
+              </button>
+              <button onclick="rateConfidence('easy')" class="confidence-btn confidence-easy p-4 rounded-lg text-center">
+                <i data-lucide="smile" class="w-6 h-6 mx-auto mb-2"></i>
+                <div class="font-medium">Easy</div>
+                <div class="text-xs opacity-80">Show less often</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Navigation -->
+          <div class="flex items-center justify-between max-w-2xl mx-auto">
+            <button id="prev-card" class="px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              <i data-lucide="chevron-left" class="w-4 h-4 inline mr-2"></i>
+              Previous
+            </button>
+            <div class="text-sm text-white/60">
+              <span id="card-counter">1 / 10</span>
+            </div>
+            <button id="next-card" class="px-6 py-2 bg-[var(--teal-primary)] rounded-lg hover:bg-[var(--teal-primary)]/80 transition">
+              Next
+              <i data-lucide="chevron-right" class="w-4 h-4 inline ml-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view" class="hidden">
+          <!-- Results content will be populated by JavaScript -->
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Flashcard Data Structure
+    const flashcardData = {
+      polity: {
+        name: "Polity & Governance",
+        chapters: [
+          {
+            id: "const-basics",
+            name: "Constitutional Basics",
+            description: "Fundamental concepts of Indian Constitution",
+            totalCards: 25,
+            studied: 18,
+            mastered: 12,
+            cards: [
+              {
+                id: 1,
+                question: "What is the fundamental structure doctrine?",
+                answer: "The basic structure doctrine is a legal principle that certain fundamental features of the Constitution cannot be altered or destroyed through amendments by the Parliament. It was established in the Kesavananda Bharati case (1973).",
+                difficulty: "medium",
+                lastReviewed: null,
+                confidence: null
+              },
+              {
+                id: 2,
+                question: "What are Directive Principles of State Policy?",
+                answer: "Directive Principles are guidelines for the government to establish a just society. They are non-justiciable but fundamental in governance, covering social, economic, and political justice.",
+                difficulty: "easy",
+                lastReviewed: null,
+                confidence: null
+              },
+              {
+                id: 3,
+                question: "Explain the concept of Judicial Review",
+                answer: "Judicial Review is the power of the judiciary to examine the constitutionality of legislative acts and executive orders. It ensures that laws and government actions comply with the Constitution.",
+                difficulty: "hard",
+                lastReviewed: null,
+                confidence: null
+              }
+            ]
+          },
+          {
+            id: "fundamental-rights",
+            name: "Fundamental Rights",
+            description: "Rights guaranteed by the Constitution",
+            totalCards: 30,
+            studied: 12,
+            mastered: 8,
+            cards: [
+              {
+                id: 1,
+                question: "What is Right to Equality?",
+                answer: "Right to Equality ensures equal treatment before law and prohibits discrimination on grounds of religion, race, caste, sex or place of birth.",
+                difficulty: "easy",
+                lastReviewed: null,
+                confidence: null
+              },
+              {
+                id: 2,
+                question: "What is Right to Freedom?",
+                answer: "Right to Freedom includes freedom of speech, assembly, association, movement, residence and profession.",
+                difficulty: "medium",
+                lastReviewed: null,
+                confidence: null
+              },
+              {
+                id: 3,
+                question: "What is Right against Exploitation?",
+                answer: "Right against Exploitation prohibits human trafficking, forced labor, and employment of children in hazardous work.",
+                difficulty: "medium",
+                lastReviewed: null,
+                confidence: null
+              }
+            ]
+          }
+        ]
+      },
+      economics: {
+        name: "Economics",
+        chapters: [
+          {
+            id: "indian-economy",
+            name: "Indian Economy Overview",
+            description: "Basic concepts of Indian economic system",
+            totalCards: 20,
+            studied: 8,
+            mastered: 5,
+            cards: []
+          }
+        ]
+      }
+    };
+
+    // Current practice state
+    let currentPractice = {
+      subject: null,
+      chapter: null,
+      cards: [],
+      currentCard: 0,
+      isFlipped: false,
+      confidenceRatings: [],
+      startTime: null
+    };
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.iconManager) window.iconManager.refresh();
+      
+      // Check if a chapter was selected from flashcards.html
+      const storedChapter = localStorage.getItem('selectedFlashcardChapter');
+      if (storedChapter) {
+        try {
+          const chapterData = JSON.parse(storedChapter);
+          // Clear the stored data
+          localStorage.removeItem('selectedFlashcardChapter');
+          // Start practice directly with the selected chapter
+          startDirectPractice(chapterData);
+        } catch (e) {
+          console.error('Error parsing stored chapter data:', e);
+          renderChapters();
+          setupEventListeners();
+        }
+      } else {
+        // If no stored chapter data, redirect back to main flashcards page
+        window.location.href = 'flashcards.html';
+      }
+    });
+
+    function renderChapters() {
+      const grid = document.getElementById('chapters-grid');
+      const filter = document.getElementById('subject-filter').value;
+      
+      let chaptersHTML = '';
+      
+      Object.keys(flashcardData).forEach(subjectKey => {
+        if (filter !== 'all' && filter !== subjectKey) return;
+        
+        const subject = flashcardData[subjectKey];
+        subject.chapters.forEach(chapter => {
+          const progressPercent = Math.round((chapter.studied / chapter.totalCards) * 100);
+          const masteryPercent = Math.round((chapter.mastered / chapter.totalCards) * 100);
+          
+          chaptersHTML += `
+            <div class="glass-card-interactive rounded-2xl p-6" 
+                 onclick="startChapterPractice('${subjectKey}', '${chapter.id}')">
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg mb-2">${chapter.name}</h3>
+                  <p class="text-white/70 text-sm mb-3">${chapter.description}</p>
+                  <span class="inline-block px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-medium">
+                    ${subject.name}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-[var(--teal-primary)]">${masteryPercent}%</div>
+                  <div class="text-xs text-white/60">Mastered</div>
+                </div>
+              </div>
+              
+              <div class="space-y-3 mb-4">
+                <div>
+                  <div class="flex justify-between text-sm text-white/70 mb-1">
+                    <span>Studied</span>
+                    <span>${chapter.studied}/${chapter.totalCards}</span>
+                  </div>
+                  <div class="w-full bg-white/10 rounded-full h-2">
+                    <div class="bg-blue-500 h-2 rounded-full" style="width: ${progressPercent}%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-sm text-white/70 mb-1">
+                    <span>Mastered</span>
+                    <span>${chapter.mastered}/${chapter.totalCards}</span>
+                  </div>
+                  <div class="w-full bg-white/10 rounded-full h-2">
+                    <div class="bg-green-500 h-2 rounded-full" style="width: ${masteryPercent}%"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-white/60">${chapter.totalCards} flashcards</span>
+                <div class="flex items-center text-[var(--teal-primary)]">
+                  <span class="mr-2">Start Study</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      });
+      
+      grid.innerHTML = chaptersHTML;
+      if (window.iconManager) window.iconManager.refresh();
+    }
+
+    function startDirectPractice(chapterData) {
+      // Create sample flashcards based on the chapter data
+      const sampleCards = generateSampleFlashcards(chapterData);
+      
+      currentPractice = {
+        subject: chapterData.subject,
+        chapter: chapterData.id,
+        chapterName: chapterData.name,
+        cards: sampleCards,
+        currentCard: 0,
+        isFlipped: false,
+        confidenceRatings: new Array(sampleCards.length).fill(null),
+        startTime: Date.now(),
+        cameFromFlashcardsPage: true // Flag to track source
+      };
+      
+      // Hide chapter selection and show practice
+      document.getElementById('chapter-selection').classList.add('hidden');
+      document.getElementById('flashcard-practice').classList.remove('hidden');
+      
+      document.getElementById('practice-title').textContent = chapterData.name;
+      
+      // Setup event listeners for practice mode
+      setupEventListeners();
+      
+      renderCurrentCard();
+    }
+
+    function generateSampleFlashcards(chapterData) {
+      // Generate sample flashcards based on chapter topics
+      const cardTemplates = {
+        'Constitutional Basics': [
+          {
+            id: 1,
+            question: "What is the Preamble?",
+            answer: "The Preamble is the introductory statement of the Constitution that sets out the guiding purpose, principles and philosophy of the Constitution.",
+            difficulty: "easy",
+            lastReviewed: null,
+            confidence: null
+          },
+          {
+            id: 2,
+            question: "What are Fundamental Rights?",
+            answer: "Fundamental Rights are basic human rights enshrined in the Constitution that are guaranteed to all citizens and are enforceable by the courts.",
+            difficulty: "medium",
+            lastReviewed: null,
+            confidence: null
+          },
+          {
+            id: 3,
+            question: "What are Directive Principles of State Policy?",
+            answer: "DPSPs are guidelines for the government to establish a just society. They are non-justiciable but fundamental in governance.",
+            difficulty: "medium",
+            lastReviewed: null,
+            confidence: null
+          }
+        ],
+        'Fundamental Rights': [
+          {
+            id: 1,
+            question: "What is Right to Equality?",
+            answer: "Right to Equality ensures equal treatment before law and prohibits discrimination on grounds of religion, race, caste, sex or place of birth.",
+            difficulty: "easy",
+            lastReviewed: null,
+            confidence: null
+          },
+          {
+            id: 2,
+            question: "What is Right to Freedom?",
+            answer: "Right to Freedom includes freedom of speech, assembly, association, movement, residence and profession.",
+            difficulty: "medium",
+            lastReviewed: null,
+            confidence: null
+          }
+        ],
+        'Indian Economy Overview': [
+          {
+            id: 1,
+            question: "What is GDP?",
+            answer: "Gross Domestic Product (GDP) is the total monetary value of all goods and services produced within a country's borders in a specific time period.",
+            difficulty: "easy",
+            lastReviewed: null,
+            confidence: null
+          },
+          {
+            id: 2,
+            question: "What is Inflation?",
+            answer: "Inflation is the rate at which the general level of prices for goods and services rises, eroding purchasing power.",
+            difficulty: "medium",
+            lastReviewed: null,
+            confidence: null
+          }
+        ]
+      };
+
+      // Get cards for this chapter or use default cards
+      let cards = cardTemplates[chapterData.name] || [
+        {
+          id: 1,
+          question: `Sample term for ${chapterData.name}`,
+          answer: "This is a sample flashcard for practice purposes.",
+          difficulty: "medium",
+          lastReviewed: null,
+          confidence: null
+        }
+      ];
+
+      return cards;
+    }
+
+    function startChapterPractice(subjectKey, chapterId) {
+      const subject = flashcardData[subjectKey];
+      const chapter = subject.chapters.find(c => c.id === chapterId);
+      
+      if (!chapter || !chapter.cards || chapter.cards.length === 0) {
+        alert('Flashcards for this chapter are not available yet. Coming soon!');
+        return;
+      }
+      
+      currentPractice = {
+        subject: subjectKey,
+        chapter: chapterId,
+        cards: [...chapter.cards],
+        currentCard: 0,
+        isFlipped: false,
+        confidenceRatings: new Array(chapter.cards.length).fill(null),
+        startTime: Date.now()
+      };
+      
+      document.getElementById('chapter-selection').classList.add('hidden');
+      document.getElementById('flashcard-practice').classList.remove('hidden');
+      
+      document.getElementById('practice-title').textContent = chapter.name;
+      
+      renderCurrentCard();
+    }
+
+    function renderCurrentCard() {
+      const card = currentPractice.cards[currentPractice.currentCard];
+      const cardNum = currentPractice.currentCard + 1;
+      const total = currentPractice.cards.length;
+      
+      document.getElementById('practice-subtitle').textContent = `Card ${cardNum} of ${total}`;
+      document.getElementById('card-counter').textContent = `${cardNum} / ${total}`;
+      
+      // Update progress ring
+      const progressPercent = (cardNum / total) * 100;
+      const circumference = 2 * Math.PI * 28;
+      const offset = circumference - (progressPercent / 100) * circumference;
+      document.getElementById('progress-circle').style.strokeDashoffset = offset;
+      
+      // Render card content
+      document.getElementById('card-question').textContent = card.question;
+      document.getElementById('card-answer').textContent = card.answer;
+      
+      // Reset card state
+      const flashcard = document.getElementById('flashcard');
+      flashcard.classList.remove('flipped');
+      currentPractice.isFlipped = false;
+      
+      // Hide confidence section
+      document.getElementById('confidence-section').classList.add('hidden');
+      
+      // Update navigation buttons
+      document.getElementById('prev-card').disabled = currentPractice.currentCard === 0;
+      
+      if (window.iconManager) window.iconManager.refresh();
+    }
+
+    function flipCard() {
+      const flashcard = document.getElementById('flashcard');
+      flashcard.classList.toggle('flipped');
+      currentPractice.isFlipped = !currentPractice.isFlipped;
+      
+      if (currentPractice.isFlipped) {
+        // Show confidence section after a delay
+        setTimeout(() => {
+          document.getElementById('confidence-section').classList.remove('hidden');
+        }, 300);
+      } else {
+        document.getElementById('confidence-section').classList.add('hidden');
+      }
+    }
+
+    function rateConfidence(level) {
+      currentPractice.confidenceRatings[currentPractice.currentCard] = level;
+      
+      // Update card's confidence in the data
+      const card = currentPractice.cards[currentPractice.currentCard];
+      card.confidence = level;
+      card.lastReviewed = new Date().toISOString();
+      
+      // Add animation based on confidence level
+      const clickedButton = event.target.closest('button');
+      if (window.duoAnimations && clickedButton) {
+        if (level === 'easy') {
+          window.duoAnimations.triggerCelebrationBounce(clickedButton);
+        } else if (level === 'medium') {
+          window.duoAnimations.triggerSuccessPulse(clickedButton);
+        } else {
+          window.duoAnimations.bounceButton(clickedButton);
+        }
+      }
+      
+      // Auto-advance to next card
+      setTimeout(() => {
+        nextCard();
+      }, 500);
+    }
+
+    function nextCard() {
+      if (currentPractice.currentCard < currentPractice.cards.length - 1) {
+        currentPractice.currentCard++;
+        renderCurrentCard();
+      } else {
+        finishPractice();
+      }
+    }
+
+    function prevCard() {
+      if (currentPractice.currentCard > 0) {
+        currentPractice.currentCard--;
+        renderCurrentCard();
+      }
+    }
+
+    function finishPractice() {
+      // Calculate results
+      const ratings = currentPractice.confidenceRatings.filter(r => r !== null);
+      const easy = ratings.filter(r => r === 'easy').length;
+      const medium = ratings.filter(r => r === 'medium').length;
+      const hard = ratings.filter(r => r === 'hard').length;
+      
+      const timeTaken = Math.round((Date.now() - currentPractice.startTime) / 1000);
+      
+      showResults(easy, medium, hard, ratings.length, timeTaken);
+    }
+
+    function showResults(easy, medium, hard, total, timeTaken) {
+      document.getElementById('flashcard-practice').classList.add('hidden');
+      
+      const resultsView = document.getElementById('results-view');
+      resultsView.innerHTML = `
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold mb-4">Study Session Complete!</h1>
+          <p class="text-white/70">Here's your confidence breakdown</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="glass-card rounded-2xl p-6 text-center stagger-item">
+            <div class="text-3xl font-bold text-green-400 mb-2">${easy}</div>
+            <div class="text-white/70">Easy</div>
+          </div>
+          <div class="glass-card rounded-2xl p-6 text-center stagger-item">
+            <div class="text-3xl font-bold text-yellow-400 mb-2">${medium}</div>
+            <div class="text-white/70">Medium</div>
+          </div>
+          <div class="glass-card rounded-2xl p-6 text-center stagger-item">
+            <div class="text-3xl font-bold text-red-400 mb-2">${hard}</div>
+            <div class="text-white/70">Hard</div>
+          </div>
+          <div class="glass-card rounded-2xl p-6 text-center stagger-item">
+            <div class="text-3xl font-bold text-purple-400 mb-2">${Math.floor(timeTaken / 60)}:${(timeTaken % 60).toString().padStart(2, '0')}</div>
+            <div class="text-white/70">Time</div>
+          </div>
+        </div>
+        
+        <div class="flex justify-center gap-4">
+          <button onclick="backToChapters()" class="px-6 py-3 bg-white/10 rounded-lg hover:bg-white/20 transition">
+            Back to Chapters
+          </button>
+          <button onclick="studyHardCards()" class="px-6 py-3 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition">
+            Review Hard Cards
+          </button>
+          <button onclick="retryPractice()" class="px-6 py-3 bg-[var(--teal-primary)] rounded-lg hover:bg-[var(--teal-primary)]/80 transition">
+            Study Again
+          </button>
+        </div>
+      `;
+      
+      resultsView.classList.remove('hidden');
+      
+      // Trigger celebration animations based on performance
+      setTimeout(() => {
+        const easyPercentage = Math.round((easy / total) * 100);
+        
+        if (window.duoAnimations) {
+          if (easyPercentage >= 70) {
+            // Great mastery - confetti celebration
+            window.duoAnimations.triggerConfetti();
+            window.duoAnimations.triggerCelebrationBounce(resultsView.querySelector('h1'));
+          } else if (easyPercentage >= 40) {
+            // Good progress - success pulse
+            window.duoAnimations.triggerSuccessPulse(resultsView.querySelector('.text-green-400').parentElement);
+          }
+        }
+      }, 500);
+    }
+
+    function backToChapters() {
+      // Check if user came from flashcards.html page
+      if (currentPractice && currentPractice.cameFromFlashcardsPage) {
+        // Redirect back to flashcards.html
+        window.location.href = 'flashcards.html';
+      } else {
+        // Show chapter selection within this page
+        document.getElementById('results-view').classList.add('hidden');
+        document.getElementById('flashcard-practice').classList.add('hidden');
+        document.getElementById('chapter-selection').classList.remove('hidden');
+      }
+    }
+
+    function studyHardCards() {
+      // Filter cards marked as hard
+      const hardCards = currentPractice.cards.filter((card, index) => 
+        currentPractice.confidenceRatings[index] === 'hard'
+      );
+      
+      if (hardCards.length === 0) {
+        alert('No cards marked as hard to review!');
+        return;
+      }
+      
+      currentPractice.cards = hardCards;
+      currentPractice.currentCard = 0;
+      currentPractice.isFlipped = false;
+      currentPractice.confidenceRatings = new Array(hardCards.length).fill(null);
+      currentPractice.startTime = Date.now();
+      
+      document.getElementById('results-view').classList.add('hidden');
+      document.getElementById('flashcard-practice').classList.remove('hidden');
+      
+      renderCurrentCard();
+    }
+
+    function retryPractice() {
+      currentPractice.currentCard = 0;
+      currentPractice.isFlipped = false;
+      currentPractice.confidenceRatings = new Array(currentPractice.cards.length).fill(null);
+      currentPractice.startTime = Date.now();
+      
+      document.getElementById('results-view').classList.add('hidden');
+      document.getElementById('flashcard-practice').classList.remove('hidden');
+      
+      renderCurrentCard();
+    }
+
+    function setupEventListeners() {
+      document.getElementById('subject-filter').addEventListener('change', renderChapters);
+      document.getElementById('back-to-chapters').addEventListener('click', backToChapters);
+      document.getElementById('next-card').addEventListener('click', nextCard);
+      document.getElementById('prev-card').addEventListener('click', prevCard);
+      document.getElementById('finish-practice').addEventListener('click', finishPractice);
+    }
+
+    // Load saved profile picture
+    function loadProfilePicture() {
+      const savedDP = localStorage.getItem('selectedDP');
+      const userInitialsEl = document.getElementById('user-initials');
+      
+      if (savedDP && userInitialsEl) {
+        const parentDiv = userInitialsEl.parentElement;
+        const img = new Image();
+        img.onload = function() {
+          parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+        };
+        img.onerror = function() {
+          console.warn('Failed to load profile picture:', savedDP);
+        };
+        img.src = `image/${savedDP}.png`;
+      }
+    }
+    
+    // Call after DOM is ready
+    setTimeout(loadProfilePicture, 100);
+
+    // Make functions globally accessible
+    window.startChapterPractice = startChapterPractice;
+    window.flipCard = flipCard;
+    window.rateConfidence = rateConfidence;
+    window.backToChapters = backToChapters;
+    window.studyHardCards = studyHardCards;
+    window.retryPractice = retryPractice;
+  </script>
+</body>
+</html>

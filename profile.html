@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aspirant Dashboard (Sidebar + Search)</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="js/profile-manager.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --teal-primary: #2C7A7B;
+      --text-faded: rgba(255, 255, 255, 0.5);
+      --search-bg-glass: rgba(255, 255, 255, 0.02);
+      --search-border-glass: rgba(255, 255, 255, 0.05);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --panel-bg: #1B1B1B;
+      --panel-border: rgba(255, 255, 255, 0.06);
+      --muted: rgba(255, 255, 255, 0.6);
+      --ring: rgba(132, 208, 247, 0.35);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark-1);
+      color: white;
+    }
+
+    .scroll-hidden::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scroll-hidden {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Glass Searchbar */
+    .glass-search-container {
+      background-color: var(--search-bg-glass);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid var(--search-border-glass);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .arrow-circle-button {
+      width: 44px;
+      height: 44px;
+      background-color: var(--bg-dark-1);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .arrow-circle-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .row-hover:hover {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .btn-ring:focus {
+      outline: none;
+      box-shadow: 0 0 0 6px var(--ring);
+    }
+
+    .card-top {
+      background: linear-gradient(135deg, rgba(132, 208, 247, 0.08), rgba(255, 255, 255, 0.02));
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    /* --- GLASSMORPHISM EFFECTS --- */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .glass-sidebar {
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- SMOOTH ANIMATIONS --- */
+    .page-transition {
+      animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .nav-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-item:hover::before {
+      left: 100%;
+    }
+
+    .nav-item:hover {
+      transform: translateX(4px);
+      background: rgba(42, 42, 42, 0.8);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(44, 122, 123, 0.2), rgba(42, 42, 42, 0.9));
+      border-left: 3px solid var(--teal-primary);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-white antialiased scroll-hidden">
+
+  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar"
+      class="hidden lg:flex flex-col w-[280px] glass-sidebar p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+      <!-- Profile and Notifications -->
+      <div class="flex items-center justify-between px-2 mb-10">
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <a href="profile.html"
+              class="block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+              <div id="user-initials" class="text-lg font-medium text-black">JD</div>
+            </a>
+            <!-- Notification badge -->
+            <button id="notification-btn" aria-label="Notifications"
+              class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+              <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+              </span>
+            </button>
+          </div>
+          <div>
+            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-1.5 pt-10">
+        <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+        </a>
+        <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Learn</span>
+        </a>
+        <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Statistics</span>
+        </a>
+        <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <div
+            class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI
+          </div>
+          <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
+        </a>
+      </nav>
+
+      <!-- Bookmarks Section -->
+      <div class="mt-8 pt-6 border-t border-white/10">
+        <button id="bookmarks-btn"
+          class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full w-full text-left">
+          <i data-lucide="bookmark" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Bookmarks</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA (Profile) -->
+    <main id="main-content" role="main" tabindex="-1"
+      class="flex-1 p-6 lg:p-10 overflow-y-auto scroll-hidden page-transition">
+      <section class="w-full max-w-5xl mx-auto mt-2">
+        <div class="panel rounded-2xl overflow-hidden">
+          <div class="card-top px-6 md:px-10 py-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="relative">
+                <div
+                  class="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center">
+                  <div id="avatarInitial" class="text-3xl md:text-4xl font-semibold text-black">A</div>
+                </div>
+                <button id="editAvatarBtn"
+                  class="absolute -right-1 -bottom-1 w-9 h-9 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700 btn-ring"
+                  title="Edit avatar">
+                  <i data-lucide="pencil" class="text-white w-4 h-4"></i>
+                </button>
+              </div>
+              <div>
+                <div id="avatarName" class="text-xl md:text-2xl font-semibold text-white">Jane Doe</div>
+                <div id="avatarEmail" class="text-sm text-white/70">jane.doe@aspirant.com</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="editAll"
+                class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 text-sm btn-ring">Edit</button>
+              <button id="saveAll"
+                class="hidden px-4 py-2 rounded-full bg-emerald-500/90 hover:bg-emerald-500 text-sm text-black font-medium btn-ring">Save</button>
+              <button id="cancelAll"
+                class="hidden px-4 py-2 rounded-full bg-white/10 hover:bg-white/15 text-sm btn-ring">Cancel</button>
+            </div>
+          </div>
+          <div class="px-6 md:px-10 py-8">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="divide-y divide-white/10">
+                <div class="py-4 rounded-xl px-2" data-field="name">
+                  <div class="flex-1 pr-4">
+                    <div class="text-xs uppercase tracking-wide text-[var(--muted)]">Name</div>
+                    <div id="nameValue" class="text-base md:text-lg font-semibold">Jane Doe</div>
+                    <input id="nameInput" type="text"
+                      class="hidden mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#84D0F7]/40" />
+                    <p id="nameError" class="hidden text-xs text-red-400 mt-1">Please enter at least 2 characters.</p>
+                  </div>
+                </div>
+
+                <div class="py-4 rounded-xl px-2" data-field="email">
+                  <div class="flex-1 pr-4">
+                    <div class="text-xs uppercase tracking-wide text-[var(--muted)]">Email</div>
+                    <div id="emailValue" class="text-base md:text-lg font-semibold">jane.doe@aspirant.com</div>
+                    <input id="emailInput" type="email"
+                      class="hidden mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#84D0F7]/40" />
+                    <p id="emailError" class="hidden text-xs text-red-400 mt-1">Enter a valid email address.</p>
+                  </div>
+                </div>
+
+                <div class="py-4 rounded-xl px-2" data-field="mobile">
+                  <div class="flex-1 pr-4">
+                    <div class="text-xs uppercase tracking-wide text-[var(--muted)]">Mobile Number</div>
+                    <div id="mobileValue" class="text-base md:text-lg font-semibold">9876543210</div>
+                    <input id="mobileInput" type="tel"
+                      class="hidden mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#84D0F7]/40" />
+                    <p id="mobileError" class="hidden text-xs text-red-400 mt-1">Enter a valid 10-digit number.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <button id="report-issue-btn"
+                  class="w-full flex items-center justify-between py-4 rounded-xl px-3 row-hover btn-ring panel">
+                  <div class="flex items-center gap-3">
+                    <span class="inline-flex w-8 h-8 rounded-full bg-white/5 items-center justify-center">
+                      <i data-lucide="bug" class="w-4 h-4 text-white/80"></i>
+                    </span>
+                    <span class="text-sm md:text-base">Report an issue</span>
+                  </div>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-white/40"></i>
+                </button>
+
+                <button id="change-password-btn"
+                  class="w-full flex items-center justify-between py-4 rounded-xl px-3 row-hover btn-ring panel">
+                  <div class="flex items-center gap-3">
+                    <span class="inline-flex w-8 h-8 rounded-full bg-white/5 items-center justify-center">
+                      <i data-lucide="lock" class="w-4 h-4 text-white/80"></i>
+                    </span>
+                    <span class="text-sm md:text-base">Change Password</span>
+                  </div>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-white/40"></i>
+                </button>
+
+                <button id="logout-btn"
+                  class="w-full bg-gradient-to-b from-[#C23B2F] to-[#A52F25] hover:from-[#B4362B] hover:to-[#92291F] transition text-white font-medium py-3 rounded-full mt-4 btn-ring">Log
+                  out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookmarks Section -->
+        <div class="panel rounded-2xl overflow-hidden mt-8">
+          <div class="card-top px-6 md:px-10 py-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <i data-lucide="bookmark" class="w-5 h-5 text-[var(--teal-primary)]"></i>
+                <h2 class="text-xl font-semibold">Bookmarks</h2>
+              </div>
+              <button id="clear-bookmarks" class="text-sm text-white/60 hover:text-white transition">
+                Clear All
+              </button>
+            </div>
+          </div>
+          <div class="px-6 md:px-10 py-6">
+            <div id="bookmarks-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Bookmarks will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      function $(sel) { return document.querySelector(sel); }
+      function setText(el, text) { if (el) el.textContent = text; }
+
+      const storeKey = (k) => `profile.${k}`;
+      const getStore = (k, fallback) => localStorage.getItem(storeKey(k)) ?? fallback;
+      const setStore = (k, v) => localStorage.setItem(storeKey(k), v);
+
+      const nodes = {
+        // values
+        nameValue: $('#nameValue'),
+        emailValue: $('#emailValue'),
+        mobileValue: $('#mobileValue'),
+        // inputs
+        nameInput: $('#nameInput'),
+        emailInput: $('#emailInput'),
+        mobileInput: $('#mobileInput'),
+        // errors
+        nameError: $('#nameError'),
+        emailError: $('#emailError'),
+        mobileError: $('#mobileError'),
+        // avatar panel
+        avatarName: $('#avatarName'),
+        avatarEmail: $('#avatarEmail'),
+        avatarInitial: $('#avatarInitial'),
+        // sidebar header
+        sbName: $('#user-name'),
+        sbEmail: $('#user-email'),
+        sbInitials: $('#user-initials'),
+        // global controls
+        editAll: $('#editAll'),
+        saveAll: $('#saveAll'),
+        cancelAll: $('#cancelAll'),
+      };
+
+      const validators = {
+        name: (v) => (v || '').trim().length >= 2,
+        email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || ''),
+        mobile: (v) => /^\d{10}$/.test(String(v || '').replace(/\D/g, '')),
+      };
+
+      function initials(name) {
+        const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+        const a = (parts[0] || '').charAt(0);
+        const b = (parts[1] || '').charAt(0);
+        return (a + (b || '')).toUpperCase() || 'A';
+      }
+
+      function syncUI() {
+        const name = nodes.nameValue?.textContent?.trim() || 'Jane Doe';
+        const email = nodes.emailValue?.textContent?.trim() || 'jane.doe@aspirant.com';
+        setText(nodes.avatarName, name);
+        setText(nodes.avatarEmail, email);
+        setText(nodes.sbName, name);
+        setText(nodes.sbEmail, email);
+        setText(nodes.avatarInitial, initials(name).charAt(0));
+        setText(nodes.sbInitials, initials(name));
+      }
+
+      function setRowMode(field, editing) {
+        const row = document.querySelector(`[data-field="${field}"]`);
+        if (!row) return;
+        const valueEl = row.querySelector(`#${field}Value`);
+        const inputEl = row.querySelector(`#${field}Input`);
+        const errEl = row.querySelector(`#${field}Error`);
+        if (!valueEl || !inputEl) return;
+        if (editing) {
+          inputEl.value = valueEl.textContent.trim();
+          valueEl.classList.add('hidden');
+          inputEl.classList.remove('hidden');
+          if (errEl) errEl.classList.add('hidden');
+        } else {
+          inputEl.classList.add('hidden');
+          valueEl.classList.remove('hidden');
+          if (errEl) errEl.classList.add('hidden');
+        }
+      }
+
+      function toggleEditMode(editing) {
+        setRowMode('name', editing);
+        setRowMode('email', editing);
+        setRowMode('mobile', editing);
+        nodes.editAll.classList.toggle('hidden', editing);
+        nodes.saveAll.classList.toggle('hidden', !editing);
+        nodes.cancelAll.classList.toggle('hidden', !editing);
+        if (editing) { nodes.nameInput?.focus(); }
+      }
+
+      function validateAndCollect() {
+        const payload = {
+          name: nodes.nameInput.value,
+          email: nodes.emailInput.value,
+          mobile: nodes.mobileInput.value,
+        };
+        let ok = true;
+        if (!validators.name(payload.name)) { nodes.nameError.classList.remove('hidden'); ok = false; }
+        else nodes.nameError.classList.add('hidden');
+        if (!validators.email(payload.email)) { nodes.emailError.classList.remove('hidden'); ok = false; }
+        else nodes.emailError.classList.add('hidden');
+        const m = String(payload.mobile).replace(/\D/g, '');
+        if (!validators.mobile(m)) { nodes.mobileError.classList.remove('hidden'); ok = false; }
+        else nodes.mobileError.classList.add('hidden');
+        payload.mobile = m;
+        return { ok, payload };
+      }
+
+      function saveAll() {
+        const { ok, payload } = validateAndCollect();
+        if (!ok) return;
+        setText(nodes.nameValue, payload.name.trim());
+        setText(nodes.emailValue, payload.email.trim());
+        setText(nodes.mobileValue, payload.mobile);
+        setStore('name', payload.name.trim());
+        setStore('email', payload.email.trim());
+        setStore('mobile', payload.mobile);
+
+        // Update ProfileManager to sync across all pages
+        if (window.profileManager) {
+          profileManager.updateProfile({
+            name: payload.name.trim(),
+            email: payload.email.trim()
+          });
+        }
+
+        syncUI();
+        toggleEditMode(false);
+      }
+
+      function cancelAll() {
+        // Reset inputs back to values
+        nodes.nameInput.value = nodes.nameValue.textContent.trim();
+        nodes.emailInput.value = nodes.emailValue.textContent.trim();
+        nodes.mobileInput.value = nodes.mobileValue.textContent.trim();
+        nodes.nameError.classList.add('hidden');
+        nodes.emailError.classList.add('hidden');
+        nodes.mobileError.classList.add('hidden');
+        toggleEditMode(false);
+      }
+
+      // Load initial values from storage
+      const initial = {
+        name: getStore('name', nodes.nameValue?.textContent?.trim() || 'Jane Doe'),
+        email: getStore('email', nodes.emailValue?.textContent?.trim() || 'jane.doe@aspirant.com'),
+        mobile: getStore('mobile', nodes.mobileValue?.textContent?.trim() || '9876543210'),
+      };
+      setText(nodes.nameValue, initial.name);
+      setText(nodes.emailValue, initial.email);
+      setText(nodes.mobileValue, initial.mobile);
+
+      // Sync UI
+      syncUI();
+
+      // Wire global controls
+      nodes.editAll?.addEventListener('click', () => toggleEditMode(true));
+      nodes.saveAll?.addEventListener('click', saveAll);
+      nodes.cancelAll?.addEventListener('click', cancelAll);
+
+      // Submit with Enter, cancel with Esc on inputs
+      [nodes.nameInput, nodes.emailInput, nodes.mobileInput].forEach((inp) => {
+        inp?.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); saveAll(); }
+          if (e.key === 'Escape') { e.preventDefault(); cancelAll(); }
+        });
+      });
+
+      // Change Password functionality
+      document.getElementById('change-password-btn')?.addEventListener('click', () => {
+        showPasswordModal();
+      });
+
+      // Logout functionality
+      document.getElementById('logout-btn')?.addEventListener('click', () => {
+        if (confirm('Are you sure you want to log out?')) {
+          // Clear any stored user data
+          localStorage.removeItem('selectedDP');
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('profile.')) {
+              localStorage.removeItem(key);
+            }
+          });
+
+          showToast('Logged out successfully');
+
+          // Redirect to login page after a short delay
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1000);
+        }
+      });
+
+      // Report Issue functionality
+      document.getElementById('report-issue-btn')?.addEventListener('click', () => {
+        showReportIssueModal();
+      });
+
+      // Render lucide icons
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.if (window.iconManager) window.iconManager.refresh();
+      }
+
+      // DP Selection Modal
+      const editAvatarBtn = document.getElementById('editAvatarBtn');
+      const avatarInitial = document.getElementById('avatarInitial');
+
+      editAvatarBtn?.addEventListener('click', () => {
+        showDPModal();
+      });
+
+      let selectedDP = localStorage.getItem('selectedDP') || 'DP1';
+
+      function showDPModal() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-md w-full border border-white/10">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-medium">Choose Profile Picture</h3>
+              <button id="closeDPModal" class="text-white/50 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-6" id="dp-options">
+              <button class="dp-option group" data-dp="DP1">
+                <div class="w-20 h-20 rounded-full overflow-hidden mx-auto mb-2 border-2 transition border-transparent group-hover:border-[var(--teal-primary)]">
+                  <img src="image/DP1.png" alt="Profile 1" class="w-full h-full object-cover">
+                </div>
+                <p class="text-sm text-white/70">Style 1</p>
+              </button>
+              <button class="dp-option group" data-dp="DP2">
+                <div class="w-20 h-20 rounded-full overflow-hidden mx-auto mb-2 border-2 transition border-transparent group-hover:border-[var(--teal-primary)]">
+                  <img src="image/DP2.png" alt="Profile 2" class="w-full h-full object-cover">
+                </div>
+                <p class="text-sm text-white/70">Style 2</p>
+              </button>
+              <button class="dp-option group" data-dp="DP3">
+                <div class="w-20 h-20 rounded-full overflow-hidden mx-auto mb-2 border-2 transition border-transparent group-hover:border-[var(--teal-primary)]">
+                  <img src="image/DP3.png" alt="Profile 3" class="w-full h-full object-cover">
+                </div>
+                <p class="text-sm text-white/70">Style 3</p>
+              </button>
+              <button class="dp-option group" data-dp="DP4">
+                <div class="w-20 h-20 rounded-full overflow-hidden mx-auto mb-2 border-2 transition border-transparent group-hover:border-[var(--teal-primary)]">
+                  <img src="image/DP4.png" alt="Profile 4" class="w-full h-full object-cover">
+                </div>
+                <p class="text-sm text-white/70">Style 4</p>
+              </button>
+            </div>
+            <div class="flex justify-between gap-3">
+              <button id="cancelDPModal" class="px-4 py-2 text-white/70 hover:text-white transition">Cancel</button>
+              <button id="saveDPModal" class="px-4 py-2 bg-[var(--teal-primary)] text-white rounded-lg hover:bg-[var(--teal-primary)]/80 transition">Save Changes</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Set initial selection
+        const currentSelectedOption = modal.querySelector(`[data-dp="${selectedDP}"] div`);
+        if (currentSelectedOption) {
+          currentSelectedOption.className = currentSelectedOption.className.replace('border-transparent group-hover:border-[var(--teal-primary)]', 'border-[var(--teal-primary)]');
+        }
+
+        // Add event listeners
+        modal.querySelector('#closeDPModal').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+
+        modal.querySelector('#cancelDPModal').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+
+        modal.querySelectorAll('.dp-option').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Remove selection from all options
+            modal.querySelectorAll('.dp-option').forEach(option => {
+              const div = option.querySelector('div');
+              div.classList.remove('border-[var(--teal-primary)]');
+              div.classList.add('border-transparent');
+              option.classList.remove('selected');
+            });
+
+            // Add selection to clicked option
+            const selectedDiv = btn.querySelector('div');
+            selectedDiv.classList.remove('border-transparent');
+            selectedDiv.classList.add('border-[var(--teal-primary)]');
+            btn.classList.add('selected');
+
+            selectedDP = btn.dataset.dp;
+            console.log('Selected DP:', selectedDP);
+          });
+        });
+
+        modal.querySelector('#saveDPModal').addEventListener('click', () => {
+          updateProfilePicture(selectedDP);
+          document.body.removeChild(modal);
+        });
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            document.body.removeChild(modal);
+          }
+        });
+
+        // Re-render icons for the modal
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.if (window.iconManager) window.iconManager.refresh();
+        }
+      }
+
+      function updateProfilePicture(dpName) {
+        console.log('Updating profile picture to:', dpName);
+
+        // Update main profile picture
+        const mainAvatarContainer = document.querySelector('#avatarInitial')?.parentElement;
+        if (mainAvatarContainer) {
+          mainAvatarContainer.innerHTML = `<img src="image/${dpName}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+          console.log('Updated main avatar');
+        }
+
+        // Update sidebar profile pictures
+        const sidebarAvatarContainer = document.querySelector('#user-initials')?.parentElement;
+        if (sidebarAvatarContainer) {
+          sidebarAvatarContainer.innerHTML = `<img src="image/${dpName}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+          console.log('Updated sidebar avatar');
+        }
+
+        // Store selection
+        localStorage.setItem('selectedDP', dpName);
+        console.log('Stored selection:', dpName);
+
+        // Show success message
+        showToast('Profile picture updated successfully!');
+      }
+
+      function updateSidebarProfilePictures(dpName) {
+        // Update all sidebar profile pictures across the site
+        const sidebarContainers = document.querySelectorAll('#user-initials');
+        sidebarContainers.forEach(container => {
+          const parentDiv = container.parentElement;
+          if (parentDiv) {
+            parentDiv.innerHTML = `<img src="image/${dpName}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+          }
+        });
+
+        // Store globally for other pages to use
+        localStorage.setItem('selectedDP', dpName);
+      }
+
+      // Load saved DP on page load
+      const savedDP = localStorage.getItem('selectedDP');
+      if (savedDP) {
+        updateProfilePicture(savedDP);
+      }
+
+      // Report Issue modal functionality
+      function showReportIssueModal() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-md w-full border border-white/10">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-medium">Report an Issue</h3>
+              <button id="closeReportModal" class="text-white/50 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            <form id="report-form" class="space-y-4">
+              <div>
+                <label class="block text-sm text-white/80 mb-2">Issue Type</label>
+                <select id="issue-type" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white" required>
+                  <option value="">Select issue type</option>
+                  <option value="bug">Bug Report</option>
+                  <option value="feature">Feature Request</option>
+                  <option value="performance">Performance Issue</option>
+                  <option value="ui">UI/UX Issue</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-white/80 mb-2">Subject</label>
+                <input type="text" id="issue-subject" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white placeholder-white/50" placeholder="Brief description of the issue" required>
+              </div>
+              <div>
+                <label class="block text-sm text-white/80 mb-2">Description</label>
+                <textarea id="issue-description" rows="4" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white placeholder-white/50 resize-none" placeholder="Please provide detailed information about the issue..." required></textarea>
+              </div>
+              <div class="flex items-center justify-end gap-3 pt-4">
+                <button type="button" id="cancelReport" class="px-4 py-2 text-white/70 hover:text-white transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-[var(--teal-primary)] text-white rounded-lg hover:bg-[var(--teal-primary)]/80 transition">
+                  Submit Report
+                </button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add event listeners
+        modal.querySelector('#closeReportModal').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+
+        modal.querySelector('#cancelReport').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+
+        modal.querySelector('#report-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          const issueType = document.getElementById('issue-type').value;
+          const subject = document.getElementById('issue-subject').value;
+          const description = document.getElementById('issue-description').value;
+
+          if (!issueType || !subject || !description) {
+            showToast('Please fill in all required fields');
+            return;
+          }
+
+          // Simulate report submission
+          showToast('Issue report submitted successfully! We will review it soon.');
+          document.body.removeChild(modal);
+        });
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            document.body.removeChild(modal);
+          }
+        });
+
+        // Re-render icons for the modal
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.if (window.iconManager) window.iconManager.refresh();
+        }
+      }
+
+      // Password change modal functionality
+      function showPasswordModal() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-md w-full border border-white/10">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-medium">Change Password</h3>
+              <button id="closePasswordModal" class="text-white/50 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            <form id="password-form" class="space-y-4">
+              <div>
+                <label class="block text-sm text-white/80 mb-2">Current Password</label>
+                <input type="password" id="current-password" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white placeholder-white/50" placeholder="Enter current password" required>
+              </div>
+              <div>
+                <label class="block text-sm text-white/80 mb-2">New Password</label>
+                <input type="password" id="new-password" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white placeholder-white/50" placeholder="Enter new password" required>
+              </div>
+              <div>
+                <label class="block text-sm text-white/80 mb-2">Confirm New Password</label>
+                <input type="password" id="confirm-password" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white placeholder-white/50" placeholder="Confirm new password" required>
+              </div>
+              <div class="flex items-center justify-end gap-3 pt-4">
+                <button type="button" id="cancelPassword" class="px-4 py-2 text-white/70 hover:text-white transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-[var(--teal-primary)] text-white rounded-lg hover:bg-[var(--teal-primary)]/80 transition">
+                  Change Password
+                </button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add event listeners
+        modal.querySelector('#closePasswordModal').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+
+        modal.querySelector('#cancelPassword').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+
+        modal.querySelector('#password-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const currentPassword = modal.querySelector('#current-password').value;
+          const newPassword = modal.querySelector('#new-password').value;
+          const confirmPassword = modal.querySelector('#confirm-password').value;
+
+          if (newPassword !== confirmPassword) {
+            showToast('New passwords do not match!');
+            return;
+          }
+
+          if (newPassword.length < 6) {
+            showToast('Password must be at least 6 characters long!');
+            return;
+          }
+
+          // Simulate password change
+          showToast('Password changed successfully!');
+          document.body.removeChild(modal);
+        });
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            document.body.removeChild(modal);
+          }
+        });
+
+        // Re-render icons for the modal
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.if (window.iconManager) window.iconManager.refresh();
+        }
+      }
+
+      // Toast functionality
+      function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 300);
+        }, 3000);
+      }
+
+      // Bookmark functionality - now uses ProfileManager
+
+      function showBookmarksModal() {
+        const bookmarks = window.profileManager ? profileManager.getBookmarks() : [];
+
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-hidden border border-white/10">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-medium">Bookmarked Content</h3>
+              <button id="closeBookmarksModal" class="text-white/50 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            <div class="overflow-y-auto max-h-[60vh]">
+              ${bookmarks.length === 0 ?
+            '<div class="text-center py-8 text-white/60"><i data-lucide="bookmark" class="w-12 h-12 mx-auto mb-4 opacity-50"></i><p>No bookmarks yet</p><p class="text-sm">Bookmark articles and news to access them later</p></div>' :
+            bookmarks.map(item => `
+                  <div class="flex items-center justify-between p-4 rounded-lg hover:bg-white/5 transition">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-lg bg-[var(--teal-primary)]/20 flex items-center justify-center">
+                        <i data-lucide="${item.type === 'news' ? 'newspaper' : 'bookmark'}" class="w-5 h-5 text-[var(--teal-primary)]"></i>
+                      </div>
+                      <div>
+                        <h4 class="text-white font-medium">${item.title}</h4>
+                        <p class="text-white/60 text-sm">${item.category} • ${new Date(item.dateAdded).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button class="open-bookmark p-2 rounded-lg hover:bg-white/10 transition" title="Open" data-url="${item.url}">
+                        <i data-lucide="external-link" class="w-4 h-4 text-white/60"></i>
+                      </button>
+                      <button class="remove-bookmark p-2 rounded-lg hover:bg-red-500/20 transition" title="Remove bookmark" data-id="${item.id}">
+                        <i data-lucide="bookmark-x" class="w-4 h-4 text-red-400"></i>
+                      </button>
+                    </div>
+                  </div>
+                `).join('')
+          }
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add event listeners
+        modal.querySelector('#closeBookmarksModal').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+
+        // Add bookmark action listeners
+        modal.querySelectorAll('.open-bookmark').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const url = btn.dataset.url;
+            if (url && url !== '#') {
+              window.open(url, '_blank');
+            }
+          });
+        });
+
+        modal.querySelectorAll('.remove-bookmark').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = parseInt(btn.dataset.id);
+            if (window.profileManager) {
+              profileManager.removeBookmark(id);
+              // Refresh the modal
+              document.body.removeChild(modal);
+              showBookmarksModal();
+            }
+          });
+        });
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            document.body.removeChild(modal);
+          }
+        });
+
+        // Re-render icons for the modal
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.if (window.iconManager) window.iconManager.refresh();
+        }
+      }
+
+      // Add bookmark button event listener
+      document.getElementById('bookmarks-btn')?.addEventListener('click', () => {
+        showBookmarksModal();
+      });
+
+      // Bookmark functions now handled by ProfileManager
+
+      // Alternative approach - add event listeners instead of onclick
+      function addBookmarkEventListeners() {
+        const modal = document.querySelector('.fixed.inset-0');
+        if (modal) {
+          const openButtons = modal.querySelectorAll('[title="Open"]');
+          const removeButtons = modal.querySelectorAll('[title="Remove bookmark"]');
+
+          openButtons.forEach((btn, index) => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const item = bookmarkedContent[index];
+              if (item) {
+                openBookmarkedContent(item.type, item.id);
+              }
+            });
+          });
+
+          removeButtons.forEach((btn, index) => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const item = bookmarkedContent[index];
+              if (item) {
+                removeBookmark(item.id);
+              }
+            });
+          });
+        }
+      }
+
+      // Notification functionality
+      const notifications = [
+        { id: 1, title: "New Daily Challenge Available", message: "Complete today's MCQ challenge to maintain your streak!", time: "2 minutes ago", type: "challenge", read: false },
+        { id: 2, title: "Revision Reminder", message: "You have 3 topics due for revision today", time: "1 hour ago", type: "reminder", read: false },
+        { id: 3, title: "New Content Added", message: "Modern History notes have been updated", time: "3 hours ago", type: "content", read: true },
+        { id: 4, title: "Achievement Unlocked", message: "You've completed 50 flashcards this week!", time: "1 day ago", type: "achievement", read: true },
+        { id: 5, title: "Study Streak", message: "Congratulations! 7-day study streak achieved", time: "2 days ago", type: "achievement", read: true }
+      ];
+
+      function showNotificationsModal() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-hidden border border-white/10">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-medium">Notifications</h3>
+              <div class="flex items-center gap-3">
+                <button id="markAllRead" class="text-sm text-[var(--teal-primary)] hover:text-[var(--teal-primary)]/80">Mark all as read</button>
+                <button id="closeNotificationsModal" class="text-white/50 hover:text-white">
+                  <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+              </div>
+            </div>
+            <div class="overflow-y-auto max-h-[60vh] space-y-3">
+              ${notifications.length === 0 ?
+            '<div class="text-center py-8 text-white/60">No notifications</div>' :
+            notifications.map(notif => `
+                  <div class="flex items-start gap-3 p-4 rounded-lg hover:bg-white/5 transition ${!notif.read ? 'bg-white/5 border-l-2 border-[var(--teal-primary)]' : ''}">
+                    <div class="w-10 h-10 rounded-lg bg-[var(--teal-primary)]/20 flex items-center justify-center flex-shrink-0">
+                      <i data-lucide="${notif.type === 'challenge' ? 'trophy' : notif.type === 'reminder' ? 'clock' : notif.type === 'content' ? 'file-plus' : 'award'}" class="w-5 h-5 text-[var(--teal-primary)]"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between">
+                        <h4 class="text-white font-medium text-sm">${notif.title}</h4>
+                        ${!notif.read ? '<div class="w-2 h-2 bg-[var(--teal-primary)] rounded-full flex-shrink-0 mt-1"></div>' : ''}
+                      </div>
+                      <p class="text-white/70 text-sm mt-1">${notif.message}</p>
+                      <p class="text-white/50 text-xs mt-2">${notif.time}</p>
+                    </div>
+                  </div>
+                `).join('')
+          }
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add event listeners
+        modal.querySelector('#closeNotificationsModal').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+
+        modal.querySelector('#markAllRead').addEventListener('click', () => {
+          notifications.forEach(notif => notif.read = true);
+          document.body.removeChild(modal);
+          showToast('All notifications marked as read');
+        });
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            document.body.removeChild(modal);
+          }
+        });
+
+        // Re-render icons for the modal
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.if (window.iconManager) window.iconManager.refresh();
+        }
+      }
+
+      // Add notification button event listener
+      document.getElementById('notification-btn')?.addEventListener('click', () => {
+        showNotificationsModal();
+      });
+
+      // Initialize bookmarks display
+      if (typeof profileManager !== 'undefined') {
+        profileManager.updateBookmarksDisplay();
+
+        // Add clear bookmarks functionality
+        document.getElementById('clear-bookmarks')?.addEventListener('click', () => {
+          if (confirm('Are you sure you want to clear all bookmarks?')) {
+            const bookmarks = profileManager.getBookmarks();
+            bookmarks.forEach(bookmark => {
+              profileManager.removeBookmark(bookmark.id);
+            });
+            showToast('All bookmarks cleared');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

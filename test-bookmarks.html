@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Bookmarks</title>
+    <script src="js/profile-manager.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+        }
+
+        #bookmarks-container {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            min-height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Bookmark System Test</h1>
+
+    <div class="test-section">
+        <h2>Add Test Bookmarks</h2>
+        <button onclick="addTestBookmark1()">Add News Article</button>
+        <button onclick="addTestBookmark2()">Add Study Material</button>
+        <button onclick="addTestBookmark3()">Add Video</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Bookmarks Display</h2>
+        <div id="bookmarks-container">
+            <!-- Bookmarks will appear here -->
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Actions</h2>
+        <button onclick="showBookmarkCount()">Show Bookmark Count</button>
+        <button onclick="clearAllBookmarks()">Clear All Bookmarks</button>
+        <button onclick="refreshDisplay()">Refresh Display</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Instructions</h2>
+        <p>1. Add some test bookmarks using the buttons above</p>
+        <p>2. Check that they appear in the bookmarks display</p>
+        <p>3. Go to profile.html and check the bookmarks section</p>
+        <p>4. Go to news.html and bookmark some articles</p>
+        <p>5. Return here to see if they appear</p>
+    </div>
+
+    <script>
+        function addTestBookmark1() {
+            if (window.profileManager) {
+                profileManager.addBookmark({
+                    title: 'Supreme Court Landmark Judgment',
+                    category: 'Legal News',
+                    type: 'news',
+                    url: '#'
+                });
+                refreshDisplay();
+                alert('News article bookmarked!');
+            }
+        }
+
+        function addTestBookmark2() {
+            if (window.profileManager) {
+                profileManager.addBookmark({
+                    title: 'Indian Constitution Study Guide',
+                    category: 'Study Material',
+                    type: 'article',
+                    url: '#'
+                });
+                refreshDisplay();
+                alert('Study material bookmarked!');
+            }
+        }
+
+        function addTestBookmark3() {
+            if (window.profileManager) {
+                profileManager.addBookmark({
+                    title: 'Economics Explained Video',
+                    category: 'Educational',
+                    type: 'video',
+                    url: '#'
+                });
+                refreshDisplay();
+                alert('Video bookmarked!');
+            }
+        }
+
+        function showBookmarkCount() {
+            if (window.profileManager) {
+                const count = profileManager.getBookmarks().length;
+                alert(`You have ${count} bookmarks`);
+            }
+        }
+
+        function clearAllBookmarks() {
+            if (window.profileManager && confirm('Clear all bookmarks?')) {
+                const bookmarks = profileManager.getBookmarks();
+                bookmarks.forEach(bookmark => {
+                    profileManager.removeBookmark(bookmark.id);
+                });
+                refreshDisplay();
+                alert('All bookmarks cleared!');
+            }
+        }
+
+        function refreshDisplay() {
+            if (window.profileManager) {
+                profileManager.updateBookmarksDisplay();
+            }
+        }
+
+        // Initialize display when page loads
+        function initializeBookmarks() {
+            if (window.profileManager) {
+                try {
+                    profileManager.updateBookmarksDisplay();
+                    console.log('Bookmarks initialized:', profileManager.getBookmarks());
+                } catch (error) {
+                    console.error('Error initializing bookmarks:', error);
+                }
+            } else {
+                console.error('ProfileManager not available');
+                // Retry after a short delay
+                setTimeout(initializeBookmarks, 200);
+            }
+        }
+
+        // Try to initialize immediately, then with delay if needed
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeBookmarks);
+        } else {
+            initializeBookmarks();
+        }
+    </script>
+</body>
+
+</html>

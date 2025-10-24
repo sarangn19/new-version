@@ -1,0 +1,66 @@
+<!-- Left navigation bar (copy/paste into your layout) -->
+<aside id="sidebar" class="hidden lg:flex flex-col w-[280px] bg-[var(--bg-dark-2)] p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden" aria-label="Primary sidebar">
+  <!-- Profile and Notifications -->
+  <div class="flex items-center justify-between px-2 mb-10">
+    <div class="flex items-center space-x-4">
+      <div class="relative" aria-hidden="false">
+        <!-- Avatar -->
+        <div class="w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center">
+          <div id="user-initials" class="text-lg font-medium text-black" aria-hidden="true">A</div>
+        </div>
+
+        <!-- Notification badge / button (accessible) -->
+        <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400" title="Notifications">
+          <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+            <i data-lucide="bell" class="text-white w-4 h-4" aria-hidden="true"></i>
+          </span>
+        </button>
+      </div>
+
+      <div>
+        <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+        <div id="user-email" class="font-light text-xs text-white/80">jane.doe@aspirant.com</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation (semantic + accessible) -->
+  <nav role="navigation" aria-label="Primary" class="space-y-1.5 pt-4">
+    <ul class="space-y-1">
+      <li>
+        <a href="#" class="flex items-center space-x-5 px-4 py-2.5 rounded-full transition bg-[#2A2A2A] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400" aria-current="page">
+          <i data-lucide="layout-dashboard" class="text-white w-5 h-5" aria-hidden="true"></i>
+          <span class="font-normal text-sm">Dashboard</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="flex items-center space-x-5 px-4 py-2.5 rounded-full transition hover:bg-[#2A2A2A] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">
+          <i data-lucide="book-open" class="text-white/80 w-5 h-5" aria-hidden="true"></i>
+          <span class="font-normal text-sm text-white/80">Learn</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="flex items-center space-x-5 px-4 py-2.5 rounded-full transition hover:bg-[#2A2A2A] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">
+          <i data-lucide="bar-chart-2" class="text-white/80 w-5 h-5" aria-hidden="true"></i>
+          <span class="font-normal text-sm text-white/80">Statistics</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="flex items-center space-x-5 px-4 py-2.5 rounded-full transition hover:bg-[#2A2A2A] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">
+          <i data-lucide="newspaper" class="text-white/80 w-5 h-5" aria-hidden="true"></i>
+          <span class="font-normal text-sm text-white/80">News</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="flex items-center space-x-5 px-4 py-2.5 rounded-full transition hover:bg-[#2A2A2A] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400">
+          <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black flex-shrink-0" aria-hidden="true">AI</div>
+          <span class="font-normal text-sm text-white">AI Assistant</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>

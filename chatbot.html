@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Assistant Chat</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="js/profile-manager.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --teal-primary: #2C7A7B;
+      --text-faded: rgba(255, 255, 255, 0.5);
+      --search-bg-glass: rgba(255, 255, 255, 0.02);
+      --search-border-glass: rgba(255, 255, 255, 0.05);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark-1);
+      color: white;
+    }
+
+    .scroll-hidden::-webkit-scrollbar { display: none; }
+    .scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Glass Searchbar */
+    .glass-search-container {
+      background-color: var(--search-bg-glass);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid var(--search-border-glass);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .arrow-circle-button {
+      width: 44px;
+      height: 44px;
+      background-color: var(--bg-dark-1);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .arrow-circle-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- GLASSMORPHISM EFFECTS --- */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .glass-sidebar {
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- SMOOTH ANIMATIONS --- */
+    .page-transition {
+      animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .nav-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-item:hover::before {
+      left: 100%;
+    }
+
+    .nav-item:hover {
+      transform: translateX(4px);
+      background: rgba(42, 42, 42, 0.8);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(44, 122, 123, 0.2), rgba(42, 42, 42, 0.9));
+      border-left: 3px solid var(--teal-primary);
+    }
+
+    /* Mode chips base + active (gradient like screenshot) */
+    .mode-chip {
+      border-radius: 9999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.8);
+      transition: all .2s ease;
+    }
+    .mode-chip:hover { background: rgba(255,255,255,0.1); }
+    .mode-chip.mode-active {
+      background: linear-gradient(90deg, #FF7A3D 0%, #211E35 100%);
+      color: #fff;
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white antialiased scroll-hidden">
+
+  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+    
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="hidden lg:flex flex-col w-[280px] glass-sidebar p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+      <!-- Profile and Notifications -->
+      <div class="flex items-center justify-between px-2 mb-10">
+        <div class="flex items-center space-x-4"> 
+          <div class="relative">
+            <a href="profile.html" class="block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+              <div id="user-initials" class="text-lg font-medium text-black">JD</div>
+            </a>
+            <!-- Notification badge -->
+            <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+              <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+              </span>
+            </button>
+          </div>
+          <div>
+            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-1.5 pt-10">
+        <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+        </a>
+        <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Learn</span>
+        </a>
+        <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Statistics</span>
+        </a>
+        <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="chatbot.html" class="nav-item active flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI</div>
+          <span class="font-normal text-sm text-white whitespace-nowrap">AI Assistant</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT AREA (center hero + search like screenshot) -->
+    <main id="main-content" role="main" tabindex="-1" class="flex-1 p-6 lg:p-8 pb-24 overflow-y-auto scroll-hidden flex flex-col page-transition">
+      <div class="max-w-5xl mx-auto mt-auto mb-4">
+        <!-- Greeting -->
+        <div id="greeting-section" class="text-center mb-6 lg:mb-8">
+          <h2 class="text-2xl lg:text-4xl font-semibold tracking-wide mb-2">
+            Hey <span id="greeting-name" class="bg-gradient-to-r from-sky-400 to-orange-400 bg-clip-text text-transparent">Jane</span>
+          </h2>
+          <p class="text-white/60">What do you want to learn today</p>
+        </div>
+
+        <!-- Chat feed (example layout) -->
+        <section id="chat-feed" class="space-y-6 mb-6">
+          <!-- AI welcome -->
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
+            <div class="text-sm text-white/90">
+              <p>Hello! I'm your AI assistant. How can I help you today? Feel free to ask me anything!</p>
+            </div>
+          </div>
+
+          <!-- Mode switch banner over thin gradient line -->
+          <div id="mode-banner-wrap" class="hidden relative">
+            <div class="h-[2px] w-full rounded-full"
+                 style="background: linear-gradient(90deg, rgba(59,59,59,0.6) 0%, rgba(255,122,61,0.45) 50%, rgba(33,30,53,0.5) 100%);"></div>
+            <div id="mode-banner" class="absolute left-1/2 -translate-x-1/2 -top-3 px-5 py-1.5 rounded-full text-[13px] font-semibold text-white"
+                 style="background: linear-gradient(90deg, #3b3b3b 0%, rgba(255,122,61,0.45) 50%, rgba(33,30,53,0.6) 100%); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);">
+              <span id="mode-banner-text">Switched to Revision Mode</span>
+            </div>
+          </div>
+
+          <!-- User prompt pill example -->
+          <div class="flex justify-end">
+            <div class="rounded-full bg-white/[0.06] border border-white/10 px-5 py-2 text-sm flex items-center gap-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
+              <span>Explain Indian President Election process</span>
+              <span class="w-7 h-7 rounded-full bg-[#2C7A7B] text-white text-xs flex items-center justify-center">JD</span>
+            </div>
+          </div>
+
+          <!-- AI answer block example -->
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
+            <div class="text-sm text-white/90 leading-6">
+              <p>The President of India is elected indirectly by an electoral college, which includes elected members of both Houses of Parliament and the legislative assemblies of states and union territories. The election uses the proportional representation system through a single transferable vote and is conducted by secret ballot...</p>
+              <div class="mt-6">
+                <div class="text-xs font-semibold text-white/80 mb-3">Related</div>
+                <ul class="rounded-lg overflow-hidden">
+                  <li class="flex items-center justify-between py-3 px-4 hover:bg-white/5 cursor-pointer border-t border-white/10 first:border-t-0">
+                    <span class="text-sm text-white/80">Create concise answers using the Introduction–Body–Conclusion format</span>
+                    <span class="text-white/60 text-lg">+</span>
+                  </li>
+                  <li class="flex items-center justify-between py-3 px-4 hover:bg-white/5 cursor-pointer border-t border-white/10">
+                    <span class="text-sm text-white/80">Summarize key points for UPSC Mains answers under 100 words</span>
+                    <span class="text-white/60 text-lg">+</span>
+                  </li>
+                  <li class="flex items-center justify-between py-3 px-4 hover:bg-white/5 cursor-pointer border-t border-white/10">
+                    <span class="text-sm text-white/80">Use bullet points effectively to shorten UPSC answers</span>
+                    <span class="text-white/60 text-lg">+</span>
+                  </li>
+                  <li class="flex items-center justify-between py-3 px-4 hover:bg-white/5 cursor-pointer border-t border-white/10">
+                    <span class="text-sm text-white/80">Identify keywords that demand brief, focused responses</span>
+                    <span class="text-white/60 text-lg">+</span>
+                  </li>
+                  <li class="flex items-center justify-between py-3 px-4 hover:bg-white/5 cursor-pointer border-t border-white/10">
+                    <span class="text-sm text-white/80">Practice rewriting detailed answers into compact versions</span>
+                    <span class="text-white/60 text-lg">+</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Footer actions -->
+              <div class="flex items-center justify-end gap-4 mt-5">
+                <button class="text-white/60 hover:text-white" title="Like"><i data-lucide="thumbs-up" class="w-5 h-5"></i></button>
+                <button class="text-white/60 hover:text-white" title="Copy"><i data-lucide="copy" class="w-5 h-5"></i></button>
+                <button class="text-white/60 hover:text-white" title="Save"><i data-lucide="bookmark" class="w-5 h-5"></i></button>
+                <button class="ml-2 bg-sky-600/80 hover:bg-sky-600 text-white text-sm font-medium rounded-full px-4 py-2">Save as Note</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Big Search/Chat Bar (sticky composer) -->
+        <div class="sticky bottom-2 z-20">
+        <form onsubmit="event.preventDefault()" class="glass-search-container rounded-[2rem] p-3 lg:p-4 relative" id="chat-form">
+          <div class="flex items-center gap-3 lg:gap-4">
+            <i data-lucide="search" class="text-white/70 w-5 h-5 lg:w-6 lg:h-6 ml-2"></i>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Ask me anything"
+              class="bg-transparent text-white placeholder-[var(--text-faded)] text-sm lg:text-base font-normal flex-grow focus:outline-none py-3"
+            />
+            <!-- Pin (upload) -->
+            <button type="button" id="btn-upload" class="text-white/60 hover:text-white hidden sm:block" aria-label="Upload files">
+              <i data-lucide="pin" class="w-5 h-5"></i>
+            </button>
+            <input id="file-input" type="file" class="hidden" multiple accept="image/*,.pdf,.doc,.docx,.txt" />
+            <!-- Attach saved (@) -->
+            <button type="button" id="btn-attach" class="text-white/60 hover:text-white hidden sm:block" aria-label="Attach saved item">
+              <span class="text-lg font-semibold">@</span>
+            </button>
+            <!-- Mic -->
+            <button type="button" id="btn-mic" class="text-white/60 hover:text-white hidden sm:block" aria-label="Voice input">
+              <i data-lucide="mic" class="w-5 h-5"></i>
+            </button>
+            <button type="submit" class="arrow-circle-button" aria-label="Send">
+              <i data-lucide="send" class="text-white w-5 h-5"></i>
+            </button>
+          </div>
+
+          <!-- Suggestion Chips (single-select) -->
+          <div id="mode-chips" class="flex flex-wrap gap-2 lg:gap-3 mt-3 lg:mt-4">
+            <button type="button" data-mode="revision" class="mode-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-white/80 border border-white/10 cursor-pointer transition">Revision Mode</button>
+            <button type="button" data-mode="current_affairs" class="mode-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-white/80 border border-white/10 cursor-pointer transition">Current Affairs Mode</button>
+            <button type="button" data-mode="mcq" class="mode-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-white/80 border border-white/10 cursor-pointer transition">MCQ Generator</button>
+            <button type="button" data-mode="flashcard" class="mode-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-white/80 border border-white/10 cursor-pointer transition">Flashcard Generator</button>
+            <button type="button" data-mode="concept" class="mode-chip px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs text-white/80 border border-white/10 cursor-pointer transition">Concept Explanation</button>
+          </div>
+
+          <!-- Attach menu -->
+          <div id="attach-menu" class="absolute right-16 top-12 hidden bg-[#222] border border-white/10 rounded-lg shadow-lg overflow-hidden text-sm z-10">
+            <button type="button" data-insert="@note" class="block px-4 py-2 w-full text-left hover:bg-white/10">Attach Note</button>
+            <button type="button" data-insert="@mcq" class="block px-4 py-2 w-full text-left hover:bg-white/10">Attach MCQ</button>
+            <button type="button" data-insert="@flashcard" class="block px-4 py-2 w-full text-left hover:bg-white/10">Attach Flashcard</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR (New Chat + Recent) -->
+    <aside class="hidden xl:flex flex-col w-[320px] bg-[var(--bg-dark-2)] border-l border-white/10 p-6 gap-6">
+      <button id="new-chat-btn" class="flex items-center justify-center gap-2 bg-[#2A2A2A] hover:bg-[#333] rounded-xl py-3 text-sm transition-colors">
+        <i data-lucide="message-square-plus" class="w-5 h-5"></i>
+        New Chat
+      </button>
+      <div>
+        <h3 class="text-xs uppercase tracking-wider text-white/50 mb-3">Recent</h3>
+        <ul class="space-y-2 text-sm">
+          <li class="truncate text-white/70 hover:text-white cursor-pointer">REPLACE WITH CranberryRed berry....</li>
+          <li class="truncate text-white/70 hover:text-white cursor-pointer">REPLACE WITH CranberryRed berry....</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize icons
+      if (window.iconManager) window.iconManager.refresh();
+
+      // Single-select mode chips
+      const chips = document.querySelectorAll('.mode-chip');
+      const input = document.getElementById('search-input');
+      const feed = document.getElementById('chat-feed');
+      const bannerWrap = document.getElementById('mode-banner-wrap');
+      const banner = document.getElementById('mode-banner');
+      const bannerText = document.getElementById('mode-banner-text');
+      let selectedMode = null;
+      function setChipActive(chip) {
+        chips.forEach(c => {
+          c.setAttribute('aria-pressed', 'false');
+          c.classList.remove('mode-active');
+        });
+        if (chip) {
+          chip.setAttribute('aria-pressed', 'true');
+          chip.classList.add('mode-active');
+        }
+      }
+      chips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          const mode = chip.dataset.mode;
+          if (selectedMode === mode) {
+            selectedMode = null;
+            setChipActive(null);
+            input.placeholder = 'Ask me anything';
+            bannerWrap.classList.add('hidden');
+          } else {
+            selectedMode = mode;
+            setChipActive(chip);
+            const placeholders = {
+              revision: 'Enter topic to revise…',
+              current_affairs: 'Ask about today\'s news…',
+              mcq: 'Give me a topic to generate MCQs…',
+              flashcard: 'Make flashcards for…',
+              concept: 'Explain the concept of…'
+            };
+            input.placeholder = placeholders[selectedMode] || 'Ask me anything';
+            bannerText.textContent = `Switched to ${chip.textContent.trim()}`;
+            bannerWrap.classList.remove('hidden');
+          }
+        });
+      });
+
+      // Upload via pin
+      const uploadBtn = document.getElementById('btn-upload');
+      const fileInput = document.getElementById('file-input');
+      uploadBtn?.addEventListener('click', () => fileInput.click());
+      fileInput?.addEventListener('change', () => {
+        if (fileInput.files?.length) {
+          const names = Array.from(fileInput.files).map(f => f.name).join(', ');
+          console.log('Selected files:', names);
+        }
+      });
+
+      // Attach menu with @
+      const attachBtn = document.getElementById('btn-attach');
+      const attachMenu = document.getElementById('attach-menu');
+      attachBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        attachMenu.classList.toggle('hidden');
+      });
+      attachMenu?.addEventListener('click', (e) => {
+        const target = e.target.closest('button[data-insert]');
+        if (!target) return;
+        const token = target.getAttribute('data-insert');
+        input.value = input.value ? input.value + ' ' + token + ' ' : token + ' ';
+        attachMenu.classList.add('hidden');
+        input.focus();
+      });
+      document.addEventListener('click', (e) => {
+        if (!attachMenu.contains(e.target) && e.target !== attachBtn) {
+          attachMenu.classList.add('hidden');
+        }
+      });
+
+      // Mic voice input
+      const micBtn = document.getElementById('btn-mic');
+      let recognizing = false;
+      let recognition;
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SR();
+        recognition.lang = 'en-US';
+        recognition.interimResults = true;
+        recognition.onresult = (event) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          input.value = transcript;
+        };
+        recognition.onend = () => {
+          recognizing = false;
+          micBtn?.classList.remove('text-sky-400');
+        };
+      }
+      micBtn?.addEventListener('click', () => {
+        if (!recognition) {
+          alert('Voice input not supported in this browser.');
+          return;
+        }
+        if (recognizing) {
+          recognition.stop();
+        } else {
+          recognition.start();
+          recognizing = true;
+          micBtn.classList.add('text-sky-400');
+        }
+      });
+
+      // New Chat functionality
+      const newChatBtn = document.getElementById('new-chat-btn');
+      const greetingSection = document.getElementById('greeting-section');
+      let isFirstMessage = true;
+
+      newChatBtn?.addEventListener('click', () => {
+        // Clear chat feed
+        feed.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
+            <div class="text-sm text-white/90">
+              <p>Hello! I'm your AI assistant. How can I help you today? Feel free to ask me anything!</p>
+            </div>
+          </div>
+        `;
+        
+        // Show greeting again
+        greetingSection.style.display = 'block';
+        isFirstMessage = true;
+        
+        // Reset mode
+        selectedMode = null;
+        setChipActive(null);
+        input.placeholder = 'Ask me anything';
+        bannerWrap.classList.add('hidden');
+        
+        // Clear input
+        input.value = '';
+      });
+
+      // Handle submit: append a user pill and mock AI response (placeholder for Gemini)
+      const form = document.getElementById('chat-form');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+
+        // Hide greeting on first message
+        if (isFirstMessage) {
+          greetingSection.style.display = 'none';
+          isFirstMessage = false;
+        }
+
+        // user pill
+        const userWrap = document.createElement('div');
+        userWrap.className = 'flex justify-end';
+        userWrap.innerHTML = `
+          <div class="rounded-full bg-white/[0.06] border border-white/10 px-4 py-2 text-sm flex items-center gap-2">
+            <span>${text}</span>
+            <span class="w-6 h-6 rounded-full bg-[#2C7A7B] text-white text-xs flex items-center justify-center">JD</span>
+          </div>`;
+        feed.appendChild(userWrap);
+
+        // simple mock AI block differing by mode
+        const ai = document.createElement('div');
+        ai.className = 'flex items-start gap-3';
+        const preface = selectedMode ? `Mode: ${selectedMode}. ` : '';
+        ai.innerHTML = `
+          <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
+          <div class="text-sm text-white/90 leading-6">
+            <p>${preface}This is a placeholder response. We will connect this to Gemini and tailor outputs per mode.</p>
+          </div>`;
+        feed.appendChild(ai);
+
+        // scroll
+        feed.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        input.value = '';
+      });
+
+      // Load saved profile picture
+      const savedDP = localStorage.getItem('selectedDP');
+      const userInitialsEl = document.getElementById('user-initials');
+      
+      if (savedDP && userInitialsEl) {
+        const parentDiv = userInitialsEl.parentElement;
+        parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+      }
+    });
+
+    // Update greeting with user's first name
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.profileManager) {
+        const firstName = profileManager.profileData.name.split(' ')[0];
+        const greetingName = document.getElementById('greeting-name');
+        if (greetingName) {
+          greetingName.textContent = firstName;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

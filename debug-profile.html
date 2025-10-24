@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Profile Manager</title>
+    <script src="js/profile-manager.js"></script>
+</head>
+<body>
+    <h1>Profile Manager Debug</h1>
+    <div id="debug-info"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const debugDiv = document.getElementById('debug-info');
+            let debugInfo = '';
+            
+            // Check if profileManager exists
+            debugInfo += `<p>ProfileManager exists: ${typeof window.profileManager !== 'undefined'}</p>`;
+            
+            if (window.profileManager) {
+                debugInfo += `<p>Current name: ${profileManager.profileData.name}</p>`;
+                debugInfo += `<p>Current email: ${profileManager.profileData.email}</p>`;
+                
+                // Check localStorage
+                debugInfo += `<p>profile.name in localStorage: ${localStorage.getItem('profile.name')}</p>`;
+                debugInfo += `<p>profile.email in localStorage: ${localStorage.getItem('profile.email')}</p>`;
+                debugInfo += `<p>userProfile in localStorage: ${localStorage.getItem('userProfile')}</p>`;
+            } else {
+                debugInfo += `<p>ProfileManager not found!</p>`;
+            }
+            
+            debugDiv.innerHTML = debugInfo;
+        });
+    </script>
+</body>
+</html>

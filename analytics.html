@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Analytics - UPSC Prep</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>`n  <script src="js/icon-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .analytics-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-card h3 {
+            color: white;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .insights-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .insight-positive { background: rgba(46, 213, 115, 0.3); }
+        .insight-warning { background: rgba(255, 165, 2, 0.3); }
+        .insight-negative { background: rgba(255, 71, 87, 0.3); }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="analytics-container">
+        <div class="header">
+            <h1>📊 Performance Analytics</h1>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="revision.html" class="nav-btn">← Back to Revision</a>
+            <button class="nav-btn" onclick="exportData()">Export Data</button>
+            <button class="nav-btn" onclick="resetData()">Reset Analytics</button>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Subject Performance</h3>
+                <div class="chart-container">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Study Progress (Last 7 Days)</h3>
+                <div class="chart-container">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Time Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="timeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Performance Trend</h3>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-section">
+            <h2 style="margin-bottom: 20px;">🔍 AI Insights & Recommendations</h2>
+            <div id="insightsContainer">
+                <!-- Insights will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/revision-engine.js"></script>
+    <script>
+        if (window.iconManager) window.iconManager.refresh();
+
+        let revisionEngine;
+        let charts = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            revisionEngine = new RevisionEngine();
+            initializeCharts();
+            generateInsights();
+        });
+
+        function initializeCharts() {
+            createSubjectChart();
+            createProgressChart();
+            createTimeChart();
+            createTrendChart();
+        }
+
+        function createSubjectChart() {
+            const ctx = document.getElementById('subjectChart').getContext('2d');
+            const subjects = revisionEngine.performanceData.subjects;
+            
+            charts.subject = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(subjects).map(s => revisionEngine.formatSubjectName(s)),
+                    datasets: [{
+                        label: 'Performance Score',
+                        data: Object.values(subjects).map(s => s.score),
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: { color: 'white', font: { size: 12 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+        }
+
+        function createProgressChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            // Generate sample data for last 7 days
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const studyTime = [120, 90, 150, 180, 75, 200, 160];
+            const accuracy = [78, 82, 75, 88, 70, 85, 80];
+
+            charts.progress = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Study Time (minutes)',
+                        data: studyTime,
+                        borderColor: 'rgba(46, 213, 115, 1)',
+                        backgroundColor: 'rgba(46, 213, 115, 0.1)',
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Accuracy (%)',
+                        data: accuracy,
+                        borderColor: 'rgba(255, 165, 2, 1)',
+                        backgroundColor: 'rgba(255, 165, 2, 0.1)',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: 'white' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                        y: { 
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            ticks: { color: 'white' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+        }
+
+        function createTimeChart() {
+            const ctx = document.getElementById('timeChart').getContext('2d');
+            const subjects = revisionEngine.performanceData.subjects;
+            
+            charts.time = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(subjects).map(s => revisionEngine.formatSubjectName(s)),
+                    datasets: [{
+                        data: Object.values(subjects).map(s => s.attempts * 15), // Approximate time
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            labels: { color: 'white', font: { size: 10 } },
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createTrendChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            // Generate trend data
+            const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            const overallTrend = [65, 70, 75, 78];
+            
+            charts.trend = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: weeks,
+                    datasets: [{
+                        label: 'Overall Performance',
+                        data: overallTrend,
+                        backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                        borderColor: 'rgba(118, 75, 162, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: 'white' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                        y: { 
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+        }
+
+        function generateInsights() {
+            const container = document.getElementById('insightsContainer');
+            const subjects = revisionEngine.performanceData.subjects;
+            const insights = [];
+
+            // Analyze performance and generate insights
+            const weakSubjects = Object.entries(subjects).filter(([_, data]) => data.score < 60);
+            const strongSubjects = Object.entries(subjects).filter(([_, data]) => data.score > 80);
+            const improvingSubjects = Object.entries(subjects).filter(([_, data]) => data.attempts > 5 && data.score > 70);
+
+            if (weakSubjects.length > 0) {
+                insights.push({
+                    type: 'negative',
+                    icon: '⚠️',
+                    text: `Focus needed on ${weakSubjects.map(([name]) => revisionEngine.formatSubjectName(name)).join(', ')}. Consider spending more time on these subjects.`
+                });
+            }
+
+            if (strongSubjects.length > 0) {
+                insights.push({
+                    type: 'positive',
+                    icon: '🎯',
+                    text: `Excellent performance in ${strongSubjects.map(([name]) => revisionEngine.formatSubjectName(name)).join(', ')}. Maintain regular review to retain knowledge.`
+                });
+            }
+
+            insights.push({
+                type: 'warning',
+                icon: '📈',
+                text: 'Your study streak is 7 days! Keep up the consistent effort to build strong habits.'
+            });
+
+            insights.push({
+                type: 'positive',
+                icon: '🧠',
+                text: 'Based on your performance pattern, morning study sessions seem most effective for you.'
+            });
+
+            // Render insights
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-item">
+                    <div class="insight-icon insight-${insight.type}">
+                        ${insight.icon}
+                    </div>
+                    <div>${insight.text}</div>
+                </div>
+            `).join('');
+        }
+
+        function exportData() {
+            const data = {
+                performance: revisionEngine.performanceData,
+                history: revisionEngine.studyHistory,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'upsc-prep-analytics.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetData() {
+            if (confirm('Are you sure you want to reset all analytics data? This cannot be undone.')) {
+                localStorage.removeItem('studentPerformance');
+                localStorage.removeItem('studyHistory');
+                localStorage.removeItem('lastRevisionUpdate');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

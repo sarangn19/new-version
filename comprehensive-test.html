@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comprehensive Profile Test</title>
+    <script src="js/profile-manager.js"></script>
+</head>
+<body>
+    <h1>Comprehensive Profile Test</h1>
+    
+    <div id="status"></div>
+    
+    <h2>Current Profile Display</h2>
+    <p>Name: <span id="user-name">Not loaded</span></p>
+    <p>Email: <span id="user-email">Not loaded</span></p>
+    <p>Initials: <span id="user-initials">Not loaded</span></p>
+    
+    <h2>Test Actions</h2>
+    <button onclick="updateProfile()">Update Profile</button>
+    <button onclick="checkLocalStorage()">Check LocalStorage</button>
+    <button onclick="manualUpdate()">Manual Update Elements</button>
+    
+    <h2>Debug Info</h2>
+    <div id="debug"></div>
+    
+    <script>
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML += '<p>' + message + '</p>';
+        }
+        
+        function updateProfile() {
+            updateStatus('Attempting to update profile...');
+            if (window.profileManager) {
+                try {
+                    profileManager.updateProfile({
+                        name: 'Updated User',
+                        email: 'updated@test.com'
+                    });
+                    updateStatus('Profile updated successfully!');
+                } catch (error) {
+                    updateStatus('Error updating profile: ' + error.message);
+                }
+            } else {
+                updateStatus('ProfileManager not available!');
+            }
+        }
+        
+        function checkLocalStorage() {
+            updateStatus('Checking localStorage...');
+            updateStatus('profile.name: ' + localStorage.getItem('profile.name'));
+            updateStatus('profile.email: ' + localStorage.getItem('profile.email'));
+            updateStatus('userProfile: ' + localStorage.getItem('userProfile'));
+        }
+        
+        function manualUpdate() {
+            updateStatus('Manually updating elements...');
+            if (window.profileManager) {
+                profileManager.updateAllProfileElements();
+                updateStatus('Manual update completed');
+            } else {
+                updateStatus('ProfileManager not available for manual update');
+            }
+        }
+        
+        // Initial check
+        setTimeout(() => {
+            const debug = document.getElementById('debug');
+            let debugInfo = '';
+            
+            debugInfo += '<p>ProfileManager exists: ' + (typeof window.profileManager !== 'undefined') + '</p>';
+            
+            if (window.profileManager) {
+                debugInfo += '<p>Profile data: ' + JSON.stringify(profileManager.profileData) + '</p>';
+                debugInfo += '<p>Name elements found: ' + document.querySelectorAll('#user-name').length + '</p>';
+                debugInfo += '<p>Email elements found: ' + document.querySelectorAll('#user-email').length + '</p>';
+            }
+            
+            debug.innerHTML = debugInfo;
+            updateStatus('Initial check completed');
+        }, 500);
+    </script>
+</body>
+</html>

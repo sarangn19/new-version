@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature Demo - All Fixes Working</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="js/profile-manager.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #1F1F1F;
+      color: white;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-8">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8 text-center">🎉 All Features Working Demo</h1>
+    
+    <!-- Profile Picture Sync Demo -->
+    <div class="glass-card rounded-2xl p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center">
+        <i data-lucide="user" class="w-6 h-6 mr-3 text-blue-400"></i>
+        1. Profile Picture Synchronization
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center">
+          <div class="user-avatar w-20 h-20 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center mx-auto mb-3">
+            <div class="user-initials text-xl font-medium text-black">JD</div>
+          </div>
+          <p class="text-sm text-white/70">Main Profile</p>
+        </div>
+        <div class="text-center">
+          <div class="user-avatar w-20 h-20 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center mx-auto mb-3">
+            <div class="user-initials text-xl font-medium text-black">JD</div>
+          </div>
+          <p class="text-sm text-white/70">Sidebar Avatar</p>
+        </div>
+        <div class="text-center">
+          <div class="user-avatar w-20 h-20 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center mx-auto mb-3">
+            <div class="user-initials text-xl font-medium text-black">JD</div>
+          </div>
+          <p class="text-sm text-white/70">Statistics Page</p>
+        </div>
+      </div>
+      <div class="mt-6 text-center">
+        <button onclick="updateTestProfile()" class="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-lg transition">
+          Test Profile Update
+        </button>
+        <p class="text-sm text-white/60 mt-2">Click to see all avatars update simultaneously</p>
+      </div>
+    </div>
+
+    <!-- Bookmark System Demo -->
+    <div class="glass-card rounded-2xl p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center">
+        <i data-lucide="bookmark" class="w-6 h-6 mr-3 text-yellow-400"></i>
+        2. Bookmark System Integration
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="text-lg font-medium mb-3">Add Test Bookmarks</h3>
+          <div class="space-y-3">
+            <button onclick="addTestBookmark('Supreme Court Judgment', 'Polity')" 
+                    class="w-full bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg p-3 hover:bg-green-500/30 transition">
+              Bookmark: Supreme Court News
+            </button>
+            <button onclick="addTestBookmark('Economic Policy Update', 'Economics')" 
+                    class="w-full bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg p-3 hover:bg-blue-500/30 transition">
+              Bookmark: Economic Policy
+            </button>
+            <button onclick="addTestBookmark('Climate Action Plan', 'Environment')" 
+                    class="w-full bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg p-3 hover:bg-purple-500/30 transition">
+              Bookmark: Climate News
+            </button>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-medium mb-3">Current Bookmarks</h3>
+          <div id="demo-bookmarks" class="space-y-2 max-h-40 overflow-y-auto">
+            <!-- Bookmarks will appear here -->
+          </div>
+          <button onclick="clearAllBookmarks()" 
+                  class="w-full mt-3 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg p-2 hover:bg-red-500/30 transition text-sm">
+            Clear All Bookmarks
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter-wise Practice Demo -->
+    <div class="glass-card rounded-2xl p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center">
+        <i data-lucide="brain" class="w-6 h-6 mr-3 text-green-400"></i>
+        3. Chapter-wise MCQ & Flashcard Practice
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="text-center">
+          <div class="bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-xl p-6 mb-4">
+            <i data-lucide="help-circle" class="w-12 h-12 mx-auto mb-3 text-blue-400"></i>
+            <h3 class="text-lg font-semibold mb-2">MCQ Practice</h3>
+            <p class="text-white/70 text-sm mb-4">Chapter-wise multiple choice questions with instant feedback</p>
+            <a href="mcq-practice.html" class="inline-block bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-lg transition">
+              Start MCQ Practice
+            </a>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="bg-gradient-to-br from-green-500/20 to-teal-600/20 rounded-xl p-6 mb-4">
+            <i data-lucide="layers" class="w-12 h-12 mx-auto mb-3 text-green-400"></i>
+            <h3 class="text-lg font-semibold mb-2">Flashcard Study</h3>
+            <p class="text-white/70 text-sm mb-4">Interactive flashcards with confidence-based repetition</p>
+            <a href="flashcard-practice.html" class="inline-block bg-green-500 hover:bg-green-600 px-6 py-2 rounded-lg transition">
+              Start Flashcard Study
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced News UI Demo -->
+    <div class="glass-card rounded-2xl p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center">
+        <i data-lucide="newspaper" class="w-6 h-6 mr-3 text-orange-400"></i>
+        4. Enhanced News UI & Functionality
+      </h2>
+      <div class="text-center">
+        <p class="text-white/70 mb-4">Improved news cards with better styling, hover effects, and bookmark integration</p>
+        <a href="news.html" class="inline-block bg-orange-500 hover:bg-orange-600 px-6 py-2 rounded-lg transition">
+          View Enhanced News Page
+        </a>
+      </div>
+    </div>
+
+    <!-- Statistics Heatmap Demo -->
+    <div class="glass-card rounded-2xl p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center">
+        <i data-lucide="calendar" class="w-6 h-6 mr-3 text-teal-400"></i>
+        5. Realistic Statistics Heatmap
+      </h2>
+      <div class="text-center">
+        <p class="text-white/70 mb-4">Meaningful study activity heatmap with realistic patterns and proper date handling</p>
+        <a href="statistics.html" class="inline-block bg-teal-500 hover:bg-teal-600 px-6 py-2 rounded-lg transition">
+          View Statistics Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Personalization Features -->
+    <div class="glass-card rounded-2xl p-6">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center">
+        <i data-lucide="settings" class="w-6 h-6 mr-3 text-purple-400"></i>
+        6. Future Personalization Features
+      </h2>
+      <div class="text-center">
+        <p class="text-white/70 mb-4">Comprehensive roadmap for AI-powered personalization and advanced features</p>
+        <a href="personalization-features.md" target="_blank" class="inline-block bg-purple-500 hover:bg-purple-600 px-6 py-2 rounded-lg transition">
+          View Feature Roadmap
+        </a>
+      </div>
+    </div>
+
+    <!-- Status Summary -->
+    <div class="mt-8 text-center">
+      <div class="inline-flex items-center bg-green-500/20 text-green-400 px-6 py-3 rounded-full">
+        <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i>
+        All requested features have been implemented and are working!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (window.iconManager) window.iconManager.refresh();
+
+    function updateTestProfile() {
+      // Simulate profile update
+      profileManager.updateProfile({
+        name: 'Test User ' + Math.floor(Math.random() * 100),
+        email: 'test' + Math.floor(Math.random() * 100) + '@example.com'
+      });
+      
+      showToast('Profile updated! All avatars should sync across pages.');
+    }
+
+    function addTestBookmark(title, category) {
+      const bookmark = profileManager.addBookmark({
+        title: title,
+        category: category,
+        type: 'news',
+        url: '#'
+      });
+      
+      updateDemoBookmarks();
+      showToast(`Bookmarked: ${title}`);
+    }
+
+    function updateDemoBookmarks() {
+      const container = document.getElementById('demo-bookmarks');
+      const bookmarks = profileManager.getBookmarks();
+      
+      if (bookmarks.length === 0) {
+        container.innerHTML = '<p class="text-white/50 text-sm">No bookmarks yet</p>';
+        return;
+      }
+      
+      container.innerHTML = bookmarks.slice(0, 5).map(bookmark => `
+        <div class="flex items-center justify-between bg-white/5 rounded-lg p-2">
+          <div class="flex-1">
+            <div class="text-sm font-medium">${bookmark.title}</div>
+            <div class="text-xs text-white/60">${bookmark.category}</div>
+          </div>
+          <button onclick="removeBookmark(${bookmark.id})" class="text-red-400 hover:text-red-300">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `).join('');
+      
+      if (window.iconManager) window.iconManager.refresh();
+    }
+
+    function removeBookmark(id) {
+      profileManager.removeBookmark(id);
+      updateDemoBookmarks();
+      showToast('Bookmark removed');
+    }
+
+    function clearAllBookmarks() {
+      const bookmarks = profileManager.getBookmarks();
+      bookmarks.forEach(bookmark => {
+        profileManager.removeBookmark(bookmark.id);
+      });
+      updateDemoBookmarks();
+      showToast('All bookmarks cleared');
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          if (document.body.contains(toast)) {
+            document.body.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // Initialize demo
+    document.addEventListener('DOMContentLoaded', function() {
+      updateDemoBookmarks();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCQ Practice - Chapter Wise</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="js/profile-manager.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  <link href="styles/duolingo-animations.css" rel="stylesheet">
+  <script src="js/duolingo-animations.js"></script>
+
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --bg-dark-3: #151515;
+      --teal-primary: #2C7A7B;
+      --text-faded: rgba(255, 255, 255, 0.5);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark-1);
+      color: white;
+    }
+
+    .scroll-hidden::-webkit-scrollbar { display: none; }
+    .scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .chapter-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .chapter-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--teal-primary);
+    }
+
+    .progress-bar {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, var(--teal-primary), #38a169);
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .mcq-option {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .mcq-option:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mcq-option.selected {
+      background: rgba(44, 122, 123, 0.2);
+      border-color: var(--teal-primary);
+    }
+
+    .mcq-option.correct {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: #22c55e;
+    }
+
+    .mcq-option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+    }
+
+    .timer {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-weight: 600;
+    }
+
+    .difficulty-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .difficulty-easy { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .difficulty-medium { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+    .difficulty-hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+  </style>
+</head>
+
+<body class="min-h-screen text-white antialiased scroll-hidden">
+  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+    
+    <!-- SIDEBAR -->
+    <aside class="hidden lg:flex flex-col w-[280px] bg-[var(--bg-dark-2)] p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+      <!-- Profile Section -->
+      <div class="flex items-center justify-between px-2 mb-10">
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <a href="profile.html" class="user-avatar block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+              <div id="user-initials" class="user-initials text-lg font-medium text-black">JD</div>
+            </a>
+            <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+              <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+              </span>
+            </button>
+          </div>
+          <div>
+            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-1.5 pt-10">
+        <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+        </a>
+        <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Learn</span>
+        </a>
+        <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Statistics</span>
+        </a>
+        <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full hover:bg-[#2A2A2A] transition">
+          <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI</div>
+          <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden">
+      <div class="max-w-7xl mx-auto">
+        
+        <!-- Chapter Selection View -->
+        <div id="chapter-selection" class="block">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h1 class="text-3xl lg:text-4xl font-semibold mb-2">MCQ Practice</h1>
+              <p class="text-white/70">Choose a chapter to start practicing</p>
+            </div>
+            <div class="flex items-center gap-4">
+              <select id="subject-filter" class="bg-[var(--bg-dark-2)] border border-white/10 rounded-lg px-4 py-2 text-sm">
+                <option value="all">All Subjects</option>
+                <option value="polity">Polity & Governance</option>
+                <option value="economics">Economics</option>
+                <option value="history">History & Culture</option>
+                <option value="geography">Geography</option>
+                <option value="environment">Environment</option>
+                <option value="science">Science & Technology</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Chapters Grid -->
+          <div id="chapters-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Chapters will be populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- MCQ Practice View -->
+        <div id="mcq-practice" class="hidden">
+          <!-- Practice Header -->
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <button id="back-to-chapters" class="p-2 rounded-lg hover:bg-white/10 transition">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+              </button>
+              <div>
+                <h2 id="practice-title" class="text-xl font-semibold">Chapter Practice</h2>
+                <p id="practice-subtitle" class="text-white/70 text-sm">Question 1 of 10</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div id="timer" class="timer">05:00</div>
+              <button id="finish-practice" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm hover:bg-red-500/30 transition">
+                Finish
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-bar h-2 mb-8">
+            <div id="progress-fill" class="progress-fill" style="width: 10%"></div>
+          </div>
+
+          <!-- MCQ Card -->
+          <div class="glass-card rounded-2xl p-8 mb-6">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-3">
+                <span id="question-number" class="bg-[var(--teal-primary)] text-white px-3 py-1 rounded-full text-sm font-medium">1</span>
+                <span id="difficulty-badge" class="difficulty-badge difficulty-medium">Medium</span>
+              </div>
+              <div class="text-sm text-white/60">
+                <span id="question-marks">2 marks</span>
+              </div>
+            </div>
+
+            <div id="question-content" class="mb-8">
+              <h3 class="text-lg font-medium mb-4">Which of the following is a fundamental right under the Indian Constitution?</h3>
+            </div>
+
+            <div id="options-container" class="space-y-3">
+              <!-- Options will be populated by JavaScript -->
+            </div>
+
+            <div id="explanation" class="hidden mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <h4 class="font-medium text-blue-400 mb-2">Explanation:</h4>
+              <p class="text-sm text-white/80"></p>
+            </div>
+          </div>
+
+          <!-- Navigation -->
+          <div class="flex items-center justify-between">
+            <button id="prev-question" class="px-6 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              <i data-lucide="chevron-left" class="w-4 h-4 inline mr-2"></i>
+              Previous
+            </button>
+            <div class="flex items-center gap-2">
+              <button id="submit-answer" class="px-6 py-2 bg-[var(--teal-primary)] rounded-lg hover:bg-[var(--teal-primary)]/80 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                Submit Answer
+              </button>
+              <button id="next-question" class="hidden px-6 py-2 bg-[var(--teal-primary)] rounded-lg hover:bg-[var(--teal-primary)]/80 transition">
+                Next
+                <i data-lucide="chevron-right" class="w-4 h-4 inline ml-2"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view" class="hidden">
+          <!-- Results content will be populated by JavaScript -->
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // MCQ Data Structure
+    const mcqData = {
+      polity: {
+        name: "Polity & Governance",
+        chapters: [
+          {
+            id: "const-basics",
+            name: "Constitutional Basics",
+            description: "Fundamental concepts of Indian Constitution",
+            totalQuestions: 25,
+            completed: 18,
+            accuracy: 85,
+            questions: [
+              {
+                id: 1,
+                question: "Which of the following is a fundamental right under the Indian Constitution?",
+                options: [
+                  "Right to Education",
+                  "Right to Work", 
+                  "Right to Health",
+                  "Right to Housing"
+                ],
+                correct: 0,
+                explanation: "Right to Education was added as a fundamental right under Article 21A through the 86th Constitutional Amendment in 2002.",
+                difficulty: "easy",
+                marks: 2
+              },
+              {
+                id: 2,
+                question: "The Constitution of India was adopted on which date?",
+                options: [
+                  "15th August 1947",
+                  "26th January 1950",
+                  "26th November 1949", 
+                  "2nd October 1948"
+                ],
+                correct: 2,
+                explanation: "The Constitution of India was adopted by the Constituent Assembly on 26th November 1949, and came into effect on 26th January 1950.",
+                difficulty: "medium",
+                marks: 2
+              }
+            ]
+          },
+          {
+            id: "fundamental-rights",
+            name: "Fundamental Rights",
+            description: "Rights guaranteed by the Constitution",
+            totalQuestions: 30,
+            completed: 12,
+            accuracy: 78,
+            questions: [
+              {
+                id: 1,
+                question: "Right to Education is guaranteed under which Article?",
+                options: ["Article 21", "Article 21A", "Article 19", "Article 14"],
+                correct: 1,
+                explanation: "Right to Education is guaranteed under Article 21A, added by the 86th Constitutional Amendment in 2002.",
+                difficulty: "medium",
+                marks: 2
+              },
+              {
+                id: 2,
+                question: "Which of the following is NOT a Fundamental Right?",
+                options: ["Right to Equality", "Right to Property", "Right to Freedom", "Right against Exploitation"],
+                correct: 1,
+                explanation: "Right to Property was removed from Fundamental Rights by the 44th Constitutional Amendment in 1978.",
+                difficulty: "hard",
+                marks: 2
+              }
+            ]
+          }
+        ]
+      },
+      economics: {
+        name: "Economics",
+        chapters: [
+          {
+            id: "indian-economy",
+            name: "Indian Economy Overview",
+            description: "Basic concepts of Indian economic system",
+            totalQuestions: 20,
+            completed: 8,
+            accuracy: 72,
+            questions: []
+          }
+        ]
+      }
+    };
+
+    // Current practice state
+    let currentPractice = {
+      subject: null,
+      chapter: null,
+      questions: [],
+      currentQuestion: 0,
+      answers: [],
+      startTime: null,
+      timeLimit: 300 // 5 minutes per question
+    };
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.iconManager) window.iconManager.refresh();
+      
+      // Check if a chapter was selected from mcq.html
+      const storedChapter = localStorage.getItem('selectedMCQChapter');
+      if (storedChapter) {
+        try {
+          const chapterData = JSON.parse(storedChapter);
+          // Clear the stored data
+          localStorage.removeItem('selectedMCQChapter');
+          // Start practice directly with the selected chapter
+          startDirectPractice(chapterData);
+        } catch (e) {
+          console.error('Error parsing stored chapter data:', e);
+          renderChapters();
+          setupEventListeners();
+        }
+      } else {
+        // If no stored chapter data, redirect back to main MCQ page
+        window.location.href = 'mcq.html';
+      }
+    });
+
+    function renderChapters() {
+      const grid = document.getElementById('chapters-grid');
+      const filter = document.getElementById('subject-filter').value;
+      
+      let chaptersHTML = '';
+      
+      Object.keys(mcqData).forEach(subjectKey => {
+        if (filter !== 'all' && filter !== subjectKey) return;
+        
+        const subject = mcqData[subjectKey];
+        subject.chapters.forEach(chapter => {
+          const progressPercent = Math.round((chapter.completed / chapter.totalQuestions) * 100);
+          
+          chaptersHTML += `
+            <div class="glass-card-interactive rounded-2xl p-6" 
+                 onclick="startChapterPractice('${subjectKey}', '${chapter.id}')">
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg mb-2">${chapter.name}</h3>
+                  <p class="text-white/70 text-sm mb-3">${chapter.description}</p>
+                  <span class="inline-block px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-medium">
+                    ${subject.name}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-[var(--teal-primary)]">${chapter.accuracy}%</div>
+                  <div class="text-xs text-white/60">Accuracy</div>
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <div class="flex justify-between text-sm text-white/70 mb-2">
+                  <span>Progress</span>
+                  <span>${chapter.completed}/${chapter.totalQuestions}</span>
+                </div>
+                <div class="progress-bar h-2">
+                  <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+              </div>
+              
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-white/60">${chapter.totalQuestions} questions</span>
+                <div class="flex items-center text-[var(--teal-primary)]">
+                  <span class="mr-2">Start Practice</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      });
+      
+      grid.innerHTML = chaptersHTML;
+      if (window.iconManager) window.iconManager.refresh();
+    }
+
+    function startDirectPractice(chapterData) {
+      // Create sample questions based on the chapter data
+      const sampleQuestions = generateSampleQuestions(chapterData);
+      
+      currentPractice = {
+        subject: chapterData.subject,
+        chapter: chapterData.id,
+        chapterName: chapterData.name,
+        questions: sampleQuestions,
+        currentQuestion: 0,
+        answers: new Array(sampleQuestions.length).fill(null),
+        startTime: Date.now(),
+        timeLimit: 300,
+        cameFromMcqPage: true // Flag to track source
+      };
+      
+      // Hide chapter selection and show practice
+      document.getElementById('chapter-selection').classList.add('hidden');
+      document.getElementById('mcq-practice').classList.remove('hidden');
+      
+      document.getElementById('practice-title').textContent = chapterData.name;
+      
+      // Setup event listeners for practice mode
+      setupEventListeners();
+      
+      renderCurrentQuestion();
+      startTimer();
+    }
+
+    function generateSampleQuestions(chapterData) {
+      // Generate sample questions based on chapter topics
+      const questionTemplates = {
+        'Constitutional Basics': [
+          {
+            question: "Which part of the Indian Constitution deals with Fundamental Rights?",
+            options: ["Part II", "Part III", "Part IV", "Part V"],
+            correct: 1,
+            explanation: "Part III of the Indian Constitution (Articles 12-35) deals with Fundamental Rights.",
+            difficulty: "easy",
+            marks: 2
+          },
+          {
+            question: "The Constitution of India was adopted on which date?",
+            options: ["15th August 1947", "26th January 1950", "26th November 1949", "2nd October 1948"],
+            correct: 2,
+            explanation: "The Constitution of India was adopted by the Constituent Assembly on 26th November 1949.",
+            difficulty: "medium",
+            marks: 2
+          },
+          {
+            question: "Who is known as the 'Father of the Indian Constitution'?",
+            options: ["Mahatma Gandhi", "Dr. B.R. Ambedkar", "Jawaharlal Nehru", "Sardar Patel"],
+            correct: 1,
+            explanation: "Dr. B.R. Ambedkar is known as the 'Father of the Indian Constitution' for his role as the Chairman of the Drafting Committee.",
+            difficulty: "easy",
+            marks: 2
+          }
+        ],
+        'Fundamental Rights': [
+          {
+            question: "Right to Education is guaranteed under which Article?",
+            options: ["Article 21", "Article 21A", "Article 19", "Article 14"],
+            correct: 1,
+            explanation: "Right to Education is guaranteed under Article 21A, added by the 86th Constitutional Amendment in 2002.",
+            difficulty: "medium",
+            marks: 2
+          },
+          {
+            question: "Which of the following is NOT a Fundamental Right?",
+            options: ["Right to Equality", "Right to Property", "Right to Freedom", "Right against Exploitation"],
+            correct: 1,
+            explanation: "Right to Property was removed from Fundamental Rights by the 44th Constitutional Amendment in 1978.",
+            difficulty: "hard",
+            marks: 2
+          }
+        ],
+        'Indian Economy Overview': [
+          {
+            question: "GDP stands for:",
+            options: ["Gross Domestic Product", "General Domestic Product", "Gross Development Product", "General Development Product"],
+            correct: 0,
+            explanation: "GDP stands for Gross Domestic Product, which measures the total value of goods and services produced within a country.",
+            difficulty: "easy",
+            marks: 2
+          },
+          {
+            question: "Which organization prepares the Economic Survey of India?",
+            options: ["RBI", "Ministry of Finance", "NITI Aayog", "Planning Commission"],
+            correct: 1,
+            explanation: "The Economic Survey of India is prepared by the Ministry of Finance, Government of India.",
+            difficulty: "medium",
+            marks: 2
+          }
+        ]
+      };
+
+      // Get questions for this chapter or use default questions
+      let questions = questionTemplates[chapterData.name] || [
+        {
+          question: `Sample question for ${chapterData.name}`,
+          options: ["Option A", "Option B", "Option C", "Option D"],
+          correct: 0,
+          explanation: "This is a sample question for practice purposes.",
+          difficulty: "medium",
+          marks: 2
+        }
+      ];
+
+      // Add IDs to questions
+      questions = questions.map((q, index) => ({
+        ...q,
+        id: index + 1
+      }));
+
+      return questions;
+    }
+
+    function startChapterPractice(subjectKey, chapterId) {
+      const subject = mcqData[subjectKey];
+      const chapter = subject.chapters.find(c => c.id === chapterId);
+      
+      if (!chapter || !chapter.questions || chapter.questions.length === 0) {
+        alert('Questions for this chapter are not available yet. Coming soon!');
+        return;
+      }
+      
+      currentPractice = {
+        subject: subjectKey,
+        chapter: chapterId,
+        chapterName: chapter.name,
+        questions: [...chapter.questions],
+        currentQuestion: 0,
+        answers: new Array(chapter.questions.length).fill(null),
+        startTime: Date.now(),
+        timeLimit: 300
+      };
+      
+      document.getElementById('chapter-selection').classList.add('hidden');
+      document.getElementById('mcq-practice').classList.remove('hidden');
+      
+      document.getElementById('practice-title').textContent = chapter.name;
+      
+      renderCurrentQuestion();
+      startTimer();
+    }
+
+    function renderCurrentQuestion() {
+      const question = currentPractice.questions[currentPractice.currentQuestion];
+      const questionNum = currentPractice.currentQuestion + 1;
+      const total = currentPractice.questions.length;
+      
+      document.getElementById('practice-subtitle').textContent = `Question ${questionNum} of ${total}`;
+      document.getElementById('question-number').textContent = questionNum;
+      document.getElementById('question-marks').textContent = `${question.marks} marks`;
+      document.getElementById('progress-fill').style.width = `${(questionNum / total) * 100}%`;
+      
+      // Set difficulty badge
+      const difficultyBadge = document.getElementById('difficulty-badge');
+      difficultyBadge.className = `difficulty-badge difficulty-${question.difficulty}`;
+      difficultyBadge.textContent = question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1);
+      
+      // Render question
+      document.getElementById('question-content').innerHTML = `
+        <h3 class="text-lg font-medium mb-4">${question.question}</h3>
+      `;
+      
+      // Render options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = question.options.map((option, index) => `
+        <div class="mcq-option border border-white/10 rounded-lg p-4" onclick="selectOption(${index})">
+          <div class="flex items-center">
+            <div class="w-6 h-6 border-2 border-white/30 rounded-full mr-3 flex items-center justify-center">
+              <div class="option-indicator w-3 h-3 rounded-full hidden"></div>
+            </div>
+            <span>${String.fromCharCode(65 + index)}. ${option}</span>
+          </div>
+        </div>
+      `).join('');
+      
+      // Update navigation buttons
+      document.getElementById('prev-question').disabled = currentPractice.currentQuestion === 0;
+      document.getElementById('submit-answer').classList.remove('hidden');
+      document.getElementById('next-question').classList.add('hidden');
+      document.getElementById('explanation').classList.add('hidden');
+      
+      // Restore previous answer if exists
+      const previousAnswer = currentPractice.answers[currentPractice.currentQuestion];
+      if (previousAnswer !== null) {
+        selectOption(previousAnswer, false);
+      }
+    }
+
+    function selectOption(optionIndex, updateAnswer = true) {
+      // Clear previous selections
+      document.querySelectorAll('.mcq-option').forEach(option => {
+        option.classList.remove('selected');
+        const indicator = option.querySelector('.option-indicator');
+        indicator.classList.add('hidden');
+      });
+      
+      // Select current option
+      const selectedOption = document.querySelectorAll('.mcq-option')[optionIndex];
+      selectedOption.classList.add('selected');
+      const indicator = selectedOption.querySelector('.option-indicator');
+      indicator.classList.remove('hidden');
+      indicator.style.backgroundColor = 'var(--teal-primary)';
+      
+      if (updateAnswer) {
+        currentPractice.answers[currentPractice.currentQuestion] = optionIndex;
+      }
+    }
+
+    function submitAnswer() {
+      const question = currentPractice.questions[currentPractice.currentQuestion];
+      const userAnswer = currentPractice.answers[currentPractice.currentQuestion];
+      
+      if (userAnswer === null) {
+        alert('Please select an answer before submitting.');
+        return;
+      }
+      
+      // Show correct/incorrect styling with animations
+      document.querySelectorAll('.mcq-option').forEach((option, index) => {
+        option.classList.remove('selected');
+        if (index === question.correct) {
+          option.classList.add('correct');
+          // Trigger correct answer animation
+          if (window.duoAnimations) {
+            window.duoAnimations.triggerCorrectAnswer(option);
+          }
+        } else if (index === userAnswer && userAnswer !== question.correct) {
+          option.classList.add('incorrect');
+          // Trigger incorrect answer animation
+          if (window.duoAnimations) {
+            window.duoAnimations.triggerIncorrectAnswer(option);
+          }
+        }
+      });
+      
+      // Show explanation
+      const explanationDiv = document.getElementById('explanation');
+      explanationDiv.querySelector('p').textContent = question.explanation;
+      explanationDiv.classList.remove('hidden');
+      
+      // Update buttons
+      document.getElementById('submit-answer').classList.add('hidden');
+      document.getElementById('next-question').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      if (currentPractice.currentQuestion < currentPractice.questions.length - 1) {
+        currentPractice.currentQuestion++;
+        renderCurrentQuestion();
+      } else {
+        finishPractice();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentPractice.currentQuestion > 0) {
+        currentPractice.currentQuestion--;
+        renderCurrentQuestion();
+      }
+    }
+
+    function finishPractice() {
+      stopTimer();
+      
+      // Calculate results
+      let correct = 0;
+      currentPractice.questions.forEach((question, index) => {
+        if (currentPractice.answers[index] === question.correct) {
+          correct++;
+        }
+      });
+      
+      const accuracy = Math.round((correct / currentPractice.questions.length) * 100);
+      const timeTaken = Math.round((Date.now() - currentPractice.startTime) / 1000);
+      
+      // Show results
+      showResults(correct, currentPractice.questions.length, accuracy, timeTaken);
+    }
+
+    function showResults(correct, total, accuracy, timeTaken) {
+      document.getElementById('mcq-practice').classList.add('hidden');
+      
+      const resultsView = document.getElementById('results-view');
+      resultsView.innerHTML = `
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold mb-4 bounce-button">Practice Complete!</h1>
+          <p class="text-white/70">Here's how you performed</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="glass-card rounded-2xl p-6 text-center stagger-item">
+            <div class="text-3xl font-bold text-[var(--teal-primary)] mb-2">${correct}/${total}</div>
+            <div class="text-white/70">Correct Answers</div>
+          </div>
+          <div class="glass-card rounded-2xl p-6 text-center stagger-item">
+            <div class="text-3xl font-bold text-blue-400 mb-2">${accuracy}%</div>
+            <div class="text-white/70">Accuracy</div>
+          </div>
+          <div class="glass-card rounded-2xl p-6 text-center stagger-item">
+            <div class="text-3xl font-bold text-purple-400 mb-2">${Math.floor(timeTaken / 60)}:${(timeTaken % 60).toString().padStart(2, '0')}</div>
+            <div class="text-white/70">Time Taken</div>
+          </div>
+        </div>
+        
+        <div class="flex justify-center gap-4">
+          <button onclick="backToChapters()" class="px-6 py-3 bg-white/10 rounded-lg hover:bg-white/20 transition">
+            Back to Chapters
+          </button>
+          <button onclick="retryPractice()" class="px-6 py-3 bg-[var(--teal-primary)] rounded-lg hover:bg-[var(--teal-primary)]/80 transition">
+            Try Again
+          </button>
+        </div>
+      `;
+      
+      resultsView.classList.remove('hidden');
+      
+      // Trigger celebration animations based on performance
+      setTimeout(() => {
+        if (window.duoAnimations) {
+          if (accuracy >= 80) {
+            // Excellent performance - confetti + celebration
+            window.duoAnimations.triggerConfetti();
+            window.duoAnimations.triggerCelebrationBounce(resultsView.querySelector('h1'));
+          } else if (accuracy >= 60) {
+            // Good performance - success pulse
+            window.duoAnimations.triggerSuccessPulse(resultsView.querySelector('.text-blue-400').parentElement);
+          }
+        }
+      }, 500);
+    }
+
+    function backToChapters() {
+      // Check if user came from mcq.html page
+      if (currentPractice && currentPractice.cameFromMcqPage) {
+        // Redirect back to mcq.html
+        window.location.href = 'mcq.html';
+      } else {
+        // Show chapter selection within this page
+        document.getElementById('results-view').classList.add('hidden');
+        document.getElementById('mcq-practice').classList.add('hidden');
+        document.getElementById('chapter-selection').classList.remove('hidden');
+      }
+    }
+
+    function retryPractice() {
+      // Reset practice state
+      currentPractice.currentQuestion = 0;
+      currentPractice.answers = new Array(currentPractice.questions.length).fill(null);
+      currentPractice.startTime = Date.now();
+      
+      // Hide results and show practice
+      document.getElementById('results-view').classList.add('hidden');
+      document.getElementById('mcq-practice').classList.remove('hidden');
+      
+      // Reset timer display
+      document.getElementById('timer').textContent = '05:00';
+      
+      // Render first question and start timer
+      renderCurrentQuestion();
+      startTimer();
+    }
+
+    let timerInterval;
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      let timeRemaining = currentPractice.timeLimit;
+      
+      const timerElement = document.getElementById('timer');
+      
+      timerInterval = setInterval(() => {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        
+        timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('Time is up!');
+          finishPractice();
+          return;
+        }
+        
+        timeRemaining--;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function setupEventListeners() {
+      document.getElementById('subject-filter').addEventListener('change', renderChapters);
+      document.getElementById('back-to-chapters').addEventListener('click', backToChapters);
+      document.getElementById('submit-answer').addEventListener('click', submitAnswer);
+      document.getElementById('next-question').addEventListener('click', nextQuestion);
+      document.getElementById('prev-question').addEventListener('click', prevQuestion);
+      document.getElementById('finish-practice').addEventListener('click', finishPractice);
+    }
+
+    // Load saved profile picture
+    function loadProfilePicture() {
+      const savedDP = localStorage.getItem('selectedDP');
+      const userInitialsEl = document.getElementById('user-initials');
+      
+      if (savedDP && userInitialsEl) {
+        const parentDiv = userInitialsEl.parentElement;
+        const img = new Image();
+        img.onload = function() {
+          parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+        };
+        img.onerror = function() {
+          console.warn('Failed to load profile picture:', savedDP);
+        };
+        img.src = `image/${savedDP}.png`;
+      }
+    }
+    
+    // Call after DOM is ready
+    setTimeout(loadProfilePicture, 100);
+
+    // Make functions globally accessible
+    window.startChapterPractice = startChapterPractice;
+    window.selectOption = selectOption;
+    window.backToChapters = backToChapters;
+    window.retryPractice = retryPractice;
+  </script>
+</body>
+</html>

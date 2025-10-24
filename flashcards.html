@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aspirant Dashboard (Sidebar + Search)</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  <link href="styles/duolingo-animations.css" rel="stylesheet">
+  <script src="js/duolingo-animations.js"></script>
+
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --teal-primary: #2C7A7B;
+      --text-faded: rgba(255, 255, 255, 0.5);
+      --search-bg-glass: rgba(255, 255, 255, 0.02);
+      --search-border-glass: rgba(255, 255, 255, 0.05);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark-1);
+      color: white;
+    }
+
+    .scroll-hidden::-webkit-scrollbar { display: none; }
+    .scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Glass Searchbar */
+    .glass-search-container {
+      background-color: var(--search-bg-glass);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid var(--search-border-glass);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .arrow-circle-button {
+      width: 44px;
+      height: 44px;
+      background-color: var(--bg-dark-1);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .arrow-circle-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white antialiased scroll-hidden">
+
+  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+    
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="hidden lg:flex flex-col w-[280px] bg-[var(--bg-dark-2)] p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+      <!-- Profile and Notifications -->
+      <div class="flex items-center justify-between px-2 mb-10">
+        <div class="flex items-center space-x-4"> 
+          <div class="relative">
+            <a href="profile.html" class="block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+              <div id="user-initials" class="text-lg font-medium text-black">JD</div>
+            </a>
+            <!-- Notification badge -->
+            <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+              <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+              </span>
+            </button>
+          </div>
+          <div>
+            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-1.5 pt-10">
+        <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+        </a>
+        <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Learn</span>
+        </a>
+        <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Statistics</span>
+        </a>
+        <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI</div>
+          <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content" role="main" tabindex="-1" class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden">
+      <div class="w-full max-w-7xl mx-auto flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <a href="learn.html" class="arrow-circle-button" aria-label="Back to Learn">
+            <i data-lucide="arrow-left" class="text-white w-5 h-5"></i>
+          </a>
+          <h1 class="text-xl font-medium">Flashcards</h1>
+        </div>
+        <div class="flex items-center gap-3"></div>
+      </div>
+
+      <!-- Search Bar -->
+      <form onsubmit="event.preventDefault()" 
+        class="glass-search-container flex items-center rounded-[2.5rem] p-1.5 mb-5 w-full max-w-7xl mx-auto">
+        <i data-lucide="search" class="text-white/70 w-5 h-5 mx-4"></i> 
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search notes, flashcards, MCQs..."
+          class="bg-transparent text-white placeholder-[var(--text-faded)] text-sm font-normal flex-grow focus:outline-none py-2"
+        />
+        <div class="arrow-circle-button">
+          <i data-lucide="arrow-right" class="text-white w-5 h-5"></i>
+        </div>
+      </form>
+
+      <!-- Sort below search bar -->
+      <div class="w-full max-w-7xl mx-auto flex justify-end relative mb-4">
+        <button id="sort-btn" class="px-4 py-2 rounded-full bg-[#2A2A2A] flex items-center gap-2">
+          <span class="text-sm">Sort</span>
+          <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+        </button>
+        <!-- Sort dropdown -->
+        <div id="sort-menu" class="hidden absolute right-0 top-full mt-2 z-20 min-w-[200px] bg-[#111] border border-white/10 rounded-2xl p-2 shadow-xl">
+          <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="subject">
+            <i data-lucide="folder" class="w-4 h-4 inline mr-2"></i>
+            By Subject
+          </button>
+          <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="paper">
+            <i data-lucide="book" class="w-4 h-4 inline mr-2"></i>
+            By Chapter Name
+          </button>
+          <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="front-asc">
+            <i data-lucide="hash" class="w-4 h-4 inline mr-2"></i>
+            Cards (Low to High)
+          </button>
+          <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="front-desc">
+            <i data-lucide="hash" class="w-4 h-4 inline mr-2"></i>
+            Cards (High to Low)
+          </button>
+        </div>
+      </div>
+
+      <!-- Chapter-wise Flashcard Topics -->
+      <section id="flashcard-topics" class="w-full max-w-7xl mx-auto">
+        <div id="flashcard-chapters" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Chapters will be populated by JavaScript -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Chapter-wise Flashcard Data
+    const FLASHCARD_CHAPTERS = [
+      {
+        id: 'polity-basics',
+        name: 'Constitutional Basics',
+        subject: 'Polity & Governance',
+        description: 'Key terms and concepts of Indian Constitution',
+        totalCards: 25,
+        estimatedTime: '30 mins',
+        topics: ['Preamble', 'Fundamental Rights', 'DPSP', 'Union Executive'],
+        icon: 'book-open',
+        color: 'blue'
+      },
+      {
+        id: 'polity-rights',
+        name: 'Fundamental Rights',
+        subject: 'Polity & Governance', 
+        description: 'Rights and freedoms guaranteed by Constitution',
+        totalCards: 30,
+        estimatedTime: '35 mins',
+        topics: ['Right to Equality', 'Right to Freedom', 'Cultural Rights'],
+        icon: 'shield',
+        color: 'green'
+      },
+      {
+        id: 'economy-basics',
+        name: 'Indian Economy Overview',
+        subject: 'Economics',
+        description: 'Essential economic terms and concepts',
+        totalCards: 20,
+        estimatedTime: '25 mins',
+        topics: ['GDP', 'Inflation', 'Monetary Policy', 'Fiscal Policy'],
+        icon: 'trending-up',
+        color: 'purple'
+      },
+      {
+        id: 'geography-physical',
+        name: 'Physical Geography',
+        subject: 'Geography',
+        description: 'Landforms, climate, and natural features',
+        totalCards: 28,
+        estimatedTime: '32 mins',
+        topics: ['Mountains', 'Rivers', 'Climate', 'Minerals'],
+        icon: 'mountain',
+        color: 'teal'
+      },
+      {
+        id: 'history-ancient',
+        name: 'Ancient India',
+        subject: 'History',
+        description: 'Civilizations, dynasties, and cultural terms',
+        totalCards: 22,
+        estimatedTime: '28 mins',
+        topics: ['Indus Valley', 'Vedic Period', 'Mauryan Empire'],
+        icon: 'landmark',
+        color: 'orange'
+      },
+      {
+        id: 'history-medieval',
+        name: 'Medieval India',
+        subject: 'History',
+        description: 'Medieval kingdoms, empires, and terminology',
+        totalCards: 26,
+        estimatedTime: '30 mins',
+        topics: ['Delhi Sultanate', 'Mughal Empire', 'Vijayanagara'],
+        icon: 'castle',
+        color: 'red'
+      }
+    ];
+
+    // State
+    let searchQuery = '';
+    let currentSort = 'subject';
+
+    // Elements
+    const chaptersEl = document.getElementById('flashcard-chapters');
+    const searchEl = document.getElementById('search-input');
+
+    function filteredChapters() {
+      return FLASHCARD_CHAPTERS.filter(chapter => {
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          return chapter.name.toLowerCase().includes(q) || 
+                 chapter.subject.toLowerCase().includes(q) ||
+                 chapter.description.toLowerCase().includes(q) ||
+                 chapter.topics.some(topic => topic.toLowerCase().includes(q));
+        }
+        return true;
+      });
+    }
+
+    function renderChapters() {
+      const chapters = filteredChapters();
+      
+      if (chapters.length === 0) {
+        chaptersEl.innerHTML = '<div class="col-span-full text-center text-white/50 py-10">No chapters found.</div>';
+        return;
+      }
+
+      chaptersEl.innerHTML = chapters.map(chapter => `
+        <article class="bg-[#1A1A1A] rounded-3xl shadow-lg cursor-pointer hover:bg-white/5 transition-all duration-300 border border-white/5 hover:border-white/10 overflow-hidden h-full flex flex-col" 
+                 onclick="startChapterPractice('${chapter.id}')">
+          <!-- Header Section -->
+          <div class="p-6 pb-4 flex-grow">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <i data-lucide="${chapter.icon}" class="w-6 h-6 text-white/80"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-medium text-base text-white mb-1 leading-tight">${chapter.name}</h3>
+                  <span class="inline-block px-3 py-1 rounded-full text-xs font-medium text-white/80 bg-white/10">
+                    ${chapter.subject}
+                  </span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0 ml-4">
+                <div class="text-2xl font-bold text-white">${chapter.totalCards}</div>
+                <div class="text-xs text-white/60">Cards</div>
+              </div>
+            </div>
+            
+            <p class="text-white/70 text-sm leading-relaxed line-clamp-2">${chapter.description}</p>
+          </div>
+          
+          <!-- Footer Section -->
+          <div class="px-6 py-4 bg-white/[0.02] border-t border-white/5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4 text-sm">
+                <div class="flex items-center gap-1.5">
+                  <i data-lucide="clock" class="w-4 h-4 text-white/50"></i>
+                  <span class="text-white/70">${chapter.estimatedTime}</span>
+                </div>
+              </div>
+              <button class="arrow-circle-button" aria-label="Start Practice">
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+
+    function startChapterPractice(chapterId) {
+      // Find the selected chapter
+      const selectedChapter = FLASHCARD_CHAPTERS.find(chapter => chapter.id === chapterId);
+      
+      if (!selectedChapter) {
+        alert('Chapter not found!');
+        return;
+      }
+      
+      // Store the selected chapter data for the practice page
+      localStorage.setItem('selectedFlashcardChapter', JSON.stringify(selectedChapter));
+      
+      // Navigate to practice page
+      window.location.href = 'flashcard-practice.html';
+    }
+
+    function initSearch() {
+      searchEl.addEventListener('input', (e) => {
+        searchQuery = e.target.value || '';
+        renderChapters();
+      });
+    }
+
+    function initSort() {
+      const btn = document.getElementById('sort-btn');
+      const menu = document.getElementById('sort-menu');
+
+      btn.addEventListener('click', () => {
+        menu.classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!menu.classList.contains('hidden') && !e.target.closest('#sort-menu') && !e.target.closest('#sort-btn')) {
+          menu.classList.add('hidden');
+        }
+      });
+      
+      document.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', () => {
+          currentSort = option.dataset.sort;
+          sortChapters();
+          menu.classList.add('hidden');
+        });
+      });
+    }
+
+    function sortChapters() {
+      const chapters = filteredChapters();
+      switch(currentSort) {
+        case 'topic':
+        case 'subject':
+          chapters.sort((a, b) => a.subject.localeCompare(b.subject));
+          break;
+        case 'paper':
+          chapters.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'front-asc':
+          chapters.sort((a, b) => a.totalCards - b.totalCards);
+          break;
+        case 'front-desc':
+          chapters.sort((a, b) => b.totalCards - a.totalCards);
+          break;
+      }
+      
+      chaptersEl.innerHTML = chapters.map(chapter => `
+        <article class="bg-[#1A1A1A] rounded-3xl shadow-lg cursor-pointer hover:bg-white/5 transition-all duration-300 border border-white/5 hover:border-white/10 overflow-hidden h-full flex flex-col" 
+                 onclick="startChapterPractice('${chapter.id}')">
+          <!-- Header Section -->
+          <div class="p-6 pb-4 flex-grow">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <i data-lucide="${chapter.icon}" class="w-6 h-6 text-white/80"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-medium text-base text-white mb-1 leading-tight">${chapter.name}</h3>
+                  <span class="inline-block px-3 py-1 rounded-full text-xs font-medium text-white/80 bg-white/10">
+                    ${chapter.subject}
+                  </span>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0 ml-4">
+                <div class="text-2xl font-bold text-white">${chapter.totalCards}</div>
+                <div class="text-xs text-white/60">Cards</div>
+              </div>
+            </div>
+            
+            <p class="text-white/70 text-sm leading-relaxed line-clamp-2">${chapter.description}</p>
+          </div>
+          
+          <!-- Footer Section -->
+          <div class="px-6 py-4 bg-white/[0.02] border-t border-white/5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4 text-sm">
+                <div class="flex items-center gap-1.5">
+                  <i data-lucide="clock" class="w-4 h-4 text-white/50"></i>
+                  <span class="text-white/70">${chapter.estimatedTime}</span>
+                </div>
+              </div>
+              <button class="arrow-circle-button" aria-label="Start Practice">
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+
+    // Load saved profile picture
+    const savedDP = localStorage.getItem('selectedDP');
+    const userInitialsEl = document.getElementById('user-initials');
+    
+    if (savedDP && userInitialsEl) {
+        const parentDiv = userInitialsEl.parentElement;
+        parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+    }
+
+    // Make function globally accessible
+    window.startChapterPractice = startChapterPractice;
+
+    // Initialize
+    lucide.createIcons();
+    initSearch();
+    initSort();
+    renderChapters();
+  </script>
+</body>
+</html>

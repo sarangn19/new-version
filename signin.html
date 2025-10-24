@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Second Brain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>`n  <script src="js/icon-manager.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@250;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #000000;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .login-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100vw;
+        }
+
+        /* Background overlay */
+        .background-overlay {
+            position: absolute;
+            width: 2000px;
+            height: 1494px;
+            left: -40px;
+            top: -47px;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1;
+        }
+
+        .background-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        /* Ellipse 1 - Large blue gradient */
+        .ellipse-1 {
+            position: absolute;
+            width: 2499px;
+            height: 2499px;
+            left: 380px;
+            top: -1178px;
+            background: radial-gradient(50% 50% at 50% 50%, #038FB1 0%, rgba(37, 42, 106, 0.05) 81.25%);
+            border-radius: 50%;
+        }
+
+        /* Ellipse 2 - Medium teal gradient left */
+        .ellipse-2 {
+            position: absolute;
+            width: 974px;
+            height: 974px;
+            left: -528px;
+            top: -274px;
+            background: radial-gradient(50% 50% at 50% 50%, rgba(3, 143, 177, 0.25) 0%, rgba(37, 42, 106, 0.0125) 100%);
+            border-radius: 50%;
+        }
+
+        /* Ellipse 3 - Rotated oval blue gradient */
+        .ellipse-3 {
+            position: absolute;
+            width: 2101px;
+            height: 504px;
+            left: 951px;
+            top: -429px;
+            background: radial-gradient(50% 50% at 50% 50%, rgba(39, 68, 140, 0.64) 0%, rgba(38, 58, 129, 0.32) 48.56%, rgba(37, 51, 121, 0) 100%);
+            border-radius: 50%;
+            transform: rotate(-35.62deg);
+        }
+
+        /* Ellipse 4 - Orange gradient left */
+        .ellipse-4 {
+            position: absolute;
+            width: 974px;
+            height: 974px;
+            left: -638px;
+            top: -64px;
+            background: radial-gradient(50% 50% at 50% 50%, rgba(255, 145, 0, 0.25) 0%, rgba(37, 42, 106, 0.0125) 100%);
+            border-radius: 50%;
+        }
+
+        /* Login form container */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px;
+            gap: 24px;
+            width: 480px;
+            min-height: 500px;
+            background: linear-gradient(179.69deg, #132B52 -7.12%, #000000 102.71%);
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 32px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .login-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 28px;
+            line-height: 36px;
+            text-align: center;
+            color: #FFFFFF;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Google sign in button */
+        .google-signin-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 24px;
+            gap: 12px;
+            width: 100%;
+            height: 56px;
+            background: linear-gradient(90deg, #012F59 0%, #044C5E 100%);
+            border-radius: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .google-signin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(1, 47, 89, 0.3);
+        }
+
+        .google-signin-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 24px;
+            color: #FFFFFF;
+        }
+
+        .google-icon {
+            width: 24px;
+            height: 24px;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIyLjU2IDEyLjI1QzIyLjU2IDExLjQ3IDIyLjQ5IDEwLjcyIDIyLjM2IDEwSDE2VjE0LjI1SDIwLjA5QzE5Ljg5IDE1LjMgMTkuMjcgMTYuMTUgMTguMzggMTYuN1YxOS4ySDIwLjYxQzIxLjgxIDE4LjEgMjIuNTYgMTUuMzUgMjIuNTYgMTIuMjVaIiBmaWxsPSIjNDI4NUY0Ii8+CjxwYXRoIGQ9Ik0xNiAyMkMxOC40MyAyMiAyMC40NyAyMS4xOSAyMS42MSAxOS4yTDE5LjM4IDE2LjdDMTguNjEgMTcuMjkgMTcuNTUgMTcuNjIgMTYgMTcuNjJDMTMuNjUgMTcuNjIgMTEuNjcgMTYuNDcgMTAuOTYgMTQuNzVIMTAuNzJWMTcuMzJDMTEuODUgMTkuNTcgMTMuNzUgMjIgMTYgMjJaIiBmaWxsPSIjMzRBODUzIi8+CjxwYXRoIGQ9Ik0xMC45NiAxNC43NUMxMC43MSAxNC4wNSAxMC41NyAxMy4zIDEwLjU3IDEyLjVDMTAuNTcgMTEuNyAxMC43MSAxMC45NSAxMC45NiAxMC4yNVYxMC4yNUgxMC43MlY3LjY4QzEwLjcyIDcuNjggMTAuNzIgNy42OCAxMC43MiA7LjY4QzguNzIgNy42OCA3IDkuNCA3IDEyLjVDNyAxNS42IDguNzIgMTcuMzIgMTAuNzIgMTcuMzJWMTQuNzVIMTAuOTZaIiBmaWxsPSIjRkJCQzA0Ii8+CjxwYXRoIGQ9Ik0xNiA3LjM4QzE3LjY4IDcuMzggMTkuMTYgNy45NSAyMC4yOSA5LjAzTDIyLjI5IDcuMDNDMjAuNDcgNS4zOSAxOC40MyA0LjYyIDE2IDQuNjJDMTMuNzUgNC42MiAxMS44NSA3LjA1IDEwLjcyIDkuM0gxMC45NkMxMS42NyA3LjU4IDEzLjY1IDYuNDMgMTYgNi40M1oiIGZpbGw9IiNFQTQzMzUiLz4KPC9zdmc+Cg==') no-repeat center;
+            background-size: contain;
+        }
+
+        .divider-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 24px;
+            text-align: center;
+            color: #FFFFFF;
+        }
+
+        /* Form fields container */
+        .form-fields {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+        }
+
+        /* Input field styling */
+        .input-group {
+            width: 100%;
+            height: 56px;
+            position: relative;
+        }
+
+        .input-field {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(3, 143, 177, 0.05) 0%, rgba(1, 47, 89, 0.05) 100%);
+            border: none;
+            border-radius: 28px;
+            padding: 10px 20px 10px 50px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 24px;
+            color: #FFFFFF;
+            outline: none;
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Forgot password link */
+        .forgot-password {
+            align-self: flex-end;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+            color: #038FB1;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: -8px;
+        }
+
+        .forgot-password:hover {
+            color: #22586C;
+        }
+
+        /* Sign in button */
+        .signin-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 32px;
+            gap: 10px;
+            width: 100%;
+            height: 56px;
+            background: linear-gradient(88.69deg, #038FB1 0%, #012F59 0%, #22586C 29.48%, #FF9100 103.94%);
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            border-radius: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .signin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .signin-btn-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 18px;
+            line-height: 24px;
+            color: #FFFFFF;
+        }
+
+        /* Sign up link */
+        .signup-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .signup-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
+            color: #FFFFFF;
+        }
+
+        .signup-link-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 20px;
+            text-decoration: underline;
+            color: #FFFFFF;
+            cursor: pointer;
+        }
+
+        .signup-link-text:hover {
+            color: #038FB1;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                width: 90%;
+                max-width: 400px;
+                padding: 24px;
+                gap: 20px;
+            }
+
+            .login-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-section">
+        <div class="background-elements">
+            <div class="ellipse-1"></div>
+            <div class="ellipse-2"></div>
+            <div class="ellipse-3"></div>
+            <div class="ellipse-4"></div>
+        </div>
+        
+        <div class="background-overlay"></div>
+
+        <div class="login-container">
+            <h1 class="login-title">Sign In</h1>
+            
+            <div class="form-container">
+                <!-- Google Sign In Button -->
+                <div class="google-signin-btn">
+                    <span class="google-signin-text">Sign in with Google</span>
+                    <div class="google-icon"></div>
+                </div>
+
+                <!-- Divider -->
+                <div class="divider-text">or</div>
+
+                <!-- Form Fields -->
+                <div class="form-fields">
+                    <div class="input-group">
+                        <i data-lucide="mail" class="input-icon"></i>
+                        <input type="email" class="input-field" placeholder="Email address" required>
+                    </div>
+
+                    <div class="input-group">
+                        <i data-lucide="lock" class="input-icon"></i>
+                        <input type="password" class="input-field" placeholder="Password" required>
+                    </div>
+
+                    <a href="reset-password.html" class="forgot-password">Forgot Password?</a>
+                </div>
+
+                <!-- Sign In Button -->
+                <button class="signin-btn">
+                    <span class="signin-btn-text">Sign In</span>
+                </button>
+
+                <!-- Sign Up Link -->
+                <div class="signup-link">
+                    <span class="signup-text">Don't have an account?</span>
+                    <a href="login.html" class="signup-link-text">Sign up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (window.iconManager) window.iconManager.refresh();
+
+        // Add form functionality
+        document.querySelector('.signin-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const email = document.querySelector('input[type="email"]').value;
+            const password = document.querySelector('input[type="password"]').value;
+            
+            if (!email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Simulate successful signin
+            console.log('Sign in successful for:', email);
+            window.location.href = 'db.html';
+        });
+
+        document.querySelector('.google-signin-btn').addEventListener('click', function() {
+            // Simulate Google sign in
+            console.log('Google sign in clicked');
+            window.location.href = 'db.html';
+        });
+    </script>
+</body>
+
+</html>

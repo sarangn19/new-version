@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aspirant Dashboard (Sidebar + Search)</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="js/profile-manager.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  <link href="styles/duolingo-animations.css" rel="stylesheet">
+  <script src="js/duolingo-animations.js"></script>
+
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --teal-primary: #2C7A7B;
+      --text-faded: rgba(255, 255, 255, 0.5);
+      --search-bg-glass: rgba(255, 255, 255, 0.02);
+      --search-border-glass: rgba(255, 255, 255, 0.05);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark-1);
+      color: white;
+    }
+
+    .scroll-hidden::-webkit-scrollbar { display: none; }
+    .scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Glass Searchbar */
+    .glass-search-container {
+      background-color: var(--search-bg-glass);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid var(--search-border-glass);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .arrow-circle-button {
+      width: 44px;
+      height: 44px;
+      background-color: var(--bg-dark-1);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .arrow-circle-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- GLASSMORPHISM EFFECTS --- */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .glass-sidebar {
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- SMOOTH ANIMATIONS --- */
+    .page-transition {
+      animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* --- NOTE CREATION ANIMATION --- */
+    .note-creation-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .note-creation-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .morphing-note {
+      position: fixed;
+      background: var(--teal-primary);
+      border-radius: 50%;
+      z-index: 1001;
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 500;
+      overflow: hidden;
+    }
+
+    .morphing-note.morphed {
+      border-radius: 16px;
+      background: rgba(45, 55, 72, 0.4);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .note-content {
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.3s ease 0.3s;
+      padding: 20px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .morphing-note.morphed .note-content {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .plus-icon {
+      transition: opacity 0.3s ease;
+    }
+
+    .morphing-note.morphed .plus-icon {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .color-picker {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: 120px;
+      opacity: 1;
+      transition: all 0.3s ease;
+      z-index: 1002;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 12px;
+      border-radius: 12px;
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .morphing-note.morphed .color-picker {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .color-picker {
+      transform: scale(0.8);
+    }
+
+    .color-option {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .color-option:hover {
+      transform: scale(1.1);
+      border-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .color-option.selected {
+      border-color: white;
+      transform: scale(1.1);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .color-option.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Note colors - Dark Glass Theme */
+    .color-black { background: rgba(45, 55, 72, 0.4); }
+    .color-dark-gray { background: rgba(74, 85, 104, 0.4); }
+    .color-charcoal { background: rgba(26, 32, 44, 0.4); }
+    .color-orange { background: #FF6B6B; }
+    .color-yellow { background: #FFD93D; }
+    .color-green { background: #6BCF7F; }
+    .color-blue { background: #4ECDC4; }
+    .color-purple { background: #A8E6CF; }
+    .color-pink { background: #FF8B94; }
+
+    .note-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      placeholder-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .note-textarea {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 14px;
+      resize: none;
+      flex: 1;
+      placeholder-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .note-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 12px;
+    }
+
+    .save-note-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .save-note-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-item:hover::before {
+      left: 100%;
+    }
+
+    .nav-item:hover {
+      transform: translateX(4px);
+      background: rgba(42, 42, 42, 0.8);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(44, 122, 123, 0.2), rgba(42, 42, 42, 0.9));
+      border-left: 3px solid var(--teal-primary);
+    }
+
+    /* View Toggle Styles */
+    .view-toggle {
+      color: rgba(255, 255, 255, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .view-toggle.active {
+      background: var(--teal-primary);
+      color: white;
+    }
+
+    .view-toggle:hover:not(.active) {
+      color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Enhanced Card Styles */
+    .note-card {
+      background: var(--bg-dark-2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .note-card:hover {
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Table Styles */
+    .table-row {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background-color 0.2s ease;
+    }
+
+    .table-row:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Action Button Styles */
+    .action-btn {
+      padding: 6px 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .action-btn.edit:hover {
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: rgb(34, 197, 94);
+    }
+
+    .action-btn.delete:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: rgb(239, 68, 68);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white antialiased scroll-hidden">
+
+  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+    
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="hidden lg:flex flex-col w-[280px] glass-sidebar p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+      <!-- Profile and Notifications -->
+      <div class="flex items-center justify-between px-2 mb-10">
+        <div class="flex items-center space-x-4"> 
+          <div class="relative">
+            <a href="profile.html" class="block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+              <div id="user-initials" class="text-lg font-medium text-black">JD</div>
+            </a>
+            <!-- Notification badge -->
+            <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+              <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+              </span>
+            </button>
+          </div>
+          <div>
+            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-1.5 pt-10">
+        <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+        </a>
+        <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Learn</span>
+        </a>
+        <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Statistics</span>
+        </a>
+        <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI</div>
+          <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
+        </a>
+      </nav>
+
+      <!-- Bookmarks Section -->
+      <div class="mt-8 pt-6 border-t border-white/10">
+        <button id="bookmarks-btn" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full w-full text-left">
+          <i data-lucide="bookmark" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Bookmarks</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA (Only Searchbar) -->
+    <main id="main-content" role="main" tabindex="-1" class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden page-transition">
+      <div class="max-w-7xl mx-auto">
+        <!-- Page Header -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <a href="learn.html" class="arrow-circle-button" aria-label="Back to Learn">
+              <i data-lucide="arrow-left" class="text-white w-5 h-5"></i>
+            </a>
+            <h1 class="text-2xl lg:text-3xl font-medium">Notes</h1>
+          </div>
+          <button id="new-note-btn" class="duolingo-button bg-[var(--teal-primary)] hover:bg-[var(--teal-primary)]/80 text-white px-4 py-2 rounded-xl flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Note
+          </button>
+
+    <!-- Note Creation Animation Overlay -->
+    <div id="note-creation-overlay" class="note-creation-overlay">
+      <div id="morphing-note" class="morphing-note">
+        <i data-lucide="plus" class="w-6 h-6 plus-icon"></i>
+        
+        <!-- Color Picker -->
+        <div class="color-picker">
+          <div class="text-xs text-white font-medium mb-2 text-center w-full">Colors</div>
+          <div class="color-option color-black selected" data-color="black" title="Dark Gray"></div>
+          <div class="color-option color-dark-gray" data-color="dark-gray" title="Medium Gray"></div>
+          <div class="color-option color-charcoal" data-color="charcoal" title="Charcoal"></div>
+          <div class="color-option color-orange" data-color="orange" title="Orange"></div>
+          <div class="color-option color-yellow" data-color="yellow" title="Yellow"></div>
+          <div class="color-option color-green" data-color="green" title="Green"></div>
+          <div class="color-option color-blue" data-color="blue" title="Blue"></div>
+          <div class="color-option color-purple" data-color="purple" title="Purple"></div>
+          <div class="color-option color-pink" data-color="pink" title="Pink"></div>
+        </div>
+        
+        <!-- Note Content (hidden initially) -->
+        <div class="note-content">
+          <input type="text" class="note-input" placeholder="Note title..." maxlength="50">
+          <textarea class="note-textarea" placeholder="Start writing your note..."></textarea>
+          <div class="note-actions">
+            <span class="text-xs opacity-70" id="note-date"></span>
+            <button class="save-note-btn" id="save-note">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+        </div>
+
+        <!-- Search and View Controls -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+          <!-- Search Bar -->
+          <form onsubmit="handleSearch(event)" 
+            class="glass-search-container flex items-center rounded-[2.5rem] p-1.5 flex-1">
+            <i data-lucide="search" class="text-white/70 w-5 h-5 mx-4"></i> 
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search notes..."
+              class="bg-transparent text-white placeholder-[var(--text-faded)] text-sm font-normal flex-grow focus:outline-none py-2"
+            />
+            <button type="submit" class="arrow-circle-button">
+              <i data-lucide="arrow-right" class="text-white w-5 h-5"></i>
+            </button>
+          </form>
+          
+          <!-- View Toggle and Filter -->
+          <div class="flex items-center gap-3">
+            <!-- View Toggle -->
+            <div class="flex items-center bg-[var(--bg-dark-2)] rounded-xl p-1 border border-white/10">
+              <button id="grid-view-btn" class="view-toggle active flex items-center justify-center w-10 h-10 rounded-lg transition-all">
+                <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+              </button>
+              <button id="table-view-btn" class="view-toggle flex items-center justify-center w-10 h-10 rounded-lg transition-all">
+                <i data-lucide="table" class="w-5 h-5"></i>
+              </button>
+            </div>
+            
+            <!-- Sort -->
+            <div class="relative">
+              <button id="sort-btn" class="flex items-center gap-2 bg-[var(--bg-dark-2)] border border-white/10 rounded-xl px-4 py-2.5 text-sm hover:bg-white/10 transition">
+                <span>Sort</span>
+                <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+              </button>
+              <div id="sort-menu" class="hidden absolute right-0 top-full mt-2 z-20 min-w-[200px] bg-[#111] border border-white/10 rounded-2xl p-2 shadow-xl">
+                <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="date-desc">
+                  <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
+                  Newest First
+                </button>
+                <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="date-asc">
+                  <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
+                  Oldest First
+                </button>
+                <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="title-asc">
+                  <i data-lucide="type" class="w-4 h-4 inline mr-2"></i>
+                  Title A-Z
+                </button>
+                <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="title-desc">
+                  <i data-lucide="type" class="w-4 h-4 inline mr-2"></i>
+                  Title Z-A
+                </button>
+                <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="subject">
+                  <i data-lucide="folder" class="w-4 h-4 inline mr-2"></i>
+                  By Subject
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Skeleton -->
+        <div id="loading-skeleton" class="hidden">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 animate-pulse">
+              <div class="h-6 bg-gray-600 rounded mb-4"></div>
+              <div class="h-4 bg-gray-700 rounded mb-2"></div>
+              <div class="h-4 bg-gray-700 rounded mb-2"></div>
+              <div class="h-4 bg-gray-700 rounded w-3/4"></div>
+            </div>
+            <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 animate-pulse">
+              <div class="h-6 bg-gray-600 rounded mb-4"></div>
+              <div class="h-4 bg-gray-700 rounded mb-2"></div>
+              <div class="h-4 bg-gray-700 rounded mb-2"></div>
+              <div class="h-4 bg-gray-700 rounded w-3/4"></div>
+            </div>
+            <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 animate-pulse">
+              <div class="h-6 bg-gray-600 rounded mb-4"></div>
+              <div class="h-4 bg-gray-700 rounded mb-2"></div>
+              <div class="h-4 bg-gray-700 rounded mb-2"></div>
+              <div class="h-4 bg-gray-700 rounded w-3/4"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid View -->
+        <div id="grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Notes will be populated here -->
+        </div>
+
+        <!-- Table View -->
+        <div id="table-view" class="hidden">
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl border border-white/5 overflow-hidden">
+            <table class="w-full">
+              <thead class="bg-[var(--bg-dark-1)] border-b border-white/10">
+                <tr>
+                  <th class="text-left py-4 px-6 text-sm font-medium text-white/80">Title</th>
+                  <th class="text-left py-4 px-6 text-sm font-medium text-white/80">Date</th>
+                  <th class="text-left py-4 px-6 text-sm font-medium text-white/80">Subject</th>
+                  <th class="text-left py-4 px-6 text-sm font-medium text-white/80">Content</th>
+                  <th class="text-left py-4 px-6 text-sm font-medium text-white/80">Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <!-- Table rows will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Notes data - consistent between grid and table views
+    const notesData = [
+      { 
+        id: 1, 
+        title: "Indian Constitution - Fundamental Rights", 
+        content: "Article 12-35 of the Indian Constitution deals with Fundamental Rights. These are basic human rights that are guaranteed to all citizens...", 
+        subject: "Constitutional Law", 
+        date: "2 days ago",
+        lastEdited: "2024-10-20",
+        color: "black"
+      },
+      { 
+        id: 2, 
+        title: "Economic Survey 2024 - Key Points", 
+        content: "GDP growth projections, inflation trends, and major economic reforms highlighted in the Economic Survey...", 
+        subject: "Economics", 
+        date: "1 week ago",
+        lastEdited: "2024-10-15",
+        color: "black"
+      },
+      { 
+        id: 3, 
+        title: "International Relations - BRICS Summit", 
+        content: "Key outcomes from the latest BRICS summit, including new member additions and economic cooperation initiatives...", 
+        subject: "International Relations", 
+        date: "3 days ago",
+        lastEdited: "2024-10-18",
+        color: "black"
+      },
+      { 
+        id: 4, 
+        title: "Environment & Ecology - Climate Change", 
+        content: "Impact of climate change on biodiversity, international climate agreements, and India's climate action plans...", 
+        subject: "Environment", 
+        date: "5 days ago",
+        lastEdited: "2024-10-16",
+        color: "black"
+      },
+      { 
+        id: 5, 
+        title: "Modern History - Freedom Struggle", 
+        content: "Timeline of major events in India's freedom struggle, key personalities, and their contributions...", 
+        subject: "History", 
+        date: "1 week ago",
+        lastEdited: "2024-10-14"
+      },
+      { 
+        id: 6, 
+        title: "Public Administration - Governance", 
+        content: "Principles of good governance, administrative reforms, and digital governance initiatives in India...", 
+        subject: "Public Administration", 
+        date: "4 days ago",
+        lastEdited: "2024-10-17"
+      }
+    ];
+
+    let currentView = 'grid';
+    let filteredNotes = [...notesData];
+    let isLoading = false;
+    let currentSort = 'date-desc';
+
+    // Subject color mapping - consistent across views
+    const subjectColors = {
+      'Constitutional Law': 'bg-blue-500/20 text-blue-300',
+      'Economics': 'bg-green-500/20 text-green-300', 
+      'International Relations': 'bg-purple-500/20 text-purple-300',
+      'Environment': 'bg-emerald-500/20 text-emerald-300',
+      'History': 'bg-orange-500/20 text-orange-300',
+      'Public Administration': 'bg-red-500/20 text-red-300'
+    };
+
+    // Show loading skeleton
+    function showLoading() {
+      isLoading = true;
+      document.getElementById('loading-skeleton').classList.remove('hidden');
+      document.getElementById('grid-view').classList.add('hidden');
+      document.getElementById('table-view').classList.add('hidden');
+    }
+
+    // Hide loading skeleton
+    function hideLoading() {
+      isLoading = false;
+      document.getElementById('loading-skeleton').classList.add('hidden');
+      if (currentView === 'grid') {
+        document.getElementById('grid-view').classList.remove('hidden');
+      } else {
+        document.getElementById('table-view').classList.remove('hidden');
+      }
+    }
+
+    // Render grid view
+    function renderGridView() {
+      const gridView = document.getElementById('grid-view');
+      gridView.innerHTML = filteredNotes.map(note => {
+        const colorMap = {
+          black: 'rgba(45, 55, 72, 0.4)',
+          'dark-gray': 'rgba(74, 85, 104, 0.4)',
+          charcoal: 'rgba(26, 32, 44, 0.4)',
+          orange: 'linear-gradient(135deg, #FF6B6B, #FF8E53)',
+          yellow: 'linear-gradient(135deg, #FFD93D, #FF6B6B)',
+          green: 'linear-gradient(135deg, #6BCF7F, #4ECDC4)',
+          blue: 'linear-gradient(135deg, #4ECDC4, #44A08D)',
+          purple: 'linear-gradient(135deg, #A8E6CF, #7F7FD3)',
+          pink: 'linear-gradient(135deg, #FF8B94, #FFB6C1)'
+        };
+        const noteColor = note.color ? colorMap[note.color] : 'rgba(45, 55, 72, 0.4)';
+        
+        return `
+        <article class="glass-card-interactive rounded-2xl p-6 cursor-pointer group" 
+                 data-note-id="${note.id}" 
+                 onclick="viewNote(${note.id})"
+                 style="background: rgba(45, 55, 72, 0.4); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1);"
+          <div class="flex items-start justify-between mb-4">
+            <h3 class="text-lg font-medium leading-snug group-hover:text-[var(--teal-primary)] transition-colors">${note.title}</h3>
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+              <button onclick="event.stopPropagation(); editNote(${note.id})" class="action-btn edit text-white/50 hover:text-green-400" title="Edit">
+                <i data-lucide="edit-2" class="w-4 h-4"></i>
+              </button>
+              <button onclick="event.stopPropagation(); deleteNote(${note.id})" class="action-btn delete text-white/50 hover:text-red-400" title="Delete">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-sm text-white/70 mb-4 line-clamp-3">${note.content}</p>
+          <div class="flex items-center justify-between text-xs text-white/50">
+            <span>Last edited: ${note.date}</span>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 rounded-full ${subjectColors[note.subject] || 'bg-gray-500/20 text-gray-300'}">${note.subject}</span>
+            </div>
+          </div>
+        </article>
+      `}).join('');
+      lucide.createIcons();
+    }
+
+    // Render table view
+    function renderTableView() {
+      const tableBody = document.getElementById('table-body');
+      tableBody.innerHTML = filteredNotes.map(note => {
+        // Format date consistently
+        const formattedDate = note.lastEdited;
+        const shortContent = note.content.length > 50 ? note.content.substring(0, 50) + '...' : note.content;
+        
+        return `
+        <tr class="table-row">
+          <td class="py-4 px-6">
+            <div class="font-medium text-white">${note.title}</div>
+          </td>
+          <td class="py-4 px-6 text-white/70">${formattedDate}</td>
+          <td class="py-4 px-6">
+            <span class="px-2 py-1 rounded-full text-xs ${subjectColors[note.subject] || 'bg-gray-500/20 text-gray-300'}">${note.subject}</span>
+          </td>
+          <td class="py-4 px-6 text-white/70 max-w-xs">${shortContent}</td>
+          <td class="py-4 px-6">
+            <div class="flex items-center gap-2">
+              <button onclick="editNote(${note.id})" class="action-btn edit text-white/50 hover:text-green-400" title="Edit">
+                <i data-lucide="edit-2" class="w-4 h-4"></i>
+              </button>
+              <button onclick="deleteNote(${note.id})" class="action-btn delete text-white/50 hover:text-red-400" title="Delete">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+              <button onclick="viewNote(${note.id})" class="action-btn text-white/50 hover:text-blue-400" title="View">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    // Switch views
+    function switchView(view) {
+      currentView = view;
+      
+      // Update toggle buttons
+      document.getElementById('grid-view-btn').classList.toggle('active', view === 'grid');
+      document.getElementById('table-view-btn').classList.toggle('active', view === 'table');
+      
+      // Show/hide views
+      document.getElementById('grid-view').classList.toggle('hidden', view !== 'grid');
+      document.getElementById('table-view').classList.toggle('hidden', view !== 'table');
+      
+      // Render appropriate view
+      if (view === 'grid') {
+        renderGridView();
+      } else {
+        renderTableView();
+      }
+    }
+
+    // Search functionality
+    function handleSearch(event) {
+      event.preventDefault();
+      const query = document.getElementById('search-input').value.toLowerCase().trim();
+      
+      showLoading();
+      
+      setTimeout(() => {
+        if (query) {
+          filteredNotes = notesData.filter(note => 
+            note.title.toLowerCase().includes(query) ||
+            note.content.toLowerCase().includes(query) ||
+            note.subject.toLowerCase().includes(query)
+          );
+        } else {
+          filteredNotes = [...notesData];
+        }
+        
+        hideLoading();
+        switchView(currentView);
+      }, 500);
+    }
+
+    // Note actions
+    function editNote(id) {
+      const note = notesData.find(n => n.id === id);
+      if (note) {
+        showEditNoteModal(note);
+      }
+    }
+
+    function showEditNoteModal(note) {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-2xl w-full border border-white/10">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-medium">Edit Note</h3>
+            <button id="closeEditModal" class="text-white/50 hover:text-white">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <form id="edit-note-form" class="space-y-4">
+            <div>
+              <label class="block text-sm text-white/80 mb-2">Title</label>
+              <input type="text" id="edit-title" value="${note.title}" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white placeholder-white/50" required>
+            </div>
+            <div>
+              <label class="block text-sm text-white/80 mb-2">Subject</label>
+              <select id="edit-subject" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white">
+                <option value="Constitutional Law" ${note.subject === 'Constitutional Law' ? 'selected' : ''}>Constitutional Law</option>
+                <option value="Economics" ${note.subject === 'Economics' ? 'selected' : ''}>Economics</option>
+                <option value="International Relations" ${note.subject === 'International Relations' ? 'selected' : ''}>International Relations</option>
+                <option value="Environment" ${note.subject === 'Environment' ? 'selected' : ''}>Environment</option>
+                <option value="History" ${note.subject === 'History' ? 'selected' : ''}>History</option>
+                <option value="Public Administration" ${note.subject === 'Public Administration' ? 'selected' : ''}>Public Administration</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-white/80 mb-2">Content</label>
+              <textarea id="edit-content" rows="12" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white placeholder-white/50 resize-y min-h-[200px] max-h-[400px]" required>${note.content}</textarea>
+            </div>
+            <div class="flex items-center justify-end gap-3 pt-4">
+              <button type="button" id="cancelEdit" class="px-4 py-2 text-white/70 hover:text-white transition">Cancel</button>
+              <button type="submit" class="px-4 py-2 bg-[var(--teal-primary)] text-white rounded-lg hover:bg-[var(--teal-primary)]/80 transition">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Add event listeners
+      modal.querySelector('#closeEditModal').addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      modal.querySelector('#cancelEdit').addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      modal.querySelector('#edit-note-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = modal.querySelector('#edit-title').value.trim();
+        const subject = modal.querySelector('#edit-subject').value;
+        const content = modal.querySelector('#edit-content').value.trim();
+        
+        if (!title || !content) {
+          showToast('Please fill in all required fields');
+          return;
+        }
+        
+        // Update the note
+        note.title = title;
+        note.subject = subject;
+        note.content = content;
+        note.lastEdited = new Date().toISOString().split('T')[0];
+        note.date = 'Today';
+        
+        // Update filtered notes
+        const filteredIndex = filteredNotes.findIndex(n => n.id === note.id);
+        if (filteredIndex !== -1) {
+          filteredNotes[filteredIndex] = note;
+        }
+        
+        switchView(currentView);
+        showToast('Note updated successfully!');
+        document.body.removeChild(modal);
+      });
+      
+      // Close on backdrop click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          document.body.removeChild(modal);
+        }
+      });
+      
+      // Re-render icons for the modal
+      if(window.lucide && typeof window.lucide.createIcons === 'function'){
+        window.lucide.createIcons();
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(toast);
+        }, 300);
+      }, 3000);
+    }
+
+    function deleteNote(id) {
+      const note = notesData.find(n => n.id === id);
+      if (note && confirm(`Are you sure you want to delete "${note.title}"?`)) {
+        const index = notesData.findIndex(n => n.id === id);
+        notesData.splice(index, 1);
+        filteredNotes = filteredNotes.filter(n => n.id !== id);
+        switchView(currentView);
+      }
+    }
+
+    function viewNote(id) {
+      const note = notesData.find(n => n.id === id);
+      if (note) {
+        // In a real app, this would navigate to the note detail page
+        window.location.href = `note file.html?id=${id}`;
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load saved profile picture
+      const savedDP = localStorage.getItem('selectedDP');
+      const userInitialsEl = document.getElementById('user-initials');
+      
+      if (savedDP && userInitialsEl) {
+          const parentDiv = userInitialsEl.parentElement;
+          parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+      }
+      
+      // View toggle event listeners
+      document.getElementById('grid-view-btn').addEventListener('click', () => switchView('grid'));
+      document.getElementById('table-view-btn').addEventListener('click', () => switchView('table'));
+      
+      // Sort functionality
+      const sortBtn = document.getElementById('sort-btn');
+      const sortMenu = document.getElementById('sort-menu');
+      
+      sortBtn.addEventListener('click', () => {
+        sortMenu.classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!sortMenu.classList.contains('hidden') && !e.target.closest('#sort-btn') && !e.target.closest('#sort-menu')) {
+          sortMenu.classList.add('hidden');
+        }
+      });
+      
+      document.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', () => {
+          currentSort = option.dataset.sort;
+          sortNotes();
+          sortMenu.classList.add('hidden');
+        });
+      });
+      
+      function sortNotes() {
+        switch(currentSort) {
+          case 'date-desc':
+            filteredNotes.sort((a, b) => new Date(b.lastEdited) - new Date(a.lastEdited));
+            break;
+          case 'date-asc':
+            filteredNotes.sort((a, b) => new Date(a.lastEdited) - new Date(b.lastEdited));
+            break;
+          case 'title-asc':
+            filteredNotes.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+          case 'title-desc':
+            filteredNotes.sort((a, b) => b.title.localeCompare(a.title));
+            break;
+          case 'subject':
+            filteredNotes.sort((a, b) => a.subject.localeCompare(b.subject));
+            break;
+        }
+        switchView(currentView);
+      }
+      
+      // New note button - Morphing Animation
+      document.getElementById('new-note-btn').addEventListener('click', (e) => {
+        createNoteWithAnimation(e.target);
+      });
+
+      function createNoteWithAnimation(buttonElement) {
+        const overlay = document.getElementById('note-creation-overlay');
+        const morphingNote = document.getElementById('morphing-note');
+        const buttonRect = buttonElement.getBoundingClientRect();
+        
+        // Set initial position and size to match button
+        morphingNote.style.left = buttonRect.left + 'px';
+        morphingNote.style.top = buttonRect.top + 'px';
+        morphingNote.style.width = buttonRect.width + 'px';
+        morphingNote.style.height = buttonRect.height + 'px';
+        
+        // Show overlay
+        overlay.classList.add('active');
+        
+        // Start morphing animation after a brief delay
+        setTimeout(() => {
+          // Calculate target position (center of screen)
+          const targetWidth = 320;
+          const targetHeight = 400;
+          const targetLeft = (window.innerWidth - targetWidth) / 2;
+          const targetTop = (window.innerHeight - targetHeight) / 2;
+          
+          // Apply morphing transformation
+          morphingNote.style.left = targetLeft + 'px';
+          morphingNote.style.top = targetTop + 'px';
+          morphingNote.style.width = targetWidth + 'px';
+          morphingNote.style.height = targetHeight + 'px';
+          morphingNote.classList.add('morphed');
+          
+          console.log('Note morphed, color picker should be visible now');
+          
+          // Set current date
+          document.getElementById('note-date').textContent = new Date().toLocaleDateString();
+          
+          // Focus on title input after animation
+          setTimeout(() => {
+            document.querySelector('.note-input').focus();
+          }, 600);
+          
+        }, 100);
+      }
+
+      // Color picker functionality
+      document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', () => {
+          // Remove selected class from all options
+          document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+          // Add selected class to clicked option
+          option.classList.add('selected');
+          
+          // Update note background
+          const morphingNote = document.getElementById('morphing-note');
+          const color = option.dataset.color;
+          const colorMap = {
+            black: 'rgba(45, 55, 72, 0.4)',
+            'dark-gray': 'rgba(74, 85, 104, 0.4)',
+            charcoal: 'rgba(26, 32, 44, 0.4)',
+            orange: 'linear-gradient(135deg, #FF6B6B, #FF8E53)',
+            yellow: 'linear-gradient(135deg, #FFD93D, #FF6B6B)',
+            green: 'linear-gradient(135deg, #6BCF7F, #4ECDC4)',
+            blue: 'linear-gradient(135deg, #4ECDC4, #44A08D)',
+            purple: 'linear-gradient(135deg, #A8E6CF, #7F7FD3)',
+            pink: 'linear-gradient(135deg, #FF8B94, #FFB6C1)'
+          };
+          morphingNote.style.background = colorMap[color];
+        });
+      });
+
+      // Save note functionality
+      document.getElementById('save-note').addEventListener('click', () => {
+        const title = document.querySelector('.note-input').value.trim();
+        const content = document.querySelector('.note-textarea').value.trim();
+        
+        if (!title && !content) {
+          // If empty, just close
+          closeNoteCreation();
+          return;
+        }
+        
+        // Create new note object
+        const newNote = {
+          id: Date.now(),
+          title: title || 'Untitled Note',
+          content: content || 'Empty note',
+          subject: 'Personal',
+          date: new Date().toLocaleDateString(),
+          lastEdited: new Date().toISOString().split('T')[0], // Add lastEdited field
+          color: document.querySelector('.color-option.selected').dataset.color || 'black'
+        };
+        
+        // Add to notes data
+        notesData.unshift(newNote);
+        console.log('New note added:', newNote);
+        console.log('Total notes:', notesData.length);
+        
+        // Trigger success celebration
+        if (window.duoAnimations) {
+          window.duoAnimations.triggerSuccessPulse(document.getElementById('save-note'));
+        }
+        
+        // Animate note flying to its position in grid
+        animateNoteToGrid(newNote);
+      });
+
+      function animateNoteToGrid(note) {
+        const morphingNote = document.getElementById('morphing-note');
+        
+        // Calculate position of first grid item
+        const gridContainer = document.getElementById('grid-view');
+        if (!gridContainer) {
+          console.error('Grid container not found');
+          renderNotes();
+          closeNoteCreation();
+          return;
+        }
+        const firstGridRect = gridContainer.getBoundingClientRect();
+        
+        // Animate to grid position
+        morphingNote.style.left = firstGridRect.left + 'px';
+        morphingNote.style.top = firstGridRect.top + 'px';
+        morphingNote.style.width = '280px';
+        morphingNote.style.height = '200px';
+        morphingNote.style.transform = 'scale(0.8)';
+        morphingNote.style.opacity = '0.8';
+        
+        // After animation, refresh the grid and close overlay
+        setTimeout(() => {
+          console.log('Rendering notes after animation...');
+          renderNotes();
+          closeNoteCreation();
+          
+          // Highlight the new note briefly
+          setTimeout(() => {
+            const newNoteElement = document.querySelector(`[data-note-id="${note.id}"]`);
+            console.log('Looking for note element:', `[data-note-id="${note.id}"]`, newNoteElement);
+            if (newNoteElement) {
+              newNoteElement.style.transform = 'scale(1.05)';
+              newNoteElement.style.boxShadow = '0 10px 30px rgba(44, 122, 123, 0.3)';
+              setTimeout(() => {
+                newNoteElement.style.transform = '';
+                newNoteElement.style.boxShadow = '';
+              }, 1000);
+            }
+          }, 100);
+        }, 600);
+      }
+
+      function closeNoteCreation() {
+        const overlay = document.getElementById('note-creation-overlay');
+        const morphingNote = document.getElementById('morphing-note');
+        
+        // Reset form
+        document.querySelector('.note-input').value = '';
+        document.querySelector('.note-textarea').value = '';
+        
+        // Reset morphing note
+        morphingNote.classList.remove('morphed');
+        morphingNote.style.transform = '';
+        morphingNote.style.opacity = '';
+        
+        // Hide overlay
+        overlay.classList.remove('active');
+      }
+
+      // Close on overlay click
+      document.getElementById('note-creation-overlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+          closeNoteCreation();
+        }
+      });
+
+      // Close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('note-creation-overlay').classList.contains('active')) {
+          closeNoteCreation();
+        }
+      });
+
+      // Render notes function (wrapper for current view)
+      function renderNotes() {
+        // Update filtered notes to include new notes
+        filteredNotes = [...notesData];
+        
+        // Re-render current view
+        if (currentView === 'grid') {
+          renderGridView();
+        } else {
+          renderTableView();
+        }
+      }
+      
+      // Notification functionality
+      const notifications = [
+        { id: 1, title: "New Daily Challenge Available", message: "Complete today's MCQ challenge to maintain your streak!", time: "2 minutes ago", type: "challenge", read: false },
+        { id: 2, title: "Revision Reminder", message: "You have 3 topics due for revision today", time: "1 hour ago", type: "reminder", read: false }
+      ];
+
+      function showNotificationsModal() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-hidden border border-white/10">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-medium">Notifications</h3>
+              <button id="closeNotificationsModal" class="text-white/50 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            <div class="overflow-y-auto max-h-[60vh] space-y-3">
+              ${notifications.map(notif => `
+                <div class="flex items-start gap-3 p-4 rounded-lg hover:bg-white/5 transition ${!notif.read ? 'bg-white/5 border-l-2 border-[var(--teal-primary)]' : ''}">
+                  <div class="w-10 h-10 rounded-lg bg-[var(--teal-primary)]/20 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="${notif.type === 'challenge' ? 'trophy' : 'clock'}" class="w-5 h-5 text-[var(--teal-primary)]"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-white font-medium text-sm">${notif.title}</h4>
+                    <p class="text-white/70 text-sm mt-1">${notif.message}</p>
+                    <p class="text-white/50 text-xs mt-2">${notif.time}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        modal.querySelector('#closeNotificationsModal').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) document.body.removeChild(modal);
+        });
+        if(window.lucide) window.lucide.createIcons();
+      }
+
+      // Bookmark functionality
+      const bookmarkedContent = [
+        { id: 1, title: "Indian Constitution - Fundamental Rights", type: "Note", date: "2 days ago" },
+        { id: 2, title: "Economic Survey 2024 - Key Points", type: "Note", date: "1 week ago" }
+      ];
+
+      function showBookmarksModal() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-hidden border border-white/10">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-medium">Bookmarked Content</h3>
+              <button id="closeBookmarksModal" class="text-white/50 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            <div class="overflow-y-auto max-h-[60vh]">
+              ${bookmarkedContent.map(item => `
+                <div class="flex items-center justify-between p-4 rounded-lg hover:bg-white/5 transition">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-[var(--teal-primary)]/20 flex items-center justify-center">
+                      <i data-lucide="file-text" class="w-5 h-5 text-[var(--teal-primary)]"></i>
+                    </div>
+                    <div>
+                      <h4 class="text-white font-medium">${item.title}</h4>
+                      <p class="text-white/60 text-sm">${item.type} • ${item.date}</p>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        modal.querySelector('#closeBookmarksModal').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) document.body.removeChild(modal);
+        });
+        if(window.lucide) window.lucide.createIcons();
+      }
+
+      // Add event listeners
+      document.getElementById('notification-btn')?.addEventListener('click', showNotificationsModal);
+      document.getElementById('bookmarks-btn')?.addEventListener('click', showBookmarksModal);
+
+      // Initial render
+      switchView('grid');
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

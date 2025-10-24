@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Profile Data</title>
+</head>
+<body>
+    <h1>Clearing Profile Data...</h1>
+    <script>
+        // Clear the stored profile data
+        localStorage.removeItem('userProfile');
+        
+        // Show confirmation
+        document.body.innerHTML = '<h1>Profile data cleared!</h1><p>The profile has been reset to default values (Jane Doe). Please refresh your other pages to see the changes.</p>';
+        
+        // Auto-close after 3 seconds
+        setTimeout(() => {
+            window.close();
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspirant Dashboard</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide icons are used throughout the dashboard -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Montserrat:wght@400&family=Roboto:wght@300&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Define custom colors and font families */
+        :root {
+            --bg-dark-1: #1F1F1F; /* Main Background */
+            --bg-dark-2: #1A1A1A; /* Card/Sidebar Background */
+            --teal-primary: #2C7A7B; /* Deep Teal for Primary Actions */
+            --teal-secondary: #22543D; /* Slightly darker teal for gradient */
+            --text-faded: rgba(255, 255, 255, 0.5);
+            
+            /* --- SUBTLE GLASSMORHISM VARIABLES --- */
+            --search-bg-glass: rgba(255, 255, 255, 0.02);
+            --search-border-glass: rgba(255, 255, 255, 0.05);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark-1);
+        }
+        .montserrat { font-family: 'Montserrat', sans-serif; }
+        .roboto { font-family: 'Roboto', sans-serif; }
+
+        /* Hide scrollbar */
+        .scroll-hidden::-webkit-scrollbar { display: none; }
+        .scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- Custom Styles for Subtle Glassmorphism Search Bar --- */
+        .glass-search-container {
+            background-color: var(--search-bg-glass);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid var(--search-border-glass);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .glass-search-container:focus-within {
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+        }
+
+        /* --- UX ENHANCEMENT: Button Gradient & Microinteraction --- */
+        .btn-primary-gradient { 
+            background: linear-gradient(135deg, var(--teal-primary) 0%, var(--teal-secondary) 100%);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+        .btn-primary-gradient:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+        .btn-primary-gradient:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Secondary Button (Snooze/Outline style) */
+        .btn-secondary-subtle {
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05); /* Added border for consistency */
+        }
+        .btn-secondary-subtle:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+        .btn-secondary-subtle:active {
+            transform: translateY(0);
+        }
+
+        /* --- UX ENHANCEMENT: Content Card Hover Lift --- */
+        .content-card-group {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .content-card-group:hover {
+            transform: translateY(-4px); 
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7); 
+        }
+        
+        /* Arrow Circle Button Style */
+        .arrow-circle-button {
+            width: 44px; 
+            height: 44px; 
+            background-color: var(--bg-dark-1); 
+            border-radius: 9999px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3); 
+            flex-shrink: 0;
+        }
+        .arrow-circle-button:hover {
+            background-color: rgba(255, 255, 255, 0.1); 
+        }
+        
+        /* Toast Notification Styling */
+        #toast-notification {
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transform: translateY(100%);
+        }
+        #toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Image specific styles for object fit and positioning */
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* Flashcard specific styles for 3D flip */
+        .perspective-1000 { perspective: 1000px; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+
+        /* Accessibility helpers */
+        .sr-only {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+
+        /* Make focused elements clearly visible */
+        :focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44,122,123,0.25);
+            border-radius: 6px;
+        }
+
+        /* Unified button radius */
+        :root { --btn-radius: 12px; }
+        .btn-unified { border-radius: var(--btn-radius); }
+
+        /* Slight background gradient for depth */
+        body {
+            background: linear-gradient(180deg, rgba(14,18,20,1) 0%, rgba(23,26,28,1) 40%), url('https://placehold.co/1200x800/0f1724/ffffff?text=');
+            background-blend-mode: overlay;
+            background-size: cover;
+        }
+
+        /* Small text increased contrast and size */
+        .text-small-strong { color: rgba(255,255,255,0.88); font-size: 0.85rem; }
+
+        /* Tighter content grouping */
+        .content-grid-tight { gap: 8px; }
+
+        button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44,122,123,0.25);
+            border-radius: 8px;
+        }
+
+        /* Remove teal focus ring for search input; the container shows focus instead */
+        .glass-search-container input:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Skip link visible on keyboard focus */
+        .skip-link {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #111;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            z-index: 10000;
+            transform: translateY(-100%);
+            transition: transform 0.18s ease-in-out;
+        }
+        .skip-link:focus, .skip-link:active {
+            transform: translateY(0);
+        }
+
+    </style>
+</head>
+<body class="min-h-screen text-white antialiased scroll-hidden">
+
+    <a href="#main-content" class="skip-link" data-skip-link>Skip to main content</a>
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="fixed right-4 bottom-4 bg-gray-700/90 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2" role="status" aria-live="polite">
+        <span id="toast-icon-container">
+            <i id="toast-icon" data-lucide="info" class="w-5 h-5 text-green-400"></i>
+        </span>
+        <span id="toast-text" class="font-medium text-sm">System feedback goes here.</span>
+    </div>
+
+    <!-- JavaScript for Logic and Interactivity -->
+    <script>
+        // --- MOCK DATA ---
+        const contentData = [
+            { id: 1, title: "Indian Polity", date: "7th Sept", description: "Indian polity refers to the political system of India which is based on the Constitution of India. Notes on Indian polity typically cover...", tag: "New", bookmarked: true, imageUrl: "https://placehold.co/300x128/3D405B/FFFFFF?text=Polity+%26+Law" },
+            { id: 2, title: "Modern History", date: "29th Sept", description: "Covering the arrival of Europeans, the struggle for independence, and post-independence consolidation...", tag: "Revision", bookmarked: false, imageUrl: "https://placehold.co/300x128/3A4F70/FFFFFF?text=History+%26+Time" },
+            { id: 3, title: "Environment & Ecology", date: "1st Oct", description: "Deals with biodiversity, climate change, pollution, and international environmental conventions...", tag: "Unattempted", bookmarked: true, imageUrl: "https://placehold.co/300x128/357960/FFFFFF?text=Nature+%26+Ecology" },
+            { id: 4, title: "Mock Test 1: Full Syllabus", date: "5th Oct", description: "A comprehensive mock test covering all major subjects to simulate exam conditions.", tag: "Mock Test", bookmarked: false, imageUrl: "https://placehold.co/300x128/703A3A/FFFFFF?text=Mock+Test" },
+            { id: 5, title: "Geography Basics", date: "10th Oct", description: "Fundamental concepts of physical and human geography, including climate and resources.", tag: "Unattempted", bookmarked: false, imageUrl: "https://placehold.co/300x128/334155/FFFFFF?text=Geography+Basics" },
+            { id: 6, title: "Economic Survey Summary", date: "15th Oct", description: "Key highlights and analysis from the latest annual economic survey.", tag: "New", bookmarked: true, imageUrl: "https://placehold.co/300x128/6D28D9/FFFFFF?text=Economics+Report" }
+        ];
+
+        const flashcards = [
+            { id: 1, front: "What is the primary function of the Supreme Court of India?", back: "To uphold the Constitution and interpret its provisions (Judicial Review)." },
+            { id: 2, front: "When was the Quit India Movement launched?", back: "August 8, 1942." },
+            { id: 3, front: "Define carrying capacity in ecology.", back: "The maximum population size of a species that the environment can sustain indefinitely." }
+        ];
+
+        const dailyQuiz = {
+            question: "Which Constitutional Amendment is often referred to as a 'Mini-Constitution'?",
+            options: ["42nd Amendment", "44th Amendment", "52nd Amendment", "61st Amendment"],
+            answerIndex: 0,
+            explanation: "The 42nd Amendment (1976) introduced vast changes to the Constitution, drastically changing its structure and earning it the nickname 'Mini-Constitution'."
+        };
+
+        // --- GLOBAL STATE ---
+        const skeletonCount = 4;
+        let isLoading = true; // Controls content card display (skeleton vs real)
+        let currentFilter = 'All'; // Active content filter
+        
+        let currentFlashcardIndex = 0;
+        let flashcardFlipped = false;
+        
+        let selectedOptionIndex = null; // Quiz state
+        let quizAttempted = false;
+        let quizCorrect = false;
+
+        // --- TOAST & UTILITIES ---
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast-notification');
+            const toastText = document.getElementById('toast-text');
+            const toastIconContainer = document.getElementById('toast-icon-container');
+
+            toastText.textContent = message;
+            toast.className = 'fixed right-4 bottom-4 px-5 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 transition-all duration-300';
+            
+            let iconName = 'info';
+            let bgColor = 'bg-gray-700/90';
+            let iconColor = 'text-teal-400';
+            let iconSize = 'w-5 h-5';
+
+            if (type === 'success') {
+                iconName = 'check-circle';
+                bgColor = 'bg-green-700/90';
+                iconColor = 'text-white';
+            } else if (type === 'error') {
+                iconName = 'x-octagon';
+                bgColor = 'bg-red-700/90';
+                iconColor = 'text-white';
+            }
+
+            toast.classList.add(bgColor, 'text-white');
+            
+            // Recreate the icon element to update attributes correctly
+            toastIconContainer.innerHTML = `<i id="toast-icon" data-lucide="${iconName}" class="${iconColor} ${iconSize}"></i>`;
+            if (window.iconManager) window.iconManager.refresh();
+
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
+        // --- CONTENT CARD LOGIC ---
+        
+        function toggleBookmark(id, btn) {
+            const item = contentData.find(d => d.id === id);
+            if (item) {
+                item.bookmarked = !item.bookmarked;
+                // Update button aria state if we have it
+                if (btn) {
+                    btn.setAttribute('aria-pressed', item.bookmarked ? 'true' : 'false');
+                    const sr = btn.querySelector('.sr-only');
+                    if (sr) sr.textContent = item.bookmarked ? `Remove bookmark for ${item.title}` : `Add bookmark for ${item.title}`;
+                    // swap icon classes (simple approach: re-render icons after content update)
+                }
+
+                renderContent(currentFilter); // Re-render content list
+                showToast(item.bookmarked ? `"${item.title}" bookmarked!` : `Bookmark removed from "${item.title}".`, 'info');
+            }
+        }
+
+    function createContentCardHTML(item, isSkeleton = false) {
+            if (isSkeleton) {
+                return `
+                    <div class="bg-[var(--bg-dark-2)] rounded-2xl overflow-hidden shadow-xl relative pb-6 animate-pulse">
+                        <div class="h-32 rounded-t-2xl bg-gray-700"></div>
+                        <div class="px-4 pt-4 space-y-2">
+                            <div class="h-5 w-3/4 bg-gray-600 rounded"></div>
+                            <div class="h-3 w-1/3 bg-gray-700 rounded"></div>
+                            <div class="h-3 bg-gray-700 rounded"></div>
+                            <div class="h-3 w-5/6 bg-gray-700 rounded"></div>
+                            <div class="h-3 w-1/4 bg-gray-600 rounded mt-4"></div>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-600"></div>
+                        <div class="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-gray-600"></div>
+                    </div>
+                `;
+            }
+
+            // Real card HTML with Bookmark
+            const bookmarkIcon = item.bookmarked ? 'bookmark' : 'bookmark-plus';
+            const bookmarkColor = item.bookmarked ? 'text-yellow-400 fill-yellow-400' : 'text-white/50';
+            const tagColor = item.tag === 'Revision' ? 'text-red-400' : (item.tag === 'Mock Test' ? 'text-blue-400' : 'text-teal-400');
+
+
+                return `
+                <article class="content-card-group bg-[var(--bg-dark-2)] rounded-2xl overflow-hidden shadow-xl relative pb-6 transition duration-300 hover:shadow-2xl" aria-labelledby="content-title-${item.id}"> 
+                    <div class="h-32 rounded-t-2xl border-b border-gray-700 overflow-hidden">
+                        <img src="${item.imageUrl}" onerror="this.onerror=null; this.src='https://placehold.co/300x128/1A1A1A/FFFFFF?text=Image+Error';" alt="${item.title} illustration" class="card-image">
+                    </div>
+
+                    <div class="px-4 space-y-1 pt-3">
+                        <div class="space-y-1">
+                            <h4 id="content-title-${item.id}" class="text-sm font-normal leading-tight text-white">${item.title}</h4>
+                            <p class="montserrat text-small-strong font-normal leading-4">Uploaded on ${item.date}</p>
+                        </div>
+                        <p class="roboto text-small-strong font-light leading-snug h-14 overflow-hidden" aria-hidden="true">
+                            ${item.description}
+                        </p>
+                        <ul class="mt-2 text-xs text-white/80 list-disc list-inside" aria-hidden="true">
+                            <li class="truncate">Brief highlight or topic bullet 1</li>
+                            <li class="truncate">Highlight or subtopic 2</li>
+                        </ul>
+                        <div class="pt-2">
+                            <span class="font-medium text-sm leading-snug ${tagColor}" aria-label="Tag: ${item.tag}">${item.tag}</span>
+                        </div>
+                    </div>
+
+                    <!-- Bookmark Button -->
+                    <button onclick="toggleBookmark(${item.id}, this)" aria-pressed="${item.bookmarked ? 'true' : 'false'}" aria-label="${item.bookmarked ? 'Remove bookmark' : 'Add bookmark'} for ${item.title}" class="bookmark-btn absolute top-3 right-3 min-w-[44px] min-h-[44px] w-11 h-11 bg-[var(--bg-dark-1)] rounded-full flex items-center justify-center shadow-lg z-20 transition hover:bg-gray-700">
+                        <span class="sr-only">${item.bookmarked ? 'Remove bookmark' : 'Add bookmark'} for ${item.title}</span>
+                        <i data-lucide="${bookmarkIcon}" class="${bookmarkColor} w-5 h-5 transition duration-300" aria-hidden="true"></i>
+                    </button>
+                    
+                    <!-- Arrow Button -->
+                    <button aria-label="Open ${item.title}" class="absolute bottom-6 right-6 min-w-[44px] min-h-[44px] w-12 h-12 bg-[var(--bg-dark-1)] rounded-full flex items-center justify-center shadow-xl z-10 transition-all duration-300 group-hover:scale-110 group-hover:bg-gray-700">
+                        <i data-lucide="arrow-right" class="text-white w-5 h-5 transition duration-300 group-hover:rotate-45" aria-hidden="true"></i>
+                    </button>
+                </article>
+                `;
+        }
+        
+        function renderContent() {
+            const grid = document.getElementById('content-grid');
+            grid.innerHTML = '';
+            
+            if (isLoading) {
+                for (let i = 0; i < skeletonCount; i++) {
+                    grid.innerHTML += createContentCardHTML(null, true);
+                }
+            } else {
+                const filteredData = contentData.filter(item => {
+                    if (currentFilter === 'All') return true;
+                    if (currentFilter === 'Revision' && item.tag === 'Revision') return true;
+                    if (currentFilter === 'Unattempted' && item.tag === 'Unattempted') return true;
+                    if (currentFilter === 'Mock Test' && item.tag === 'Mock Test') return true;
+                    if (currentFilter === 'Recent' && item.tag === 'New') return true;
+                    // Add logic to filter by bookmarked if needed later
+                    return false;
+                });
+
+                filteredData.forEach(item => {
+                    grid.innerHTML += createContentCardHTML(item, false);
+                });
+                if (window.iconManager) window.iconManager.refresh(); // Re-render icons after adding content
+            }
+        }
+
+        // --- FILTER CHIP LOGIC ---
+
+        function setActiveFilter(filter) {
+            currentFilter = filter;
+            renderFilterChips();
+            renderContent();
+        }
+
+        function renderFilterChips() {
+            const chipsContainer = document.getElementById('filter-chips');
+            const filters = ['All', 'Recent', 'Unattempted', 'Revision', 'Mock Test'];
+
+            chipsContainer.innerHTML = filters.map(filter => {
+                const isActive = filter === currentFilter;
+                // Chip text size reduced to text-xs
+                const classes = isActive 
+                    ? 'btn-primary-gradient px-3 py-1 text-xs font-medium rounded-full shadow-md transition'
+                    : 'bg-gray-700/70 border border-white/10 px-3 py-1 text-xs text-white/80 rounded-full transition hover:bg-gray-700';
+
+                return `
+                    <button onclick="setActiveFilter('${filter}')" class="${classes}" role="tab" aria-selected="${isActive}">
+                        ${filter}
+                    </button>
+                `;
+            }).join('');
+        }
+        
+        // --- FLASHCARD LOGIC ---
+
+        function renderFlashcard() {
+            const cardContainer = document.getElementById('flashcard-container');
+            const card = flashcards[currentFlashcardIndex];
+            
+            cardContainer.innerHTML = `
+                <button id="card-inner" aria-pressed="${flashcardFlipped ? 'true' : 'false'}" aria-label="Flashcard: ${card.front}. Press Enter or Space to flip" 
+                    onclick="flipFlashcard()" 
+                    class="w-full h-full cursor-pointer transition-transform duration-500 rounded-lg shadow-xl 
+                    bg-[var(--bg-dark-2)] p-4 flex items-center justify-center 
+                    text-center border border-white/10 hover:border-teal-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400" 
+                    style="transform-style: preserve-3d; ${flashcardFlipped ? 'transform: rotateY(180deg);' : 'transform: rotateY(0deg);'}">
+                    
+                    <!-- Front Face -->
+                    <div id="card-front" class="absolute w-full h-full p-4 flex items-center justify-center backface-hidden">
+                        <p class="text-xs font-light text-white/50 absolute bottom-2">Press Enter or Space to flip</p>
+                        <p class="text-base font-semibold text-teal-400 pt-8">${card.front}</p>
+                    </div>
+                    
+                    <!-- Back Face -->
+                    <div id="card-back" class="absolute w-full h-full p-4 flex items-center justify-center backface-hidden" style="transform: rotateY(180deg);">
+                        <p class="text-base font-medium text-white/80">${card.back}</p>
+                    </div>
+                </button>
+            `;
+            
+            // Update navigation button states
+            document.getElementById('flashcard-prev').disabled = currentFlashcardIndex === 0;
+            document.getElementById('flashcard-next').disabled = currentFlashcardIndex === flashcards.length - 1;
+            
+            // Update progress indicator
+            const progressEl = document.getElementById('flashcard-progress');
+            if(progressEl) {
+                progressEl.textContent = `${currentFlashcardIndex + 1} of ${flashcards.length}`;
+            }
+        }
+
+        function flipFlashcard() {
+            flashcardFlipped = !flashcardFlipped;
+            renderFlashcard();
+        }
+
+        function navigateFlashcard(direction) {
+            flashcardFlipped = false; // Reset flip state
+            if (direction === 'next' && currentFlashcardIndex < flashcards.length - 1) {
+                currentFlashcardIndex++;
+            } else if (direction === 'prev' && currentFlashcardIndex > 0) {
+                currentFlashcardIndex--;
+            }
+            renderFlashcard();
+        }
+
+        function flashcardAction(action) {
+            const card = flashcards[currentFlashcardIndex];
+            if (action === 'learned') {
+                showToast(`Card on "${card.front.substring(0, 30)}..." marked as Learned!`, 'success');
+                // In a real app, you'd remove this card from the active deck
+            } else if (action === 'weak') {
+                showToast(`Card on "${card.front.substring(0, 30)}..." flagged as Weak Area.`, 'error');
+                // In a real app, you'd mark it for priority revision
+            }
+            // Move to next card (if not the last one)
+            if (currentFlashcardIndex < flashcards.length - 1) {
+                navigateFlashcard('next');
+            } else {
+                 showToast("End of Flashcards for today! Great job.", 'info');
+            }
+        }
+
+        // --- DAILY QUIZ LOGIC ---
+
+        function renderQuiz() {
+            const optionsContainer = document.getElementById('quiz-options');
+            const questionEl = document.getElementById('daily-quiz-question');
+            const feedbackDiv = document.getElementById('quiz-feedback');
+            const checkBtn = document.getElementById('check-answer-btn');
+            const retryBtn = document.getElementById('retry-quiz-btn');
+
+            // Populate the question text
+            if (questionEl) questionEl.textContent = dailyQuiz.question;
+
+            optionsContainer.innerHTML = dailyQuiz.options.map((option, index) => {
+                // Use role=radio buttons for accessibility
+                let classes = 'p-3 rounded-xl cursor-pointer transition duration-200 text-white border border-white/10 inline-flex items-center w-full text-left';
+                let ariaChecked = 'false';
+                
+                if (quizAttempted) {
+                    if (index === dailyQuiz.answerIndex) {
+                        classes += ' bg-green-800/50 border-green-500 shadow-md';
+                        ariaChecked = 'true';
+                    } else if (index === selectedOptionIndex) {
+                        classes += ' bg-red-800/50 border-red-500 shadow-md';
+                        ariaChecked = 'true';
+                    } else {
+                        classes += ' bg-gray-700/50';
+                    }
+                } else {
+                    classes += ' bg-gray-700/50 hover:bg-gray-600/70';
+                    if (index === selectedOptionIndex) {
+                        classes += ' border-teal-primary ring-2 ring-teal-primary shadow-lg';
+                        ariaChecked = 'true';
+                    }
+                }
+
+                return `
+                    <button role="radio" tabindex="0" aria-checked="${ariaChecked}" class="${classes}" onclick="selectQuizOption(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); selectQuizOption(${index}); }">
+                        <span class="text-sm">${String.fromCharCode(65 + index)}. ${option}</span>
+                    </button>
+                `;
+            }).join('');
+
+            if (quizAttempted) {
+                checkBtn.classList.add('hidden');
+                retryBtn.classList.remove('hidden');
+                feedbackDiv.classList.remove('hidden');
+                feedbackDiv.innerHTML = `
+                    <div class="p-3 rounded-lg ${quizCorrect ? 'bg-green-700/30 border-l-4 border-green-500' : 'bg-red-700/30 border-l-4 border-red-500'}">
+                        <p class="text-xs font-medium ${quizCorrect ? 'text-green-400' : 'text-red-400'}">
+                            ${quizCorrect ? 'Correct! Excellent work.' : 'Incorrect.'}
+                        </p>
+                        <p class="text-xs text-white/70 pt-1">${dailyQuiz.explanation}</p>
+                    </div>
+                `;
+            } else {
+                checkBtn.classList.remove('hidden');
+                retryBtn.classList.add('hidden');
+                feedbackDiv.classList.add('hidden');
+                checkBtn.disabled = selectedOptionIndex === null;
+            }
+        }
+
+        function selectQuizOption(index) {
+            if (quizAttempted) return;
+            selectedOptionIndex = index;
+            renderQuiz();
+        }
+
+        function checkQuizAnswer() {
+            if (selectedOptionIndex === null) {
+                showToast("Please select an option first!", 'error');
+                return;
+            }
+            
+            quizAttempted = true;
+            quizCorrect = selectedOptionIndex === dailyQuiz.answerIndex;
+
+            if (quizCorrect) {
+                showToast("You nailed the daily challenge!", 'success');
+            } else {
+                showToast("Keep going, you'll get it next time.", 'info');
+            }
+
+            renderQuiz();
+        }
+
+        function resetQuiz() {
+            quizAttempted = false;
+            selectedOptionIndex = null;
+            quizCorrect = false;
+            showToast("Quiz reset. Good luck!", 'info');
+            renderQuiz();
+        }
+
+        // --- DASHBOARD ACTIONS ---
+        function handleSearch(event) {
+            event.preventDefault(); 
+            const searchInput = document.getElementById('search-input');
+            const query = searchInput.value.trim();
+
+            if (query) {
+                console.log("Searching for:", query);
+                showToast(`Searching for "${query}"...`, 'info');
+                setTimeout(() => {
+                    showToast(`Search for "${query}" completed.`, 'success');
+                }, 1500);
+            } else {
+                showToast("Please enter a query.", 'error');
+            }
+        }
+        
+        function handleSnooze() {
+             showToast("Revision snoozed! Reminder set for tomorrow.", 'success');
+             console.log("Revision snoozed.");
+        }
+
+        function getInitials(fullName) {
+            const names = fullName.split(' ');
+            if (names.length === 1) return names[0].charAt(0).toUpperCase();
+            if (names.length > 1) return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+            return 'A'; 
+        }
+        
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+             // Profile information is now handled by profile-manager.js
+             if (window.profileManager) {
+                 const userInitialsEl = document.getElementById('user-initials');
+                 if (userInitialsEl) {
+                     userInitialsEl.textContent = profileManager.generateInitials(profileManager.profileData.name);
+                 }
+                 
+                 // Update welcome message with first name
+                 const welcomeNameEl = document.querySelector('#welcome-message #user-name');
+                 if (welcomeNameEl) {
+                     welcomeNameEl.textContent = profileManager.profileData.name.split(' ')[0] + '!';
+                 }
+             }
+
+
+             // Initial Render Calls
+             renderContent(); // Show skeletons initially
+             renderFilterChips();
+             renderFlashcard();
+             renderQuiz();
+
+             // Simulate data fetching delay
+             setTimeout(() => {
+                 isLoading = false;
+                 renderContent(); // Render real content
+                 showToast("Content successfully loaded.", 'success');
+             }, 1500); 
+
+             // Render Lucide Icons
+             if (window.iconManager) window.iconManager.refresh();
+        });
+
+    </script>
+    
+    <!-- MAIN APPLICATION CONTAINER -->
+    <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+        
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="hidden lg:flex flex-col w-[280px] bg-[var(--bg-dark-2)] p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+        
+            <!-- Profile and Notifications (Continued from user's snippet) -->
+            <div class="flex items-center justify-between px-2 mb-10">
+                <div class="flex items-center space-x-4"> 
+                    <div class="relative"> <!-- wrapper to allow badge overflow -->
+                        <div class="w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center">
+                            <div id="user-initials" class="text-lg font-medium text-black">A</div>
+                        </div>
+                        <!-- Notification badge overlay (positioned relative to wrapper) -->
+                        <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500" title="Notifications" onclick="showToast('You have 3 unread notifications.', 'info')">
+                            <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+                                <!-- Mock unread count -->
+                                <span class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-[var(--bg-dark-1)] bg-red-500"></span>
+                            </span>
+                        </button>
+                    </div>
+                </div> 
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="space-y-2 mb-auto mt-6" aria-label="Main Navigation">
+                <!-- Dashboard (Active) -->
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-xl bg-teal-primary/20 text-teal-400 font-semibold transition hover:bg-teal-primary/30" aria-current="page">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <!-- Content Library -->
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-white/70 font-medium transition hover:bg-white/10 hover:text-white">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    <span>Content Library</span>
+                </a>
+                <!-- Mock Tests -->
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-white/70 font-medium transition hover:bg-white/10 hover:text-white">
+                    <i data-lucide="test-tube" class="w-5 h-5"></i>
+                    <span>Mock Tests</span>
+                </a>
+                <!-- Performance -->
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-white/70 font-medium transition hover:bg-white/10 hover:text-white">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                    <span>Performance Tracking</span>
+                </a>
+            </nav>
+
+            <!-- Settings & Logout Footer -->
+            <div class="mt-auto pt-6 border-t border-white/10 space-y-4">
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-white/70 font-medium transition hover:bg-white/10 hover:text-white">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span>Settings</span>
+                </a>
+                <div class="pt-2 text-center">
+                    <p class="text-xs text-white/50 mb-1" id="user-email">jane.doe@aspirant.com</p>
+                    <button class="w-full text-sm font-medium text-red-400 p-2 rounded-lg transition hover:bg-red-900/50" onclick="showToast('Logged out successfully', 'info')">
+                        <i data-lucide="log-out" class="w-4 h-4 inline mr-2 align-middle"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content" class="flex-1 overflow-y-auto scroll-hidden p-4 md:p-8 lg:pt-8 pt-4">
+
+        <!-- Header and Search (Desktop/Tablet) -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-3xl font-bold">Dashboard</h1>
+                <p class="text-lg text-white/50" id="welcome-message">Welcome back, <span class="font-semibold text-white" id="user-name">Jane!</span></p>
+            </div>
+            
+            <!-- Search Bar with subtle glassmorphism -->
+            <form onsubmit="handleSearch(event)" class="w-full max-w-lg">
+                <div class="glass-search-container flex items-center p-2 rounded-xl focus-within:ring-2 focus-within:ring-teal-500">
+                    <i data-lucide="search" class="w-5 h-5 text-white/50 ml-2 mr-2 flex-shrink-0" aria-hidden="true"></i>
+                    <input type="search" id="search-input" placeholder="Search content, topics, or notes..." 
+                        class="w-full bg-transparent text-white placeholder-white/50 focus:outline-none p-2 text-sm"
+                        aria-label="Search content, topics, or notes">
+                    <button type="submit" class="p-2 btn-primary-gradient rounded-lg text-sm font-semibold flex-shrink-0 min-w-[60px] btn-unified">Search</button>
+                </div>
+            </form>
+        </header>
+
+        <!-- Top Utility Grid: Revision, Flashcard, Quiz -->
+        <section aria-labelledby="utility-heading" class="mb-8">
+            <h2 id="utility-heading" class="sr-only">Daily Utilities: Revision, Flashcards, and Quiz</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+
+                <!-- 1. Revision Focus Card (Span 2 or 1) -->
+                <div class="lg:col-span-2 bg-[var(--bg-dark-2)] rounded-2xl p-6 shadow-2xl border border-white/10 flex flex-col justify-between content-card-group">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i data-lucide="bolt" class="w-6 h-6 text-yellow-400 fill-yellow-400"></i>
+                            <h3 class="text-xl font-bold text-teal-400">Today's Focus: Indian Polity</h3>
+                        </div>
+                        <p class="text-white/70 mb-4 text-sm roboto">
+                            Based on your last performance, we recommend focusing on **Fundamental Rights** and **DPSP**. 
+                            Allocate at least 90 minutes to these topics.
+                        </p>
+                        <ul class="space-y-2 text-sm text-white/80">
+                            <li class="flex items-start space-x-2">
+                                <i data-lucide="circle-check" class="w-4 h-4 text-green-400 mt-1 flex-shrink-0"></i>
+                                <span>Revise Articles 12-35 (Fundamental Rights)</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-orange-400 mt-1 flex-shrink-0"></i>
+                                <span>Pending Quiz: 15 questions on DPSP</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Actions -->
+                    <div class="flex space-x-4 mt-6">
+                        <button class="btn-primary-gradient flex-1 px-4 py-2 text-sm font-semibold btn-unified flex items-center justify-center" onclick="showToast('Starting revision for Indian Polity...', 'info')">
+                            <i data-lucide="book-open-check" class="w-4 h-4 mr-2"></i>
+                            Start Revision
+                        </button>
+                        <button class="btn-secondary-subtle px-4 py-2 text-sm font-medium btn-unified" onclick="handleSnooze()">
+                            <i data-lucide="bell-off" class="w-4 h-4"></i>
+                            <span class="sr-only">Snooze Revision</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Daily Quiz Card (Span 1) -->
+                <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 shadow-2xl border border-white/10 flex flex-col content-card-group">
+                    <h3 class="text-lg font-bold flex items-center space-x-2 mb-4">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-purple-400 fill-purple-400/50"></i>
+                        Daily Quiz Challenge
+                    </h3>
+                    <p id="daily-quiz-question" class="text-sm font-medium mb-4 text-white/90"></p>
+                    <div id="quiz-options" class="space-y-2 mb-4" role="radiogroup" aria-labelledby="daily-quiz-question">
+                        <!-- Quiz options rendered by JS -->
+                    </div>
+                    <div id="quiz-feedback" class="mb-4 hidden">
+                        <!-- Feedback box rendered by JS -->
+                    </div>
+                    <button id="check-answer-btn" onclick="checkQuizAnswer()" class="btn-primary-gradient px-4 py-2 text-sm font-semibold btn-unified mt-auto" disabled>
+                        Check Answer
+                    </button>
+                    <button id="retry-quiz-btn" onclick="resetQuiz()" class="btn-secondary-subtle px-4 py-2 text-sm font-medium btn-unified mt-auto hidden">
+                        Try Again
+                    </button>
+                </div>
+
+                <!-- 3. Flashcard Review Card (Span 1) -->
+                <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 shadow-2xl border border-white/10 flex flex-col content-card-group">
+                    <h3 class="text-lg font-bold flex items-center justify-between mb-4">
+                        <span class="flex items-center space-x-2">
+                            <i data-lucide="infinity" class="w-5 h-5 text-blue-400"></i>
+                            <span>Flashcards</span>
+                        </span>
+                        <span id="flashcard-progress" class="text-xs font-medium text-white/50">1 of 3</span>
+                    </h3>
+                    
+                    <!-- Card Display and Navigation -->
+                    <div class="flex items-center space-x-4 h-48 perspective-1000 mb-4">
+                        <!-- Previous Button -->
+                        <button id="flashcard-prev" onclick="navigateFlashcard('prev')" class="arrow-circle-button disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Previous Flashcard" disabled>
+                            <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
+                        </button>
+                        
+                        <!-- Flashcard Container (Flip Interaction) -->
+                        <div id="flashcard-container" class="flex-1 h-full relative">
+                            <!-- Flashcard HTML rendered by JS -->
+                        </div>
+                        
+                        <!-- Next Button -->
+                        <button id="flashcard-next" onclick="navigateFlashcard('next')" class="arrow-circle-button disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Next Flashcard">
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-white"></i>
+                        </button>
+                    </div>
+
+                    <!-- Flashcard Actions -->
+                    <div class="flex space-x-4 pt-2 justify-center">
+                        <button onclick="flashcardAction('learned')" class="flex-1 bg-green-700/50 hover:bg-green-700 border border-green-700 text-sm font-medium p-3 rounded-lg transition btn-unified">
+                            <i data-lucide="thumbs-up" class="w-4 h-4 mr-1 inline"></i> Learned
+                        </button>
+                        <button onclick="flashcardAction('weak')" class="flex-1 bg-red-700/50 hover:bg-red-700 border border-red-700 text-sm font-medium p-3 rounded-lg transition btn-unified">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 mr-1 inline"></i> Weak Area
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        ---
+
+        <!-- Content Library Section -->
+        <section aria-labelledby="content-library-heading">
+            <h2 id="content-library-heading" class="text-2xl font-bold mb-4 flex items-center space-x-2">
+                <i data-lucide="folder-open" class="w-6 h-6 text-teal-400"></i>
+                Content Library
+            </h2>
+            
+            <!-- Filter Chips -->
+            <div id="filter-chips" class="flex flex-wrap gap-2 mb-6" role="tablist">
+                <!-- Filter chips rendered by JS (setActiveFilter) -->
+            </div>
+
+            <!-- Content Grid -->
+            <div id="content-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 content-grid-tight">
+                <!-- Content cards and skeletons rendered by JS (renderContent) -->
+            </div>
+        </section>
+
+    </main>
+</div>
+    
+</body>
+</html>

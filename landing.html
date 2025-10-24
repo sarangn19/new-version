@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Second Brain - AI-Powered Learning Ecosystem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@250;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* --- Main Container for Hover Logic --- */
+        .main-button-container {
+            width: 320px;
+            height: 65px;
+            position: relative;
+            margin: 40px auto 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* --- Shared Transition Styling for States --- */
+        .get-started-state,
+        .auth-state {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Smoother easing and transition duration */
+            transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* ------------------------------------- */
+        /* 1. Get Started State (Initial View)   */
+        /* ------------------------------------- */
+        .get-started-state {
+            z-index: 20;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* HIDE Get Started on hover */
+        .main-button-container:hover .get-started-state {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        /* Styling for the large "Get Started" button container */
+        .split-button-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .split-button-left,
+        .split-button-right {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            font-size: 18px;
+            color: #FFFFFF;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .split-button-left {
+            width: 120px;
+            background: linear-gradient(270deg, #193631 0%, #653E06 100%);
+            border-radius: 50px 0px 0px 50px;
+            padding: 0 5px;
+            justify-content: flex-end;
+            padding-right: 5px;
+        }
+
+        .split-button-right {
+            flex-grow: 1;
+            background: linear-gradient(270deg, #012F59 0%, #21372D 100%);
+            border-radius: 0px 50px 50px 0px;
+            padding-left: 5px;
+            padding-right: 60px;
+            justify-content: flex-start;
+        }
+
+        /* --- ARROW CIRCLE POSITIONING --- */
+        .split-button-center {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            top: 50%;
+            /* Positioned on the right extreme */
+            right: 5px;
+            transform: translateY(-50%);
+            z-index: 30;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        /* Hover effect for the center circle */
+        .split-button-center:hover {
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        /* ------------------------------------- */
+        /* 2. Sign In / Sign Up State (Hover View) */
+        /* ------------------------------------- */
+        .auth-state {
+            gap: 12px;
+            z-index: 10;
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        /* SHOW Sign In / Sign Up on hover */
+        .main-button-container:hover .auth-state {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* Shared Auth Button Styles */
+        .sign-in-btn,
+        .sign-up-btn {
+            /* Ensures equal width distribution */
+            flex: 1;
+            height: 65px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 50px;
+            padding: 0 30px;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        /* Sign In Button (Ghost Style) */
+        .sign-in-btn {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sign-in-btn:hover {
+            border-color: #51c4d3;
+            background-color: rgba(81, 196, 211, 0.1);
+            transform: scale(1.05);
+        }
+
+        /* Sign Up Button (Filled Gradient Style) */
+        .sign-up-btn {
+            color: #FFFFFF;
+            background: linear-gradient(270deg, #012F59 0%, #21372D 100%);
+            box-shadow: 0px 4px 20px rgba(1, 47, 89, 0.5);
+        }
+
+        .sign-up-btn:hover {
+            background: linear-gradient(270deg, #1e5491 0%, #3e6d5b 100%);
+            transform: scale(1.05);
+        }
+
+        .welcome-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .logo-container {
+            margin-bottom: 24px;
+        }
+
+        .main-logo {
+            max-width: 600px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 50px;
+        }
+
+        .background-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* Ellipse 1 - Large blue gradient */
+        .ellipse-1 {
+            position: absolute;
+            width: 2499px;
+            height: 2499px;
+            left: 380px;
+            top: -1178px;
+            background: radial-gradient(50% 50% at 50% 50%, #038FB1 0%, rgba(37, 42, 106, 0.05) 81.25%);
+            border-radius: 50%;
+        }
+
+        /* Ellipse 2 - Medium teal gradient left */
+        .ellipse-2 {
+            position: absolute;
+            width: 974px;
+            height: 974px;
+            left: -528px;
+            top: -274px;
+            background: radial-gradient(50% 50% at 50% 50%, rgba(3, 143, 177, 0.25) 0%, rgba(37, 42, 106, 0.0125) 100%);
+            border-radius: 50%;
+        }
+
+        /* Ellipse 3 - Rotated oval blue gradient */
+        .ellipse-3 {
+            position: absolute;
+            width: 2101px;
+            height: 504px;
+            left: 951px;
+            top: -429px;
+            background: radial-gradient(50% 50% at 50% 50%, rgba(39, 68, 140, 0.64) 0%, rgba(38, 58, 129, 0.32) 48.56%, rgba(37, 51, 121, 0) 100%);
+            border-radius: 50%;
+            transform: rotate(-35.62deg);
+        }
+
+        /* Ellipse 4 - Orange gradient left */
+        .ellipse-4 {
+            position: absolute;
+            width: 974px;
+            height: 974px;
+            left: -638px;
+            top: -64px;
+            background: radial-gradient(50% 50% at 50% 50%, rgba(255, 145, 0, 0.25) 0%, rgba(37, 42, 106, 0.0125) 100%);
+            border-radius: 50%;
+        }
+
+        /* Welcome badge styling */
+        .welcome-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: #052A33;
+            border-radius: 24px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-badge-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 20px;
+            color: #FFFFFF;
+        }
+
+        @media (max-width: 768px) {
+            .main-logo {
+                max-width: 400px;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .auth-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hero-section">
+        <div class="background-elements">
+            <div class="ellipse-1"></div>
+            <div class="ellipse-2"></div>
+            <div class="ellipse-3"></div>
+            <div class="ellipse-4"></div>
+        </div>
+
+        <div class="text-center max-w-4xl mx-auto px-6" style="position: relative; z-index: 10;">
+            <div class="welcome-badge">
+                <span class="welcome-badge-text">welcome to</span>
+            </div>
+
+            <div class="logo-container">
+                <img src="logo.png" alt="Second Brain Logo" class="main-logo">
+            </div>
+
+            <p class="subtitle">Your AI-Powered Learning Ecosystem</p>
+
+            <div class="main-button-container group">
+                <!-- 1. INITIAL STATE: Get Started Button -->
+                <div class="get-started-state">
+                    <div class="split-button-container">
+                        <!-- Left Half: Get -->
+                        <div class="split-button-left active:scale-[0.98]">
+                            <span>Get</span>
+                        </div>
+                        <!-- Right Half: Started -->
+                        <div class="split-button-right active:scale-[0.98]">
+                            <span>Started</span>
+                        </div>
+                        <!-- Center Floating Circle with Arrow (Now on the right) -->
+                        <div class="split-button-center shadow-2xl">
+                            <!-- Arrow Icon (pointing right) -->
+                            <i data-lucide="arrow-right" class="w-6 h-6 text-black stroke-2"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. HOVER STATE: Sign In / Sign Up Buttons -->
+                <div class="auth-state">
+                    <a href="signin.html" class="sign-in-btn active:scale-[0.95]">Sign In</a>
+                    <a href="login.html" class="sign-up-btn active:scale-[0.95]">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (window.iconManager) window.iconManager.refresh();
+    </script>
+</body>
+
+</html>

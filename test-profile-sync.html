@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile Sync Test</title>
+    <script src="js/profile-manager.js"></script>
+</head>
+<body>
+    <h1>Profile Sync Test</h1>
+    <p>Current Profile:</p>
+    <p>Name: <span id="current-name"></span></p>
+    <p>Email: <span id="current-email"></span></p>
+    
+    <hr>
+    
+    <h2>Test Profile Update</h2>
+    <input type="text" id="test-name" placeholder="Enter test name" value="John Smith">
+    <input type="email" id="test-email" placeholder="Enter test email" value="john.smith@test.com">
+    <button onclick="updateTestProfile()">Update Profile</button>
+    
+    <script>
+        // Display current profile
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('current-name').textContent = profileManager.profileData.name;
+            document.getElementById('current-email').textContent = profileManager.profileData.email;
+        });
+        
+        function updateTestProfile() {
+            const name = document.getElementById('test-name').value;
+            const email = document.getElementById('test-email').value;
+            
+            profileManager.updateProfile({ name, email });
+            
+            // Update display
+            document.getElementById('current-name').textContent = name;
+            document.getElementById('current-email').textContent = email;
+            
+            alert('Profile updated! Check other pages to see if they reflect the changes.');
+        }
+    </script>
+</body>
+</html>

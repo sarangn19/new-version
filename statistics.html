@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistics - Advanced Analytics Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="js/profile-manager.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --bg-dark-3: #151515;
+      --teal-primary: #2C7A7B;
+      --text-faded: rgba(255, 255, 255, 0.5);
+      --search-bg-glass: rgba(255, 255, 255, 0.02);
+      --search-border-glass: rgba(255, 255, 255, 0.05);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --gradient-tertiary: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --gradient-quaternary: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark-1);
+      color: white;
+    }
+
+    .scroll-hidden::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scroll-hidden {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Glass Searchbar */
+    .glass-search-container {
+      background-color: var(--search-bg-glass);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid var(--search-border-glass);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .arrow-circle-button {
+      width: 44px;
+      height: 44px;
+      background-color: var(--bg-dark-1);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .arrow-circle-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- GLASSMORPHISM EFFECTS --- */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .glass-sidebar {
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- SMOOTH ANIMATIONS --- */
+    .page-transition {
+      animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .nav-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .nav-item:hover::before {
+      left: 100%;
+    }
+
+    .nav-item:hover {
+      transform: translateX(4px);
+      background: rgba(42, 42, 42, 0.8);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(44, 122, 123, 0.2), rgba(42, 42, 42, 0.9));
+      border-left: 3px solid var(--teal-primary);
+    }
+
+    /* --- STATISTICS SPECIFIC STYLES --- */
+    .stat-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .gradient-text {
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .chart-container {
+      background: var(--bg-dark-2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+      transition: stroke-dashoffset 0.35s;
+      transform-origin: 50% 50%;
+    }
+
+    /* Animated counters */
+    .counter {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Heatmap styles */
+    .heatmap-cell {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .heatmap-cell:hover {
+      transform: scale(1.1);
+      z-index: 10;
+    }
+
+    /* Performance indicators */
+    .performance-indicator {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .performance-indicator::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* Custom scrollbar for charts */
+    .chart-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .chart-scroll::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .chart-scroll::-webkit-scrollbar-thumb {
+      background: var(--teal-primary);
+      border-radius: 2px;
+    }
+
+    /* Tooltip styles */
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .tooltip.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-white antialiased scroll-hidden">
+
+  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar"
+      class="hidden lg:flex flex-col w-[280px] glass-sidebar p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+      <!-- Profile and Notifications -->
+      <div class="flex items-center justify-between px-2 mb-10">
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <a href="profile.html"
+              class="user-avatar block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+              <div id="user-initials" class="user-initials text-lg font-medium text-black">JD</div>
+            </a>
+            <!-- Notification badge -->
+            <button id="notification-btn" aria-label="Notifications"
+              class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+              <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+              </span>
+            </button>
+          </div>
+          <div>
+            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-1.5 pt-10">
+        <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+        </a>
+        <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Learn</span>
+        </a>
+        <a href="statistics.html" class="nav-item active flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="bar-chart-2" class="text-white w-5 h-5"></i>
+          <span class="font-normal text-sm">Statistics</span>
+        </a>
+        <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <div
+            class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI
+          </div>
+          <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content" role="main" tabindex="-1"
+      class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden page-transition">
+      <div class="max-w-7xl mx-auto">
+        <!-- Page Header -->
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h1 class="text-3xl lg:text-4xl font-semibold mb-2">Advanced Analytics</h1>
+            <p class="text-white/70">Comprehensive insights into your learning journey</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <!-- Time Range Selector -->
+            <select id="timeRange" class="bg-[var(--bg-dark-2)] border border-white/10 rounded-lg px-4 py-2 text-sm">
+              <option value="7d">Last 7 days</option>
+              <option value="30d" selected>Last 30 days</option>
+              <option value="90d">Last 3 months</option>
+              <option value="1y">Last year</option>
+            </select>
+            <!-- Export Button -->
+            <button id="exportBtn" class="bg-[var(--teal-primary)] hover:bg-[var(--teal-primary)]/80 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <!-- Total Study Time -->
+          <div class="stat-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                <i data-lucide="clock" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold counter" data-target="247">0</div>
+                <div class="text-xs text-white/60">hours</div>
+              </div>
+            </div>
+            <div class="text-sm text-white/80 mb-2">Total Study Time</div>
+            <div class="flex items-center text-xs">
+              <i data-lucide="trending-up" class="w-3 h-3 text-green-400 mr-1"></i>
+              <span class="text-green-400">+12.5%</span>
+              <span class="text-white/60 ml-1">vs last month</span>
+            </div>
+          </div>
+
+          <!-- Questions Attempted -->
+          <div class="stat-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center">
+                <i data-lucide="help-circle" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold counter" data-target="1847">0</div>
+                <div class="text-xs text-white/60">questions</div>
+              </div>
+            </div>
+            <div class="text-sm text-white/80 mb-2">Questions Attempted</div>
+            <div class="flex items-center text-xs">
+              <i data-lucide="trending-up" class="w-3 h-3 text-green-400 mr-1"></i>
+              <span class="text-green-400">+8.3%</span>
+              <span class="text-white/60 ml-1">vs last month</span>
+            </div>
+          </div>
+
+          <!-- Accuracy Rate -->
+          <div class="stat-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
+                <i data-lucide="target" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold counter" data-target="78.5">0</div>
+                <div class="text-xs text-white/60">%</div>
+              </div>
+            </div>
+            <div class="text-sm text-white/80 mb-2">Accuracy Rate</div>
+            <div class="flex items-center text-xs">
+              <i data-lucide="trending-up" class="w-3 h-3 text-green-400 mr-1"></i>
+              <span class="text-green-400">+2.1%</span>
+              <span class="text-white/60 ml-1">vs last month</span>
+            </div>
+          </div>
+
+          <!-- Learning Streak -->
+          <div class="stat-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                <i data-lucide="flame" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold counter" data-target="23">0</div>
+                <div class="text-xs text-white/60">days</div>
+              </div>
+            </div>
+            <div class="text-sm text-white/80 mb-2">Learning Streak</div>
+            <div class="flex items-center text-xs">
+              <i data-lucide="trending-up" class="w-3 h-3 text-green-400 mr-1"></i>
+              <span class="text-green-400">Active</span>
+              <span class="text-white/60 ml-1">Keep it up!</span>
+            </div>
+          </div>
+        </div>       
+ <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <!-- Study Time Trend -->
+          <div class="chart-container">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Study Time Trend</h3>
+              <div class="flex items-center gap-2">
+                <button class="chart-toggle active" data-chart="daily">Daily</button>
+                <button class="chart-toggle" data-chart="weekly">Weekly</button>
+                <button class="chart-toggle" data-chart="monthly">Monthly</button>
+              </div>
+            </div>
+            <div class="h-64">
+              <canvas id="studyTimeChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Subject Performance -->
+          <div class="chart-container">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Subject Performance</h3>
+              <button class="text-xs text-white/60 hover:text-white transition">View Details</button>
+            </div>
+            <div class="h-64">
+              <canvas id="subjectChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <!-- Accuracy by Subject -->
+          <div class="chart-container lg:col-span-2">
+            <h3 class="text-lg font-semibold mb-4">Accuracy by Subject</h3>
+            <div class="space-y-4">
+              <div class="performance-indicator">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium">Polity & Governance</span>
+                  <span class="text-sm text-white/70">85.2%</span>
+                </div>
+                <div class="w-full bg-white/10 rounded-full h-2">
+                  <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full" style="width: 85.2%"></div>
+                </div>
+              </div>
+              <div class="performance-indicator">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium">Economics</span>
+                  <span class="text-sm text-white/70">78.9%</span>
+                </div>
+                <div class="w-full bg-white/10 rounded-full h-2">
+                  <div class="bg-gradient-to-r from-green-500 to-teal-600 h-2 rounded-full" style="width: 78.9%"></div>
+                </div>
+              </div>
+              <div class="performance-indicator">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium">History & Culture</span>
+                  <span class="text-sm text-white/70">82.1%</span>
+                </div>
+                <div class="w-full bg-white/10 rounded-full h-2">
+                  <div class="bg-gradient-to-r from-orange-500 to-red-600 h-2 rounded-full" style="width: 82.1%"></div>
+                </div>
+              </div>
+              <div class="performance-indicator">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium">Geography</span>
+                  <span class="text-sm text-white/70">76.4%</span>
+                </div>
+                <div class="w-full bg-white/10 rounded-full h-2">
+                  <div class="bg-gradient-to-r from-purple-500 to-pink-600 h-2 rounded-full" style="width: 76.4%"></div>
+                </div>
+              </div>
+              <div class="performance-indicator">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium">Environment & Ecology</span>
+                  <span class="text-sm text-white/70">73.8%</span>
+                </div>
+                <div class="w-full bg-white/10 rounded-full h-2">
+                  <div class="bg-gradient-to-r from-cyan-500 to-blue-600 h-2 rounded-full" style="width: 73.8%"></div>
+                </div>
+              </div>
+              <div class="performance-indicator">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-medium">Science & Technology</span>
+                  <span class="text-sm text-white/70">80.3%</span>
+                </div>
+                <div class="w-full bg-white/10 rounded-full h-2">
+                  <div class="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full" style="width: 80.3%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly Goal Progress -->
+          <div class="chart-container">
+            <h3 class="text-lg font-semibold mb-4">Weekly Goals</h3>
+            <div class="space-y-6">
+              <!-- Study Hours Goal -->
+              <div class="text-center">
+                <div class="relative inline-flex items-center justify-center">
+                  <svg class="w-24 h-24 progress-ring">
+                    <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none" />
+                    <circle cx="48" cy="48" r="40" stroke="url(#gradient1)" stroke-width="8" fill="none" 
+                            stroke-dasharray="251.2" stroke-dashoffset="62.8" class="progress-ring-circle" />
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                      <div class="text-lg font-bold">75%</div>
+                      <div class="text-xs text-white/60">Study Hours</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 text-sm text-white/70">30/40 hours completed</div>
+              </div>
+
+              <!-- Questions Goal -->
+              <div class="text-center">
+                <div class="relative inline-flex items-center justify-center">
+                  <svg class="w-24 h-24 progress-ring">
+                    <circle cx="48" cy="48" r="40" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none" />
+                    <circle cx="48" cy="48" r="40" stroke="url(#gradient2)" stroke-width="8" fill="none" 
+                            stroke-dasharray="251.2" stroke-dashoffset="87.92" class="progress-ring-circle" />
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                      <div class="text-lg font-bold">65%</div>
+                      <div class="text-xs text-white/60">Questions</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 text-sm text-white/70">325/500 questions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Heatmap -->
+        <div class="chart-container mb-8">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold">Study Activity Heatmap</h3>
+            <div class="flex items-center gap-2 text-xs text-white/60">
+              <span>Less</span>
+              <div class="flex gap-1">
+                <div class="w-3 h-3 rounded-sm bg-white/10"></div>
+                <div class="w-3 h-3 rounded-sm bg-green-900/50"></div>
+                <div class="w-3 h-3 rounded-sm bg-green-700/70"></div>
+                <div class="w-3 h-3 rounded-sm bg-green-500"></div>
+                <div class="w-3 h-3 rounded-sm bg-green-400"></div>
+              </div>
+              <span>More</span>
+            </div>
+          </div>
+          <div id="heatmapContainer" class="overflow-x-auto chart-scroll">
+            <!-- Heatmap will be generated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Detailed Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <!-- Time Distribution -->
+          <div class="chart-container">
+            <h3 class="text-lg font-semibold mb-4">Time Distribution</h3>
+            <div class="h-64">
+              <canvas id="timeDistributionChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Learning Velocity -->
+          <div class="chart-container">
+            <h3 class="text-lg font-semibold mb-4">Learning Velocity</h3>
+            <div class="h-64">
+              <canvas id="velocityChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Insights -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <!-- Strength Areas -->
+          <div class="stat-card rounded-2xl p-6">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center mr-3">
+                <i data-lucide="trending-up" class="w-5 h-5 text-green-400"></i>
+              </div>
+              <h4 class="font-semibold">Strength Areas</h4>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm">Constitutional Law</span>
+                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">92%</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm">Indian Economy</span>
+                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">88%</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm">Modern History</span>
+                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">85%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Areas for Improvement -->
+          <div class="stat-card rounded-2xl p-6">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center mr-3">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-orange-400"></i>
+              </div>
+              <h4 class="font-semibold">Needs Improvement</h4>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm">International Relations</span>
+                <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full">68%</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm">Physical Geography</span>
+                <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full">71%</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm">Science & Tech</span>
+                <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full">74%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Achievements -->
+          <div class="stat-card rounded-2xl p-6">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mr-3">
+                <i data-lucide="award" class="w-5 h-5 text-purple-400"></i>
+              </div>
+              <h4 class="font-semibold">Recent Achievements</h4>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center mr-3">
+                  <i data-lucide="star" class="w-4 h-4 text-yellow-400"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">Perfect Week</div>
+                  <div class="text-xs text-white/60">7 days streak</div>
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center mr-3">
+                  <i data-lucide="target" class="w-4 h-4 text-blue-400"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">Accuracy Master</div>
+                  <div class="text-xs text-white/60">90%+ in Polity</div>
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center mr-3">
+                  <i data-lucide="zap" class="w-4 h-4 text-green-400"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">Speed Demon</div>
+                  <div class="text-xs text-white/60">500+ questions</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="stat-card rounded-2xl p-6">
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-4">
+              <i data-lucide="lightbulb" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold">AI-Powered Recommendations</h3>
+              <p class="text-sm text-white/70">Personalized insights to boost your performance</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <div class="flex items-center mb-2">
+                <i data-lucide="book-open" class="w-4 h-4 text-blue-400 mr-2"></i>
+                <span class="text-sm font-medium text-blue-400">Study Focus</span>
+              </div>
+              <p class="text-sm text-white/80">Spend more time on International Relations to improve overall score by 5-7%</p>
+            </div>
+            <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+              <div class="flex items-center mb-2">
+                <i data-lucide="clock" class="w-4 h-4 text-green-400 mr-2"></i>
+                <span class="text-sm font-medium text-green-400">Optimal Timing</span>
+              </div>
+              <p class="text-sm text-white/80">Your peak performance is between 9-11 AM. Schedule difficult topics then.</p>
+            </div>
+            <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
+              <div class="flex items-center mb-2">
+                <i data-lucide="repeat" class="w-4 h-4 text-purple-400 mr-2"></i>
+                <span class="text-sm font-medium text-purple-400">Revision Strategy</span>
+              </div>
+              <p class="text-sm text-white/80">Review Constitutional Law topics from 2 weeks ago to maintain high accuracy.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- SVG Gradients for Progress Rings -->
+  <svg width="0" height="0">
+    <defs>
+      <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+      </linearGradient>
+      <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#43e97b;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#38f9d7;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    // Initialize Lucide icons
+    if (window.iconManager) window.iconManager.refresh();
+
+    // Chart.js default configuration
+    Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+    Chart.defaults.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+
+    // Animated counter function
+    function animateCounter(element, target, duration = 2000) {
+      const start = 0;
+      const increment = target / (duration / 16);
+      let current = start;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        
+        if (target % 1 === 0) {
+          element.textContent = Math.floor(current);
+        } else {
+          element.textContent = current.toFixed(1);
+        }
+      }, 16);
+    }
+
+    // Initialize counters
+    document.addEventListener('DOMContentLoaded', function() {
+      const counters = document.querySelectorAll('.counter');
+      counters.forEach(counter => {
+        const target = parseFloat(counter.getAttribute('data-target'));
+        animateCounter(counter, target);
+      });
+    });
+
+    // Study Time Trend Chart
+    const studyTimeCtx = document.getElementById('studyTimeChart').getContext('2d');
+    const studyTimeChart = new Chart(studyTimeCtx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Study Hours',
+          data: [4.5, 6.2, 5.8, 7.1, 5.5, 8.2, 6.8],
+          borderColor: 'rgb(102, 126, 234)',
+          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: 'rgb(102, 126, 234)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            },
+            ticks: {
+              callback: function(value) {
+                return value + 'h';
+              }
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          }
+        },
+        elements: {
+          point: {
+            hoverBackgroundColor: 'rgb(102, 126, 234)'
+          }
+        }
+      }
+    });
+
+    // Subject Performance Chart
+    const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+    const subjectChart = new Chart(subjectCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Polity', 'Economics', 'History', 'Geography', 'Environment', 'Science & Tech'],
+        datasets: [{
+          data: [25, 20, 18, 15, 12, 10],
+          backgroundColor: [
+            'rgba(102, 126, 234, 0.8)',
+            'rgba(67, 233, 123, 0.8)',
+            'rgba(245, 87, 108, 0.8)',
+            'rgba(118, 75, 162, 0.8)',
+            'rgba(79, 172, 254, 0.8)',
+            'rgba(255, 193, 7, 0.8)'
+          ],
+          borderColor: [
+            'rgb(102, 126, 234)',
+            'rgb(67, 233, 123)',
+            'rgb(245, 87, 108)',
+            'rgb(118, 75, 162)',
+            'rgb(79, 172, 254)',
+            'rgb(255, 193, 7)'
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              font: {
+                size: 12
+              }
+            }
+          }
+        },
+        cutout: '60%'
+      }
+    });
+
+    // Time Distribution Chart
+    const timeDistCtx = document.getElementById('timeDistributionChart').getContext('2d');
+    const timeDistChart = new Chart(timeDistCtx, {
+      type: 'bar',
+      data: {
+        labels: ['6-8 AM', '8-10 AM', '10-12 PM', '2-4 PM', '4-6 PM', '6-8 PM', '8-10 PM'],
+        datasets: [{
+          label: 'Study Sessions',
+          data: [12, 25, 30, 18, 22, 28, 15],
+          backgroundColor: 'rgba(67, 233, 123, 0.6)',
+          borderColor: 'rgb(67, 233, 123)',
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          }
+        }
+      }
+    });
+
+    // Learning Velocity Chart
+    const velocityCtx = document.getElementById('velocityChart').getContext('2d');
+    const velocityChart = new Chart(velocityCtx, {
+      type: 'line',
+      data: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        datasets: [{
+          label: 'Questions/Hour',
+          data: [15, 18, 22, 25],
+          borderColor: 'rgb(245, 87, 108)',
+          backgroundColor: 'rgba(245, 87, 108, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: 'rgb(245, 87, 108)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6
+        }, {
+          label: 'Accuracy %',
+          data: [72, 75, 78, 82],
+          borderColor: 'rgb(79, 172, 254)',
+          backgroundColor: 'rgba(79, 172, 254, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: 'rgb(79, 172, 254)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              usePointStyle: true,
+              padding: 20
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          }
+        }
+      }
+    });
+
+    // Generate Activity Heatmap with realistic study patterns
+    function generateHeatmap() {
+      const container = document.getElementById('heatmapContainer');
+      const currentDate = new Date();
+      const startDate = new Date(currentDate.getFullYear(), 0, 1); // Start of current year
+      const endDate = new Date(currentDate.getFullYear(), 11, 31); // End of current year
+      
+      // Create realistic study patterns
+      const studyPatterns = {
+        // Higher activity on weekdays, lower on weekends
+        weekdayMultiplier: [0.3, 0.8, 0.9, 0.9, 0.9, 0.9, 0.5], // Sun-Sat
+        // Seasonal patterns (exam periods, holidays)
+        monthlyMultiplier: [0.9, 0.8, 1.0, 1.0, 0.7, 0.4, 0.5, 0.8, 1.0, 1.0, 0.9, 0.6], // Jan-Dec
+        // Special events (exam weeks, holidays)
+        specialDates: {
+          // Exam periods - higher activity
+          '2024-03-15': 4, '2024-03-16': 4, '2024-03-17': 3, '2024-03-18': 4, '2024-03-19': 4,
+          '2024-06-10': 4, '2024-06-11': 4, '2024-06-12': 3, '2024-06-13': 4, '2024-06-14': 4,
+          '2024-10-20': 4, '2024-10-21': 4, '2024-10-22': 3, '2024-10-23': 4, '2024-10-24': 4,
+          // Holiday periods - lower activity
+          '2024-12-25': 0, '2024-12-26': 0, '2024-01-01': 0, '2024-01-26': 1,
+          '2024-08-15': 1, '2024-10-02': 1, '2024-11-12': 1,
+          // Sick days or breaks
+          '2024-02-14': 0, '2024-04-22': 0, '2024-07-08': 0, '2024-09-15': 0
+        }
+      };
+      
+      const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      let heatmapHTML = '<div class="flex flex-col gap-1">';
+      
+      // Month labels - show only every other month to avoid crowding
+      heatmapHTML += '<div class="flex gap-1 mb-2 ml-6">';
+      for (let i = 0; i < 53; i++) { // 53 weeks in a year
+        const weekDate = new Date(startDate.getTime() + (i * 7 * 24 * 60 * 60 * 1000));
+        const isFirstWeekOfMonth = weekDate.getDate() <= 7;
+        const monthName = isFirstWeekOfMonth ? months[weekDate.getMonth()] : '';
+        heatmapHTML += `<div class="text-xs text-white/60 w-3 text-center">${monthName}</div>`;
+      }
+      heatmapHTML += '</div>';
+      
+      // Generate heatmap data
+      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+        heatmapHTML += '<div class="flex gap-1 items-center">';
+        heatmapHTML += `<div class="text-xs text-white/60 w-4 text-center">${days[dayOfWeek]}</div>`;
+        
+        for (let week = 0; week < 53; week++) {
+          const currentCellDate = new Date(startDate.getTime() + (week * 7 + dayOfWeek) * 24 * 60 * 60 * 1000);
+          
+          // Skip if date is beyond current date or before start of year
+          if (currentCellDate > currentDate || currentCellDate < startDate) {
+            heatmapHTML += `<div class="w-3 h-3 rounded-sm bg-white/5"></div>`;
+            continue;
+          }
+          
+          const dateString = currentCellDate.toISOString().split('T')[0];
+          let intensity = 0;
+          
+          // Check for special dates first
+          if (studyPatterns.specialDates[dateString] !== undefined) {
+            intensity = studyPatterns.specialDates[dateString];
+          } else {
+            // Calculate base intensity using realistic patterns
+            const weekdayFactor = studyPatterns.weekdayMultiplier[dayOfWeek];
+            const monthFactor = studyPatterns.monthlyMultiplier[currentCellDate.getMonth()];
+            
+            // Base study probability (70% chance of studying on a given day)
+            const baseIntensity = Math.random() < 0.7 ? Math.floor(Math.random() * 3) + 1 : 0;
+            
+            // Apply multipliers and add some randomness
+            intensity = Math.floor(baseIntensity * weekdayFactor * monthFactor + Math.random() * 0.5);
+            intensity = Math.min(Math.max(intensity, 0), 4); // Clamp between 0-4
+          }
+          
+          // Calculate color based on intensity
+          let color, studyHours;
+          switch(intensity) {
+            case 0:
+              color = 'rgba(255,255,255,0.05)';
+              studyHours = 0;
+              break;
+            case 1:
+              color = 'rgba(34, 197, 94, 0.3)';
+              studyHours = Math.floor(Math.random() * 2) + 1; // 1-2 hours
+              break;
+            case 2:
+              color = 'rgba(34, 197, 94, 0.5)';
+              studyHours = Math.floor(Math.random() * 2) + 3; // 3-4 hours
+              break;
+            case 3:
+              color = 'rgba(34, 197, 94, 0.7)';
+              studyHours = Math.floor(Math.random() * 2) + 5; // 5-6 hours
+              break;
+            case 4:
+              color = 'rgba(34, 197, 94, 0.9)';
+              studyHours = Math.floor(Math.random() * 3) + 7; // 7-9 hours
+              break;
+          }
+          
+          const formattedDate = currentCellDate.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          const tooltipText = studyHours === 0 ? 
+            `${formattedDate}: No study activity` : 
+            `${formattedDate}: ${studyHours} hours studied`;
+          
+          heatmapHTML += `<div class="heatmap-cell w-3 h-3 rounded-sm cursor-pointer" 
+                            style="background-color: ${color}" 
+                            data-intensity="${intensity}"
+                            data-hours="${studyHours}"
+                            data-date="${dateString}"
+                            title="${tooltipText}"></div>`;
+        }
+        heatmapHTML += '</div>';
+      }
+      heatmapHTML += '</div>';
+      
+      container.innerHTML = heatmapHTML;
+      
+      // Add enhanced hover effects
+      const cells = container.querySelectorAll('.heatmap-cell');
+      cells.forEach(cell => {
+        cell.addEventListener('mouseenter', function(e) {
+          const tooltip = document.getElementById('tooltip');
+          tooltip.innerHTML = this.getAttribute('title');
+          tooltip.classList.add('show');
+          tooltip.style.left = e.pageX + 10 + 'px';
+          tooltip.style.top = e.pageY - 30 + 'px';
+          
+          // Add subtle hover effect
+          this.style.transform = 'scale(1.2)';
+          this.style.zIndex = '10';
+        });
+        
+        cell.addEventListener('mouseleave', function() {
+          const tooltip = document.getElementById('tooltip');
+          tooltip.classList.remove('show');
+          
+          // Remove hover effect
+          this.style.transform = 'scale(1)';
+          this.style.zIndex = '1';
+        });
+        
+        // Add click functionality for detailed view
+        cell.addEventListener('click', function() {
+          const date = this.getAttribute('data-date');
+          const hours = this.getAttribute('data-hours');
+          const intensity = this.getAttribute('data-intensity');
+          
+          if (hours > 0) {
+            // You could expand this to show detailed study breakdown
+            console.log(`Study details for ${date}: ${hours} hours (intensity: ${intensity})`);
+          }
+        });
+      });
+    }
+
+    // Chart toggle functionality
+    const chartToggles = document.querySelectorAll('.chart-toggle');
+    chartToggles.forEach(toggle => {
+      toggle.addEventListener('click', function() {
+        chartToggles.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update chart data based on selection
+        const chartType = this.getAttribute('data-chart');
+        updateStudyTimeChart(chartType);
+      });
+    });
+
+    function updateStudyTimeChart(type) {
+      let labels, data;
+      
+      switch(type) {
+        case 'daily':
+          labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          data = [4.5, 6.2, 5.8, 7.1, 5.5, 8.2, 6.8];
+          break;
+        case 'weekly':
+          labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+          data = [28, 35, 42, 38];
+          break;
+        case 'monthly':
+          labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+          data = [120, 135, 158, 142, 165, 148];
+          break;
+      }
+      
+      studyTimeChart.data.labels = labels;
+      studyTimeChart.data.datasets[0].data = data;
+      studyTimeChart.update();
+    }
+
+    // Export functionality
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      // Simulate export functionality
+      const exportData = {
+        totalStudyTime: 247,
+        questionsAttempted: 1847,
+        accuracyRate: 78.5,
+        learningStreak: 23,
+        subjectPerformance: {
+          'Polity & Governance': 85.2,
+          'Economics': 78.9,
+          'History & Culture': 82.1,
+          'Geography': 76.4,
+          'Environment & Ecology': 73.8,
+          'Science & Technology': 80.3
+        },
+        exportDate: new Date().toISOString()
+      };
+      
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'statistics-export.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Time range selector
+    document.getElementById('timeRange').addEventListener('change', function() {
+      const range = this.value;
+      // Update all charts based on selected time range
+      console.log('Time range changed to:', range);
+      // Here you would typically fetch new data and update charts
+    });
+
+    // Add CSS for chart toggles
+    const style = document.createElement('style');
+    style.textContent = `
+      .chart-toggle {
+        padding: 4px 12px;
+        border-radius: 6px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .chart-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      
+      .chart-toggle.active {
+        background: var(--teal-primary);
+        border-color: var(--teal-primary);
+        color: white;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize heatmap
+    generateHeatmap();
+
+    // Add smooth scrolling for better UX
+    document.documentElement.style.scrollBehavior = 'smooth';
+
+    // Performance optimization: Lazy load charts when they come into view
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '50px'
+    };
+
+    const chartObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Chart is visible, ensure it's properly rendered
+          const canvas = entry.target.querySelector('canvas');
+          if (canvas) {
+            const chart = Chart.getChart(canvas);
+            if (chart) {
+              chart.resize();
+            }
+          }
+        }
+      });
+    }, observerOptions);
+
+    // Observe all chart containers
+    document.querySelectorAll('.chart-container').forEach(container => {
+      chartObserver.observe(container);
+    });
+
+    // Initialize profile manager for cross-page synchronization
+    if (typeof ProfileManager !== 'undefined') {
+      window.profileManager = new ProfileManager();
+    }
+
+    // Load saved profile picture
+    const savedDP = localStorage.getItem('selectedDP');
+    const userInitialsEl = document.getElementById('user-initials');
+    
+    if (savedDP && userInitialsEl) {
+      const parentDiv = userInitialsEl.parentElement;
+      parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+    }
+
+  </script>
+</body>
+</html>
