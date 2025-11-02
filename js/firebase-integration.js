@@ -47,11 +47,13 @@ class FirebaseIntegration {
     }
 
     /**
-     * Save to localStorage
+     * Save to localStorage with correct keys
      */
     saveToLocalStorage(type, data) {
         try {
-            let existingData = JSON.parse(localStorage.getItem(type) || '[]');
+            // Map to correct localStorage keys
+            const storageKey = this.getStorageKey(type);
+            let existingData = JSON.parse(localStorage.getItem(storageKey) || '[]');
             
             // Check if updating existing item
             const existingIndex = existingData.findIndex(item => item.id === data.id);
@@ -61,10 +63,27 @@ class FirebaseIntegration {
                 existingData.unshift(data);
             }
             
-            localStorage.setItem(type, JSON.stringify(existingData));
+            localStorage.setItem(storageKey, JSON.stringify(existingData));
+            console.log(`💾 Saved to localStorage (${storageKey}):`, data.title || data.question || 'Item');
         } catch (error) {
             console.error('LocalStorage save error:', error);
         }
+    }
+
+    /**
+     * Get correct localStorage key for data type
+     */
+    getStorageKey(type) {
+        const keyMap = {
+            'notes': 'userNotes',
+            'userNotes': 'userNotes',
+            'flashcards': 'bookmarks',
+            'bookmarks': 'bookmarks',
+            'mcq-explanations': 'bookmarks',
+            'mcqs': 'bookmarks',
+            'conversations': 'conversations'
+        };
+        return keyMap[type] || type;
     }
 
     /**
@@ -287,47 +306,173 @@ window.firebaseIntegration = new FirebaseIntegration();
 // Enhanced save functions for existing code compatibility
 window.saveAIResponse = async function(content, type, originalQuestion) {
     const timestamp = new Date().toISOString();
-    const savedData = {
-        id: Date.now(),
-        content: content,
-        question: originalQuestion,
-        timestamp: timestamp,
-        mode: window.selectedMode || 'general',
-        synced: false
-    };
+    const selectedMode = window.selectedMode || 'general';
+    
+    try {
+        let savedData;
+        
+        switch (type) {
+            case 'note':
+                savedData = {
+                    id: Date.now(),
+                    title: originalQuestion.length > 50 ? originalQuestion.substring(0, 50) + '...' : originalQuestion,
+                    content: content,
+                    richContent: content.replace(/\n/g, '<br>'),
+                    subject: selectedMode === 'news' ? 'Current Affairs' : 
+                            selectedMode === 'mcq' ? 'MCQ Analysis' : 
+                            selectedMode === 'essay' ? 'Essay Writing' : 'General',
+                    tags: ['ai-generated', selectedMode],
+                    attachments: [],
+                    createdAt: timestamp,
+                    updatedAt: timestamp,
+                    color: 'blue',
+                    isFavorite: false,
+                    isArchived: false,
+                    source: 'AI Generated',
+                    mode: selectedMode
+                };
+                
+                // Save to Firebase
+                if (window.firebaseManager?.isReady()) {
+                    await window.firebaseManager.saveNote(savedData);
+                    savedData.synced = true;
+                } else {
+                    savedData.synced = false;
+                }
+                
+                // Also save to localStorage for offline access
+                await window.firebaseIntegration.saveData('userNotes', savedData);
+                break;
+                
+            case 'flashcard':
+                savedData = {
+                    id: Date.now(),
+                    title: originalQuestion.length > 50 ? originalQuestion.substring(0, 50) + '...' : originalQuestion,
+                    front: originalQuestion,
+                    back: content,
+                    tags: ['ai-generated', 'flashcard', selectedMode],
+                    difficulty: 'medium',
+                    category: selectedMode === 'news' ? 'Current Affairs' : 
+                             selectedMode === 'mcq' ? 'MCQ Analysis' : 'General',
+                    createdAt: timestamp,
+                    updatedAt: timestamp,
+                    source: 'AI Generated',
+                    mode: selectedMode
+                };
+                
+                // Save to Firebase
+                if (window.firebaseManager?.isReady()) {
+                    await window.firebaseManager.saveFlashcard(savedData);
+                    savedData.synced = true;
+                } else {
+                    savedData.synced = false;
+                }
+                
+                // Also save to localStorage as bookmark for compatibility
+                const flashcardBookmark = {
+                    ...savedData,
+                    url: '#',
+                    description: content,
+                    category: 'notes',
+                    isImportant: false,
+                    notes: `Front: ${originalQuestion}\n\nBack: ${content}`,
+                    metadata: {
+                        type: 'flashcard',
+                        front: originalQuestion,
+                        back: content,
+                        difficulty: 'medium',
+                        source: 'AI Generated'
+                    }
+                };
+                await window.firebaseIntegration.saveData('bookmarks', flashcardBookmark);
+                break;
+                
+            case 'mcq':
+                savedData = {
+                    id: Date.now(),
+                    title: `MCQ: ${originalQuestion.length > 40 ? originalQuestion.substring(0, 40) + '...' : originalQuestion}`,
+                    question: originalQuestion,
+                    explanation: content,
+                    tags: ['ai-generated', 'mcq', selectedMode],
+                    category: selectedMode === 'news' ? 'Current Affairs' : 
+                             selectedMode === 'essay' ? 'Essay Writing' : 'General',
+                    createdAt: timestamp,
+                    updatedAt: timestamp,
+                    source: 'AI Generated',
+                    mode: selectedMode
+                };
+                
+                // Save to Firebase
+                if (window.firebaseManager?.isReady()) {
+                    await window.firebaseManager.saveMCQ(savedData);
+                    savedData.synced = true;
+                } else {
+                    savedData.synced = false;
+                }
+                
+                // Also save to localStorage as bookmark for compatibility
+                const mcqBookmark = {
+                    ...savedData,
+                    url: '#',
+                    description: content,
+                    category: 'notes',
+                    isImportant: false,
+                    notes: `Question: ${originalQuestion}\n\nExplanation: ${content}`,
+                    metadata: {
+                        type: 'mcq',
+                        question: originalQuestion,
+                        explanation: content,
+                        source: 'AI Generated'
+                    }
+                };
+                await window.firebaseIntegration.saveData('bookmarks', mcqBookmark);
+                break;
+                
+            case 'evaluation':
+                savedData = {
+                    id: Date.now(),
+                    title: 'Answer Evaluation - ' + originalQuestion.substring(0, 30) + '...',
+                    content: content,
+                    richContent: content.replace(/\n/g, '<br>'),
+                    subject: 'Answer Evaluation',
+                    tags: ['ai-generated', 'evaluation', selectedMode],
+                    attachments: [],
+                    createdAt: timestamp,
+                    updatedAt: timestamp,
+                    color: 'orange',
+                    isFavorite: false,
+                    isArchived: false,
+                    source: 'AI Generated',
+                    mode: selectedMode,
+                    evaluation: content,
+                    originalQuestion: originalQuestion
+                };
+                
+                // Save to Firebase
+                if (window.firebaseManager?.isReady()) {
+                    await window.firebaseManager.saveNote(savedData);
+                    savedData.synced = true;
+                } else {
+                    savedData.synced = false;
+                }
+                
+                await window.firebaseIntegration.saveData('userNotes', savedData);
+                break;
+        }
 
-    switch (type) {
-        case 'note':
-            savedData.title = originalQuestion.substring(0, 50) + '...';
-            savedData.tags = ['ai-generated'];
-            savedData.category = 'AI Responses';
-            await window.firebaseIntegration.saveData('notes', savedData);
-            break;
-            
-        case 'flashcard':
-            savedData.front = originalQuestion;
-            savedData.back = content;
-            savedData.tags = ['ai-generated'];
-            savedData.difficulty = 'medium';
-            await window.firebaseIntegration.saveData('flashcards', savedData);
-            break;
-            
-        case 'mcq':
-            savedData.question = originalQuestion;
-            savedData.explanation = content;
-            savedData.source = 'AI Generated';
-            await window.firebaseIntegration.saveData('mcq-explanations', savedData);
-            break;
-            
-        case 'evaluation':
-            savedData.title = 'Answer Evaluation - ' + originalQuestion.substring(0, 30) + '...';
-            savedData.evaluation = content;
-            savedData.category = 'Answer Evaluations';
-            await window.firebaseIntegration.saveData('notes', savedData);
-            break;
+        console.log(`✅ Saved AI response to ${type} (Firebase + localStorage):`, savedData);
+        
+        // Trigger count update event
+        window.dispatchEvent(new CustomEvent('contentSaved', {
+            detail: { type, data: savedData }
+        }));
+        
+        return savedData;
+        
+    } catch (error) {
+        console.error(`❌ Error saving AI response to ${type}:`, error);
+        throw error;
     }
-
-    console.log(`Saved AI response to ${type}:`, savedData);
 };
 
 // Export for module usage

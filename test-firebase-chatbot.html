@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Chatbot Integration Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Integration -->
+    <script src="js/firebase-init.js"></script>
+    <script src="js/firebase-integration.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Firebase Chatbot Integration Test</h1>
+        
+        <!-- Connection Status -->
+        <div id="connection-status" class="mb-6 p-4 rounded-lg border">
+            <h2 class="text-xl font-semibold mb-2">Connection Status</h2>
+            <div id="status-info" class="space-y-2 text-sm">
+                <div>Firebase Ready: <span id="firebase-ready" class="font-mono">Checking...</span></div>
+                <div>Online: <span id="online-status" class="font-mono">Checking...</span></div>
+                <div>User ID: <span id="user-id" class="font-mono">Checking...</span></div>
+            </div>
+        </div>
+
+        <!-- Test Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Save Test Data -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-lg font-semibold mb-4">Save Test Data</h3>
+                <div class="space-y-3">
+                    <button onclick="testSaveNote()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                        Save Test Note
+                    </button>
+                    <button onclick="testSaveFlashcard()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                        Save Test Flashcard
+                    </button>
+                    <button onclick="testSaveMCQ()" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                        Save Test MCQ
+                    </button>
+                    <button onclick="testSaveConversation()" class="w-full bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded">
+                        Save Test Conversation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Load Test Data -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-lg font-semibold mb-4">Load Test Data</h3>
+                <div class="space-y-3">
+                    <button onclick="testLoadNotes()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                        Load Notes
+                    </button>
+                    <button onclick="testLoadConversations()" class="w-full bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded">
+                        Load Conversations
+                    </button>
+                    <button onclick="testSyncData()" class="w-full bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded">
+                        Force Sync All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="mt-8">
+            <h3 class="text-lg font-semibold mb-4">Test Results</h3>
+            <div id="test-results" class="bg-gray-800 p-4 rounded-lg min-h-32 font-mono text-sm overflow-auto max-h-96">
+                <div class="text-gray-400">Test results will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wait for Firebase to initialize
+        setTimeout(() => {
+            updateConnectionStatus();
+            setInterval(updateConnectionStatus, 2000);
+        }, 1000);
+
+        function updateConnectionStatus() {
+            const firebaseReady = window.firebaseManager?.isReady() || false;
+            const online = navigator.onLine;
+            const userId = window.firebaseManager?.getCurrentUserId() || 'Not available';
+
+            document.getElementById('firebase-ready').textContent = firebaseReady ? '✅ Yes' : '❌ No';
+            document.getElementById('firebase-ready').className = firebaseReady ? 'font-mono text-green-400' : 'font-mono text-red-400';
+
+            document.getElementById('online-status').textContent = online ? '✅ Yes' : '❌ No';
+            document.getElementById('online-status').className = online ? 'font-mono text-green-400' : 'font-mono text-red-400';
+
+            document.getElementById('user-id').textContent = userId;
+
+            // Update connection status container
+            const statusContainer = document.getElementById('connection-status');
+            if (firebaseReady && online) {
+                statusContainer.className = 'mb-6 p-4 rounded-lg border border-green-500 bg-green-900/20';
+            } else {
+                statusContainer.className = 'mb-6 p-4 rounded-lg border border-red-500 bg-red-900/20';
+            }
+        }
+
+        function logResult(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'success' ? 'text-green-400' : 
+                         type === 'error' ? 'text-red-400' : 
+                         type === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = color;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            
+            results.appendChild(logEntry);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        async function testSaveNote() {
+            try {
+                logResult('Testing note save...', 'info');
+                
+                if (!window.firebaseManager?.isReady()) {
+                    logResult('Firebase not ready, testing localStorage fallback', 'warning');
+                }
+
+                const noteData = {
+                    id: Date.now(),
+                    title: 'Test Note from Firebase Integration',
+                    content: 'This is a test note to verify Firebase integration is working correctly.',
+                    richContent: 'This is a test note to verify Firebase integration is working correctly.',
+                    subject: 'Test Subject',
+                    tags: ['test', 'firebase', 'integration'],
+                    attachments: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    color: 'blue',
+                    isFavorite: false,
+                    isArchived: false,
+                    source: 'Firebase Test'
+                };
+
+                if (window.firebaseManager?.isReady()) {
+                    const firebaseId = await window.firebaseManager.saveNote(noteData);
+                    logResult(`✅ Note saved to Firebase with ID: ${firebaseId}`, 'success');
+                } else {
+                    logResult('⚠️ Firebase not ready, saving to localStorage only', 'warning');
+                }
+
+                // Also save to localStorage
+                const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+                notes.unshift(noteData);
+                localStorage.setItem('userNotes', JSON.stringify(notes));
+                logResult(`✅ Note saved to localStorage with ID: ${noteData.id}`, 'success');
+
+            } catch (error) {
+                logResult(`❌ Error saving note: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSaveFlashcard() {
+            try {
+                logResult('Testing flashcard save...', 'info');
+
+                const flashcardData = {
+                    id: Date.now(),
+                    front: 'What is Firebase?',
+                    back: 'Firebase is a platform developed by Google for creating mobile and web applications.',
+                    subject: 'Technology',
+                    tags: ['test', 'firebase', 'flashcard'],
+                    difficulty: 'medium',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    source: 'Firebase Test'
+                };
+
+                if (window.firebaseManager?.isReady()) {
+                    const firebaseId = await window.firebaseManager.saveFlashcard(flashcardData);
+                    logResult(`✅ Flashcard saved to Firebase with ID: ${firebaseId}`, 'success');
+                } else {
+                    logResult('⚠️ Firebase not ready, saving to localStorage only', 'warning');
+                }
+
+                // Also save to localStorage
+                const flashcards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+                flashcards.unshift(flashcardData);
+                localStorage.setItem('flashcards', JSON.stringify(flashcards));
+                logResult(`✅ Flashcard saved to localStorage with ID: ${flashcardData.id}`, 'success');
+
+            } catch (error) {
+                logResult(`❌ Error saving flashcard: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSaveMCQ() {
+            try {
+                logResult('Testing MCQ save...', 'info');
+
+                const mcqData = {
+                    id: Date.now(),
+                    question: 'Which company developed Firebase?',
+                    explanation: 'Firebase was developed by Google. It provides various services for mobile and web application development.',
+                    subject: 'Technology',
+                    tags: ['test', 'firebase', 'mcq'],
+                    difficulty: 'easy',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    source: 'Firebase Test'
+                };
+
+                if (window.firebaseManager?.isReady()) {
+                    const firebaseId = await window.firebaseManager.saveMCQ(mcqData);
+                    logResult(`✅ MCQ saved to Firebase with ID: ${firebaseId}`, 'success');
+                } else {
+                    logResult('⚠️ Firebase not ready, saving to localStorage only', 'warning');
+                }
+
+                // Also save to localStorage
+                const mcqs = JSON.parse(localStorage.getItem('mcqs') || '[]');
+                mcqs.unshift(mcqData);
+                localStorage.setItem('mcqs', JSON.stringify(mcqs));
+                logResult(`✅ MCQ saved to localStorage with ID: ${mcqData.id}`, 'success');
+
+            } catch (error) {
+                logResult(`❌ Error saving MCQ: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSaveConversation() {
+            try {
+                logResult('Testing conversation save...', 'info');
+
+                const conversationData = {
+                    id: `conv_${Date.now()}`,
+                    title: 'Test Firebase Integration',
+                    preview: 'Testing Firebase integration for conversations',
+                    mode: 'general',
+                    messages: [
+                        {
+                            id: `msg_${Date.now()}_user`,
+                            role: 'user',
+                            content: 'Test Firebase integration',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: `msg_${Date.now()}_ai`,
+                            role: 'assistant',
+                            content: 'Firebase integration is working correctly!',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    messageCount: 2,
+                    lastMessageAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    isActive: true,
+                    context: {
+                        mode: 'general',
+                        subject: 'Firebase Testing'
+                    }
+                };
+
+                if (window.firebaseManager?.isReady()) {
+                    const firebaseId = await window.firebaseManager.saveConversation(conversationData);
+                    logResult(`✅ Conversation saved to Firebase with ID: ${firebaseId}`, 'success');
+                } else {
+                    logResult('⚠️ Firebase not ready, saving to localStorage only', 'warning');
+                }
+
+            } catch (error) {
+                logResult(`❌ Error saving conversation: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLoadNotes() {
+            try {
+                logResult('Testing notes load...', 'info');
+
+                if (window.firebaseManager?.isReady()) {
+                    const notes = await window.firebaseManager.getNotes(10);
+                    logResult(`✅ Loaded ${notes.length} notes from Firebase`, 'success');
+                    
+                    if (notes.length > 0) {
+                        logResult(`Latest note: "${notes[0].title}"`, 'info');
+                    }
+                } else {
+                    logResult('⚠️ Firebase not ready, loading from localStorage', 'warning');
+                    const localNotes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+                    logResult(`✅ Loaded ${localNotes.length} notes from localStorage`, 'success');
+                }
+
+            } catch (error) {
+                logResult(`❌ Error loading notes: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLoadConversations() {
+            try {
+                logResult('Testing conversations load...', 'info');
+
+                if (window.firebaseManager?.isReady()) {
+                    const conversations = await window.firebaseManager.getConversations(10);
+                    logResult(`✅ Loaded ${conversations.length} conversations from Firebase`, 'success');
+                    
+                    if (conversations.length > 0) {
+                        logResult(`Latest conversation: "${conversations[0].title || conversations[0].preview}"`, 'info');
+                    }
+                } else {
+                    logResult('⚠️ Firebase not ready, cannot load conversations', 'warning');
+                }
+
+            } catch (error) {
+                logResult(`❌ Error loading conversations: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSyncData() {
+            try {
+                logResult('Testing data sync...', 'info');
+
+                if (!window.firebaseManager?.isReady()) {
+                    logResult('❌ Firebase not ready, cannot sync', 'error');
+                    return;
+                }
+
+                await window.firebaseManager.syncLocalDataToFirebase();
+                logResult('✅ Data sync completed successfully', 'success');
+
+            } catch (error) {
+                logResult(`❌ Error syncing data: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

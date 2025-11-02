@@ -31,12 +31,12 @@ class AIServiceManager {
             general: {
                 systemPrompt: "You are a helpful UPSC preparation assistant. Provide clear, accurate, and exam-focused responses to help students prepare for the UPSC Civil Services Examination.",
                 temperature: 0.7,
-                maxOutputTokens: 1024
+                maxOutputTokens: 4096
             },
             mcq: {
                 systemPrompt: "You are an expert at explaining MCQ solutions for UPSC preparation. Provide detailed explanations for both correct and incorrect answers, focusing on concepts and reasoning.",
                 temperature: 0.3,
-                maxOutputTokens: 512,
+                maxOutputTokens: 1024,
                 responseFormat: "structured"
             },
             mcq_generator: {
@@ -66,7 +66,7 @@ class AIServiceManager {
             news: {
                 systemPrompt: "You analyze current affairs for UPSC relevance. Focus on exam importance, subject connections, and key points that candidates should remember.",
                 temperature: 0.4,
-                maxOutputTokens: 1024,
+                maxOutputTokens: 4096,
                 responseFormat: "summary_analysis"
             }
         };
@@ -171,14 +171,15 @@ class AIServiceManager {
             if (this.conversationStorage) {
                 try {
                     // Check if conversation exists, create if not
-                    let conversation = this.conversationStorage.loadConversation(conversationId);
+                    let conversation = await this.conversationStorage.loadConversation(conversationId);
                     if (!conversation) {
-                        conversation = this.conversationStorage.createConversation({
+                        conversation = await this.conversationStorage.createConversation({
                             mode: this.currentMode,
                             userId: 'default',
                             title: sanitizedMessage.substring(0, 50) + '...'
                         });
                         conversationId = conversation.id;
+                        this.activeConversationId = conversationId;
                         response.conversationId = conversationId;
                     }
                     
@@ -224,7 +225,7 @@ class AIServiceManager {
             if (window.MockAIResponses && (error.message.includes('404') || error.message.includes('Invalid API response format'))) {
                 console.warn('API failed, using mock response as fallback:', error.message);
                 const mockAI = new MockAIResponses();
-                const mockResponse = mockAI.generateResponse(sanitizedMessage, this.currentMode);
+                const mockResponse = mockAI.generateResponse(message, this.currentMode);
                 
                 // Add fallback indicator
                 mockResponse.content = `🤖 **Demo Mode**: ${mockResponse.content}\n\n*Note: This is a demo response while we resolve API issues. Check the console for details.*`;
@@ -329,7 +330,7 @@ class AIServiceManager {
         }
         
         try {
-            return await this.conversationStorage.getConversationHistory(targetId, limit);
+            return await this.conversationStorage.getConversationHistory(targetId, { limit });
         } catch (error) {
             console.error('Error retrieving conversation history:', error);
             return [];
@@ -517,7 +518,7 @@ class AIServiceManager {
             const userMessage = this.lastUserMessage || 'New Conversation';
             
             const chatEntry = {
-                id: response.conversationId,
+                id: response.conversationId || `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 title: userMessage.length > 50 ? userMessage.substring(0, 50) + '...' : userMessage,
                 preview: response.content.substring(0, 100) + '...',
                 mode: response.mode,
@@ -525,8 +526,8 @@ class AIServiceManager {
                 lastMessage: response.content
             };
             
-            // Remove existing entry if present
-            recentChats = recentChats.filter(chat => chat.id !== response.conversationId);
+            // Remove existing entry if present (to update it with latest message)
+            recentChats = recentChats.filter(chat => chat.id !== chatEntry.id);
             
             // Add to beginning
             recentChats.unshift(chatEntry);

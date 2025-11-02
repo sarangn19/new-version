@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Response Length Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/mock-ai-responses.js"></script>
+    <script src="js/ai-config.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Response Length Test</h1>
+        
+        <div class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🔧 Token Limit Fixes</h2>
+                <ul class="space-y-2 text-green-400">
+                    <li>• Increased general mode maxOutputTokens from 1024 to 2048</li>
+                    <li>• Increased MCQ mode maxOutputTokens from 512 to 1024</li>
+                    <li>• Increased news mode maxOutputTokens from 1024 to 2048</li>
+                    <li>• Increased default API client maxOutputTokens from 2048 to 3072</li>
+                </ul>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🧪 Test Long Response</h2>
+                <button id="test-long-response" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-4">
+                    Test Long Response
+                </button>
+                <div id="response-result" class="bg-gray-700 p-4 rounded text-sm"></div>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">📊 Token Usage Analysis</h2>
+                <div id="token-analysis" class="space-y-2 text-sm"></div>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🎯 Test Different Modes</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="test-general" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                        Test General Mode
+                    </button>
+                    <button id="test-mcq" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                        Test MCQ Mode
+                    </button>
+                    <button id="test-news" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded">
+                        Test News Mode
+                    </button>
+                    <button id="test-essay" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+                        Test Essay Mode
+                    </button>
+                </div>
+                <div id="mode-results" class="mt-4 space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const responseResult = document.getElementById('response-result');
+            const tokenAnalysis = document.getElementById('token-analysis');
+            const modeResults = document.getElementById('mode-results');
+
+            // Test long response
+            document.getElementById('test-long-response').addEventListener('click', async () => {
+                responseResult.innerHTML = 'Testing long response generation...';
+                
+                try {
+                    if (!window.aiServiceManager) {
+                        throw new Error('AI Service Manager not initialized');
+                    }
+
+                    const longPrompt = "Explain the Indian Constitution in detail, covering its history, key features, fundamental rights, directive principles, federal structure, amendment process, and significance for UPSC preparation. Provide comprehensive information with examples.";
+                    
+                    const response = await window.aiServiceManager.sendMessage(longPrompt);
+                    
+                    const wordCount = response.content.split(' ').length;
+                    const charCount = response.content.length;
+                    
+                    responseResult.innerHTML = `
+                        <div class="text-green-400 mb-2">✅ Response generated successfully!</div>
+                        <div class="mb-2"><strong>Word Count:</strong> ${wordCount} words</div>
+                        <div class="mb-2"><strong>Character Count:</strong> ${charCount} characters</div>
+                        <div class="mb-2"><strong>Token Usage:</strong> ${response.usage?.totalTokenCount || 'N/A'} tokens</div>
+                        <div class="mb-2"><strong>Processing Time:</strong> ${response.processingTime}ms</div>
+                        <div class="mb-2"><strong>From Cache:</strong> ${response.fromCache ? 'Yes' : 'No'}</div>
+                        <div class="mt-4 p-3 bg-gray-600 rounded max-h-64 overflow-y-auto">
+                            <strong>Response Preview:</strong><br>
+                            ${response.content.substring(0, 500)}${response.content.length > 500 ? '...' : ''}
+                        </div>
+                        <div class="mt-2 text-xs text-gray-400">
+                            Full response length: ${response.content.length} characters
+                        </div>
+                    `;
+
+                    // Update token analysis
+                    tokenAnalysis.innerHTML = `
+                        <div>Prompt Tokens: ${response.usage?.promptTokenCount || 'N/A'}</div>
+                        <div>Response Tokens: ${response.usage?.candidatesTokenCount || 'N/A'}</div>
+                        <div>Total Tokens: ${response.usage?.totalTokenCount || 'N/A'}</div>
+                        <div>Max Allowed: 2048 tokens (general mode)</div>
+                        <div class="${(response.usage?.totalTokenCount || 0) > 1800 ? 'text-yellow-400' : 'text-green-400'}">
+                            Token Usage: ${((response.usage?.totalTokenCount || 0) / 2048 * 100).toFixed(1)}%
+                        </div>
+                    `;
+                } catch (error) {
+                    responseResult.innerHTML = `
+                        <div class="text-red-400 mb-2">❌ Error generating response</div>
+                        <div class="text-gray-300">${error.message}</div>
+                    `;
+                }
+            });
+
+            // Test different modes
+            const modeTests = {
+                'test-general': { mode: 'general', prompt: 'Explain federalism in India comprehensively' },
+                'test-mcq': { mode: 'mcq', prompt: 'Analyze this MCQ: Which article deals with Right to Education?' },
+                'test-news': { mode: 'news', prompt: 'Analyze the UPSC relevance of recent education policy changes' },
+                'test-essay': { mode: 'essay', prompt: 'Provide detailed feedback on essay writing for UPSC Mains' }
+            };
+
+            Object.keys(modeTests).forEach(buttonId => {
+                document.getElementById(buttonId).addEventListener('click', async () => {
+                    const test = modeTests[buttonId];
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'bg-gray-600 p-4 rounded';
+                    resultDiv.innerHTML = `Testing ${test.mode} mode...`;
+                    modeResults.appendChild(resultDiv);
+
+                    try {
+                        if (window.aiServiceManager) {
+                            window.aiServiceManager.setMode(test.mode);
+                            const response = await window.aiServiceManager.sendMessage(test.prompt);
+                            
+                            const wordCount = response.content.split(' ').length;
+                            const isComplete = !response.content.endsWith('...');
+                            
+                            resultDiv.innerHTML = `
+                                <div class="font-semibold text-blue-400 mb-2">${test.mode.toUpperCase()} Mode Test</div>
+                                <div class="text-sm space-y-1">
+                                    <div>Words: ${wordCount}</div>
+                                    <div>Characters: ${response.content.length}</div>
+                                    <div>Tokens: ${response.usage?.totalTokenCount || 'N/A'}</div>
+                                    <div class="${isComplete ? 'text-green-400' : 'text-red-400'}">
+                                        Status: ${isComplete ? 'Complete' : 'Truncated'}
+                                    </div>
+                                </div>
+                                <div class="mt-2 p-2 bg-gray-700 rounded text-xs max-h-32 overflow-y-auto">
+                                    ${response.content.substring(0, 200)}...
+                                </div>
+                            `;
+                        }
+                    } catch (error) {
+                        resultDiv.innerHTML = `
+                            <div class="font-semibold text-red-400 mb-2">${test.mode.toUpperCase()} Mode - Error</div>
+                            <div class="text-sm text-gray-300">${error.message}</div>
+                        `;
+                    }
+                });
+            });
+
+            // Initialize AI service
+            setTimeout(() => {
+                if (window.aiServiceManager && window.aiServiceManager.isReady()) {
+                    console.log('✅ AI Service Manager ready for response length testing');
+                    tokenAnalysis.innerHTML = '<div class="text-green-400">AI Service Manager initialized and ready for testing</div>';
+                } else {
+                    console.warn('⚠️ AI Service Manager not ready');
+                    tokenAnalysis.innerHTML = '<div class="text-red-400">AI Service Manager not ready - check console for details</div>';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

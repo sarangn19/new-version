@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Fixes Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/mock-ai-responses.js"></script>
+    <script src="js/ai-config.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">API Fixes Test</h1>
+        
+        <div class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🔧 Fixed Issues</h2>
+                <ul class="space-y-2 text-green-400">
+                    <li>• Fixed "sanitizedMessage is not defined" error</li>
+                    <li>• Updated API response validation for new Gemini format</li>
+                    <li>• Fixed content extraction to handle both old and new API formats</li>
+                    <li>• Improved error handling and fallback to mock responses</li>
+                </ul>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🧪 Test API Response</h2>
+                <button id="test-api" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-4">
+                    Test API Call
+                </button>
+                <div id="test-result" class="bg-gray-700 p-4 rounded text-sm font-mono"></div>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">📝 Test Chat Message</h2>
+                <input type="text" id="test-message" placeholder="Enter test message" 
+                       class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-4">
+                <button id="test-chat" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded mb-4">
+                    Send Test Message
+                </button>
+                <div id="chat-result" class="bg-gray-700 p-4 rounded text-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const testApiBtn = document.getElementById('test-api');
+            const testResult = document.getElementById('test-result');
+            const testChatBtn = document.getElementById('test-chat');
+            const testMessage = document.getElementById('test-message');
+            const chatResult = document.getElementById('chat-result');
+
+            testApiBtn.addEventListener('click', async () => {
+                testResult.innerHTML = 'Testing API...';
+                
+                try {
+                    if (window.aiServiceManager && window.aiServiceManager.isReady()) {
+                        testResult.innerHTML = '✅ AI Service Manager is ready and initialized';
+                    } else {
+                        testResult.innerHTML = '❌ AI Service Manager not ready. Check console for details.';
+                    }
+                } catch (error) {
+                    testResult.innerHTML = `❌ Error: ${error.message}`;
+                }
+            });
+
+            testChatBtn.addEventListener('click', async () => {
+                const message = testMessage.value.trim();
+                if (!message) {
+                    chatResult.innerHTML = '❌ Please enter a test message';
+                    return;
+                }
+
+                chatResult.innerHTML = 'Sending message...';
+                
+                try {
+                    if (!window.aiServiceManager) {
+                        throw new Error('AI Service Manager not initialized');
+                    }
+
+                    const response = await window.aiServiceManager.sendMessage(message);
+                    
+                    chatResult.innerHTML = `
+                        <div class="text-green-400 mb-2">✅ Message sent successfully!</div>
+                        <div><strong>Response:</strong> ${response.content.substring(0, 200)}...</div>
+                        <div class="text-gray-400 text-xs mt-2">
+                            Mode: ${response.mode} | 
+                            Conversation ID: ${response.conversationId} | 
+                            Processing Time: ${response.processingTime}ms
+                        </div>
+                    `;
+                } catch (error) {
+                    chatResult.innerHTML = `
+                        <div class="text-red-400 mb-2">❌ Error sending message</div>
+                        <div class="text-gray-300">${error.message}</div>
+                    `;
+                }
+            });
+
+            // Initialize AI service
+            setTimeout(() => {
+                if (window.aiServiceManager && window.aiServiceManager.isReady()) {
+                    console.log('✅ AI Service Manager ready for testing');
+                } else {
+                    console.warn('⚠️ AI Service Manager not ready');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

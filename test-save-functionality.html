@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Functionality Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Save Functionality Test</h1>
+        
+        <div class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🔧 Save Function Fixes</h2>
+                <ul class="space-y-2 text-green-400">
+                    <li>• Fixed save to Notes - now uses 'userNotes' localStorage key</li>
+                    <li>• Fixed save to Flashcards - saves as bookmarks with flashcard metadata</li>
+                    <li>• Fixed save to MCQs - saves as bookmarks with MCQ metadata</li>
+                    <li>• Added proper data structure matching each page's expectations</li>
+                    <li>• Added success/error notifications</li>
+                    <li>• Added count updates for learn page</li>
+                </ul>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🧪 Test Save Functions</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Test Question:</label>
+                        <input type="text" id="test-question" 
+                               value="What is the Indian Constitution?"
+                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Test Response:</label>
+                        <textarea id="test-response" rows="4"
+                                  class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">The Indian Constitution is the supreme law of India that establishes the framework of government, fundamental rights, and directive principles. It serves as the foundational document for India's democratic governance.
+
+KEY FEATURES:
+• Adopted on 26th January 1950 (Republic Day)
+• World's longest written constitution with 395 articles and 12 schedules
+• Establishes parliamentary democracy with federal structure</textarea>
+                    </div>
+                    <div class="flex gap-4">
+                        <button id="test-save-note" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                            Save as Note
+                        </button>
+                        <button id="test-save-flashcard" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                            Save as Flashcard
+                        </button>
+                        <button id="test-save-mcq" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                            Save as MCQ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">📊 Current Counts</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-gray-700 p-4 rounded">
+                        <h3 class="font-medium text-blue-400">Notes</h3>
+                        <p id="notes-display" class="text-2xl font-bold">0</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded">
+                        <h3 class="font-medium text-green-400">Flashcards</h3>
+                        <p id="flashcards-display" class="text-2xl font-bold">0</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded">
+                        <h3 class="font-medium text-purple-400">MCQs</h3>
+                        <p id="mcqs-display" class="text-2xl font-bold">0</p>
+                    </div>
+                </div>
+                <button id="refresh-counts" class="mt-4 bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded">
+                    Refresh Counts
+                </button>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🔍 Inspect Saved Data</h2>
+                <div class="space-y-4">
+                    <button id="inspect-notes" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mr-2">
+                        Inspect Notes
+                    </button>
+                    <button id="inspect-bookmarks" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded mr-2">
+                        Inspect Bookmarks
+                    </button>
+                    <button id="clear-all" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+                        Clear All Data
+                    </button>
+                </div>
+                <pre id="data-display" class="mt-4 bg-gray-900 p-4 rounded text-xs overflow-auto max-h-64"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Copy the saveAIResponse function from chatbot.html
+        let selectedMode = 'general';
+
+        function saveAIResponse(content, type, originalQuestion) {
+            const timestamp = new Date().toISOString();
+            const savedData = {
+                content: content,
+                question: originalQuestion,
+                timestamp: timestamp,
+                mode: selectedMode || 'general'
+            };
+
+            try {
+                switch (type) {
+                    case 'note':
+                        const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+                        const newNote = {
+                            id: Date.now(),
+                            title: originalQuestion.length > 50 ? originalQuestion.substring(0, 50) + '...' : originalQuestion,
+                            content: content,
+                            richContent: content.replace(/\n/g, '<br>'),
+                            subject: selectedMode === 'news' ? 'Current Affairs' : 
+                                    selectedMode === 'mcq' ? 'MCQ Analysis' : 
+                                    selectedMode === 'essay' ? 'Essay Writing' : 'General',
+                            tags: ['ai-generated', selectedMode || 'general'],
+                            attachments: [],
+                            createdAt: timestamp,
+                            updatedAt: timestamp,
+                            color: 'blue',
+                            isFavorite: false,
+                            isArchived: false
+                        };
+                        notes.unshift(newNote);
+                        localStorage.setItem('userNotes', JSON.stringify(notes));
+                        break;
+
+                    case 'flashcard':
+                        const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+                        const newFlashcard = {
+                            id: Date.now(),
+                            title: originalQuestion.length > 50 ? originalQuestion.substring(0, 50) + '...' : originalQuestion,
+                            url: '#',
+                            description: content,
+                            category: 'notes',
+                            tags: ['ai-generated', 'flashcard', selectedMode || 'general'],
+                            createdAt: timestamp,
+                            updatedAt: timestamp,
+                            isImportant: false,
+                            notes: `Front: ${originalQuestion}\n\nBack: ${content}`,
+                            metadata: {
+                                type: 'flashcard',
+                                front: originalQuestion,
+                                back: content,
+                                difficulty: 'medium',
+                                source: 'AI Generated'
+                            }
+                        };
+                        bookmarks.unshift(newFlashcard);
+                        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                        break;
+
+                    case 'mcq':
+                        const mcqBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+                        const newMCQ = {
+                            id: Date.now(),
+                            title: `MCQ: ${originalQuestion.length > 40 ? originalQuestion.substring(0, 40) + '...' : originalQuestion}`,
+                            url: '#',
+                            description: content,
+                            category: 'notes',
+                            tags: ['ai-generated', 'mcq', selectedMode || 'general'],
+                            createdAt: timestamp,
+                            updatedAt: timestamp,
+                            isImportant: false,
+                            notes: `Question: ${originalQuestion}\n\nExplanation: ${content}`,
+                            metadata: {
+                                type: 'mcq',
+                                question: originalQuestion,
+                                explanation: content,
+                                source: 'AI Generated'
+                            }
+                        };
+                        mcqBookmarks.unshift(newMCQ);
+                        localStorage.setItem('bookmarks', JSON.stringify(mcqBookmarks));
+                        break;
+                }
+
+                console.log(`✅ Saved AI response to ${type}:`, savedData);
+                showNotification(`Content saved to ${type === 'note' ? 'Notes' : type === 'flashcard' ? 'Flashcards' : 'MCQs'} successfully!`);
+                refreshCounts();
+                
+            } catch (error) {
+                console.error(`❌ Error saving to ${type}:`, error);
+                showNotification(`Error saving to ${type}. Please try again.`, 'error');
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg text-white text-sm font-medium shadow-lg transition-all duration-300 ${
+                type === 'error' ? 'bg-red-600' : 'bg-green-600'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i data-lucide="${type === 'error' ? 'x-circle' : 'check-circle'}" class="w-4 h-4"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons(notification);
+            }
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function refreshCounts() {
+            const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            const flashcards = bookmarks.filter(b => b.metadata?.type === 'flashcard');
+            const mcqs = bookmarks.filter(b => b.metadata?.type === 'mcq');
+            
+            document.getElementById('notes-display').textContent = notes.length;
+            document.getElementById('flashcards-display').textContent = flashcards.length;
+            document.getElementById('mcqs-display').textContent = mcqs.length;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshCounts();
+
+            document.getElementById('test-save-note').addEventListener('click', () => {
+                const question = document.getElementById('test-question').value;
+                const response = document.getElementById('test-response').value;
+                saveAIResponse(response, 'note', question);
+            });
+
+            document.getElementById('test-save-flashcard').addEventListener('click', () => {
+                const question = document.getElementById('test-question').value;
+                const response = document.getElementById('test-response').value;
+                saveAIResponse(response, 'flashcard', question);
+            });
+
+            document.getElementById('test-save-mcq').addEventListener('click', () => {
+                const question = document.getElementById('test-question').value;
+                const response = document.getElementById('test-response').value;
+                saveAIResponse(response, 'mcq', question);
+            });
+
+            document.getElementById('refresh-counts').addEventListener('click', refreshCounts);
+
+            document.getElementById('inspect-notes').addEventListener('click', () => {
+                const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+                document.getElementById('data-display').textContent = JSON.stringify(notes, null, 2);
+            });
+
+            document.getElementById('inspect-bookmarks').addEventListener('click', () => {
+                const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+                document.getElementById('data-display').textContent = JSON.stringify(bookmarks, null, 2);
+            });
+
+            document.getElementById('clear-all').addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear all saved data?')) {
+                    localStorage.removeItem('userNotes');
+                    localStorage.removeItem('bookmarks');
+                    refreshCounts();
+                    document.getElementById('data-display').textContent = 'All data cleared.';
+                    showNotification('All data cleared successfully!');
+                }
+            });
+
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>

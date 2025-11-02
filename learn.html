@@ -326,6 +326,129 @@
       parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
     }
     
+    // Load and display content counts from Firebase and localStorage
+    async function loadContentCounts() {
+      try {
+        let notesCount = 0;
+        let flashcardsCount = 0;
+        let mcqsCount = 0;
+        
+        // Try to get from Firebase first
+        if (window.firebaseManager?.isReady()) {
+          try {
+            const [notes, flashcards, mcqs] = await Promise.all([
+              window.firebaseManager.getNotes(1000),
+              window.firebaseManager.getFlashcards ? window.firebaseManager.getFlashcards(1000) : [],
+              window.firebaseManager.getMCQs ? window.firebaseManager.getMCQs(1000) : []
+            ]);
+            
+            notesCount = notes.length;
+            flashcardsCount = flashcards.length;
+            mcqsCount = mcqs.length;
+            
+            console.log('📊 Content counts loaded from Firebase:', { notes: notesCount, flashcards: flashcardsCount, mcqs: mcqsCount });
+          } catch (firebaseError) {
+            console.warn('Firebase count fetch failed, using localStorage:', firebaseError);
+          }
+        }
+        
+        // Fallback to localStorage if Firebase failed or returned 0
+        if (notesCount === 0 && flashcardsCount === 0 && mcqsCount === 0) {
+          const localNotes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+          const localFlashcards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+          const localMCQs = JSON.parse(localStorage.getItem('mcqs') || '[]');
+          const localBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+          
+          notesCount = localNotes.length;
+          
+          // Check both dedicated flashcards storage and bookmarks
+          flashcardsCount = localFlashcards.length + localBookmarks.filter(b => b.metadata?.type === 'flashcard').length;
+          
+          // Check both dedicated MCQs storage and bookmarks  
+          mcqsCount = localMCQs.length + localBookmarks.filter(b => b.metadata?.type === 'mcq').length;
+          
+          console.log('📊 Content counts loaded from localStorage:', { 
+            notes: notesCount, 
+            flashcards: flashcardsCount, 
+            mcqs: mcqsCount,
+            sources: {
+              userNotes: localNotes.length,
+              flashcards: localFlashcards.length,
+              mcqs: localMCQs.length,
+              bookmarkFlashcards: localBookmarks.filter(b => b.metadata?.type === 'flashcard').length,
+              bookmarkMCQs: localBookmarks.filter(b => b.metadata?.type === 'mcq').length
+            }
+          });
+        }
+        
+        // Update display
+        const notesCountEl = document.getElementById('notes-count');
+        if (notesCountEl) {
+          notesCountEl.textContent = `${notesCount} note${notesCount !== 1 ? 's' : ''}`;
+        }
+        
+        const flashcardsCountEl = document.getElementById('flashcards-count');
+        if (flashcardsCountEl) {
+          flashcardsCountEl.textContent = `${flashcardsCount} card${flashcardsCount !== 1 ? 's' : ''}`;
+        }
+        
+        const mcqCountEl = document.getElementById('mcq-count');
+        if (mcqCountEl) {
+          mcqCountEl.textContent = `${mcqsCount} question${mcqsCount !== 1 ? 's' : ''}`;
+        }
+        
+      } catch (error) {
+        console.error('Error loading content counts:', error);
+      }
+    }
+
+    // Listen for count updates from other pages (like chatbot)
+    window.addEventListener('updateCount', (event) => {
+      const { type, count } = event.detail;
+      const countEl = document.getElementById(`${type}-count`);
+      if (countEl) {
+        const label = type === 'notes' ? 'note' : type === 'flashcards' ? 'card' : 'question';
+        countEl.textContent = `${count} ${label}${count !== 1 ? 's' : ''}`;
+      }
+    });
+
+    // Listen for batch count updates from chatbot
+    window.addEventListener('contentCountsUpdated', (event) => {
+      const counts = event.detail;
+      console.log('🔄 Received batch count update:', counts);
+      
+      if (counts.notes !== undefined) {
+        const notesCountEl = document.getElementById('notes-count');
+        if (notesCountEl) {
+          notesCountEl.textContent = `${counts.notes} note${counts.notes !== 1 ? 's' : ''}`;
+        }
+      }
+      
+      if (counts.flashcards !== undefined) {
+        const flashcardsCountEl = document.getElementById('flashcards-count');
+        if (flashcardsCountEl) {
+          flashcardsCountEl.textContent = `${counts.flashcards} card${counts.flashcards !== 1 ? 's' : ''}`;
+        }
+      }
+      
+      if (counts.mcqs !== undefined) {
+        const mcqCountEl = document.getElementById('mcq-count');
+        if (mcqCountEl) {
+          mcqCountEl.textContent = `${counts.mcqs} question${counts.mcqs !== 1 ? 's' : ''}`;
+        }
+      }
+    });
+
+    // Load counts on page load
+    loadContentCounts();
+
+    // Refresh counts when page becomes visible (in case content was added in another tab)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        loadContentCounts();
+      }
+    });
+    
     // Initialize Lucide icons
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();

@@ -65,7 +65,7 @@ class GeminiAPIClient {
                 temperature: options.temperature || 0.7,
                 topK: options.topK || 40,
                 topP: options.topP || 0.95,
-                maxOutputTokens: options.maxOutputTokens || 2048,
+                maxOutputTokens: options.maxOutputTokens || 4096,
                 ...options.generationConfig
             },
             safetySettings: options.safetySettings || [
@@ -227,21 +227,28 @@ class GeminiAPIClient {
             return false;
         }
         
-        // Check for parts array
-        if (!candidate.content.parts || !Array.isArray(candidate.content.parts)) {
-            console.error('Invalid response: no parts array in content');
-            return false;
-        }
-        
-        if (candidate.content.parts.length === 0) {
-            console.error('Invalid response: empty parts array');
-            return false;
-        }
-        
-        // Check if first part has text
-        const firstPart = candidate.content.parts[0];
-        if (!firstPart || typeof firstPart !== 'object' || !firstPart.text) {
-            console.error('Invalid response: no text in first part');
+        // Check for parts array (new API format may not have parts)
+        if (candidate.content.parts && Array.isArray(candidate.content.parts)) {
+            // Old format with parts array
+            if (candidate.content.parts.length === 0) {
+                console.error('Invalid response: empty parts array');
+                return false;
+            }
+
+            // Check if first part has text
+            const firstPart = candidate.content.parts[0];
+            if (!firstPart || typeof firstPart !== 'object' || !firstPart.text) {
+                console.error('Invalid response: no text in first part');
+                return false;
+            }
+        } else if (candidate.content.text) {
+            // New format with direct text property
+            if (!candidate.content.text || typeof candidate.content.text !== 'string') {
+                console.error('Invalid response: no valid text in content');
+                return false;
+            }
+        } else {
+            console.error('Invalid response: no parts array or text in content');
             return false;
         }
         
@@ -368,7 +375,19 @@ class GeminiAPIClient {
             throw new Error('Invalid response format');
         }
         
-        return response.candidates[0].content.parts[0].text;
+        const candidate = response.candidates[0];
+        
+        // Handle new API format with direct text property
+        if (candidate.content.text) {
+            return candidate.content.text;
+        }
+        
+        // Handle old API format with parts array
+        if (candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text) {
+            return candidate.content.parts[0].text;
+        }
+        
+        throw new Error('No text content found in response');
     }
 
     /**

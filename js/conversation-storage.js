@@ -1,6 +1,6 @@
 /**
  * Conversation Storage System
- * Manages conversation data models, local storage, history retrieval, and data retention policies
+ * Manages conversation data models with Firebase integration and localStorage fallback
  */
 class ConversationStorage {
     constructor(config = {}) {
@@ -9,6 +9,7 @@ class ConversationStorage {
         this.maxContextMessages = config.maxContextMessages || 10;
         this.retentionDays = config.retentionDays || 30;
         this.compressionEnabled = config.compressionEnabled || false;
+        this.useFirebase = config.useFirebase !== false; // Default to true
         
         // Initialize storage keys
         this.keys = {
@@ -18,13 +19,32 @@ class ConversationStorage {
             metadata: `${this.storagePrefix}metadata`
         };
         
+        // Firebase integration
+        this.isOnline = navigator.onLine;
+        this.syncQueue = [];
+        this.setupEventListeners();
+        
         this.initializeStorage();
+    }
+
+    /**
+     * Setup event listeners for online/offline status
+     */
+    setupEventListeners() {
+        window.addEventListener('online', () => {
+            this.isOnline = true;
+            this.processSyncQueue();
+        });
+
+        window.addEventListener('offline', () => {
+            this.isOnline = false;
+        });
     }
 
     /**
      * Initialize storage structure and perform cleanup
      */
-    initializeStorage() {
+    async initializeStorage() {
         try {
             // Create conversation index if it doesn't exist
             if (!localStorage.getItem(this.keys.conversationIndex)) {
@@ -41,11 +61,23 @@ class ConversationStorage {
                 localStorage.setItem(this.keys.metadata, JSON.stringify(metadata));
             }
             
+            // Sync with Firebase if available and online
+            if (this.useFirebase && this.isOnline && this.isFirebaseReady()) {
+                await this.syncWithFirebase();
+            }
+            
             // Perform cleanup on initialization
             this.performCleanup();
         } catch (error) {
             console.error('Failed to initialize conversation storage:', error);
         }
+    }
+
+    /**
+     * Check if Firebase is ready
+     */
+    isFirebaseReady() {
+        return window.firebaseUtils && window.firebaseUtils.auth && window.firebaseUtils.auth.currentUser;
     }
 
     /**
@@ -90,20 +122,35 @@ class ConversationStorage {
     }
 
     /**
-     * Save conversation to storage
+     * Save conversation to storage (Firebase + localStorage)
      * @param {Object} conversation - Conversation object to save
      */
-    saveConversation(conversation) {
+    async saveConversation(conversation) {
         try {
-            const storageKey = `${this.keys.conversations}_${conversation.id}`;
             conversation.updatedAt = new Date().toISOString();
             
+            // Always save to localStorage first for immediate access
+            const storageKey = `${this.keys.conversations}_${conversation.id}`;
             if (this.compressionEnabled) {
-                // Simple compression by removing unnecessary whitespace
                 const compressed = JSON.stringify(conversation);
                 localStorage.setItem(storageKey, compressed);
             } else {
                 localStorage.setItem(storageKey, JSON.stringify(conversation));
+            }
+            
+            // Save to Firebase if available and online
+            if (this.useFirebase && this.isOnline && this.isFirebaseReady()) {
+                try {
+                    await this.saveConversationToFirebase(conversation);
+                    conversation.synced = true;
+                    localStorage.setItem(storageKey, JSON.stringify(conversation));
+                } catch (firebaseError) {
+                    console.warn('Firebase save failed, queuing for sync:', firebaseError);
+                    this.addToSyncQueue('conversation', conversation);
+                }
+            } else {
+                // Queue for sync when online
+                this.addToSyncQueue('conversation', conversation);
             }
         } catch (error) {
             console.error('Failed to save conversation:', error);
@@ -112,24 +159,101 @@ class ConversationStorage {
     }
 
     /**
-     * Load conversation from storage
+     * Save conversation to Firebase
+     * @param {Object} conversation - Conversation object
+     */
+    async saveConversationToFirebase(conversation) {
+        if (!this.isFirebaseReady()) {
+            throw new Error('Firebase not ready');
+        }
+
+        const conversationData = {
+            ...conversation,
+            userId: window.firebaseUtils.auth.currentUser.uid,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await window.firebaseUtils.db
+            .collection('users')
+            .doc(window.firebaseUtils.auth.currentUser.uid)
+            .collection('conversations')
+            .doc(conversation.id)
+            .set(conversationData, { merge: true });
+    }
+
+    /**
+     * Load conversation from storage (Firebase with localStorage fallback)
      * @param {string} conversationId - ID of conversation to load
      * @returns {Object|null} Conversation object or null if not found
      */
-    loadConversation(conversationId) {
+    async loadConversation(conversationId) {
         try {
+            // First try localStorage for immediate response
             const storageKey = `${this.keys.conversations}_${conversationId}`;
-            const conversationData = localStorage.getItem(storageKey);
+            const localData = localStorage.getItem(storageKey);
+            let localConversation = null;
             
-            if (!conversationData) {
-                return null;
+            if (localData) {
+                localConversation = JSON.parse(localData);
             }
             
-            return JSON.parse(conversationData);
+            // If online and Firebase is ready, try to get latest from Firebase
+            if (this.useFirebase && this.isOnline && this.isFirebaseReady()) {
+                try {
+                    const firebaseConversation = await this.loadConversationFromFirebase(conversationId);
+                    
+                    if (firebaseConversation) {
+                        // Compare timestamps and use the newer version
+                        if (!localConversation || 
+                            new Date(firebaseConversation.updatedAt) > new Date(localConversation.updatedAt)) {
+                            
+                            // Update localStorage with Firebase data
+                            localStorage.setItem(storageKey, JSON.stringify(firebaseConversation));
+                            return firebaseConversation;
+                        }
+                    }
+                } catch (firebaseError) {
+                    console.warn('Firebase load failed, using local data:', firebaseError);
+                }
+            }
+            
+            return localConversation;
         } catch (error) {
             console.error('Failed to load conversation:', error);
             return null;
         }
+    }
+
+    /**
+     * Load conversation from Firebase
+     * @param {string} conversationId - ID of conversation to load
+     * @returns {Object|null} Conversation object or null if not found
+     */
+    async loadConversationFromFirebase(conversationId) {
+        if (!this.isFirebaseReady()) {
+            return null;
+        }
+
+        const doc = await window.firebaseUtils.db
+            .collection('users')
+            .doc(window.firebaseUtils.auth.currentUser.uid)
+            .collection('conversations')
+            .doc(conversationId)
+            .get();
+
+        if (doc.exists) {
+            const data = doc.data();
+            // Convert Firebase timestamp to ISO string
+            if (data.updatedAt && data.updatedAt.toDate) {
+                data.updatedAt = data.updatedAt.toDate().toISOString();
+            }
+            if (data.createdAt && data.createdAt.toDate) {
+                data.createdAt = data.createdAt.toDate().toISOString();
+            }
+            return data;
+        }
+        
+        return null;
     }
 
     /**
@@ -244,30 +368,51 @@ class ConversationStorage {
     }
 
     /**
-     * List all conversations with pagination
+     * List all conversations with pagination (Firebase + localStorage)
      * @param {Object} options - Pagination and filtering options
      * @returns {Array} Array of conversation summaries
      */
-    listConversations(options = {}) {
+    async listConversations(options = {}) {
         try {
-            const index = this.getConversationIndex();
             let conversations = [];
-
-            // Load conversation summaries
-            for (const entry of index) {
-                const conversation = this.loadConversation(entry.id);
-                if (conversation) {
-                    conversations.push({
-                        id: conversation.id,
-                        mode: conversation.mode,
-                        context: conversation.context,
-                        messageCount: conversation.messageCount,
-                        createdAt: conversation.createdAt,
-                        updatedAt: conversation.updatedAt,
-                        lastMessageAt: conversation.lastMessageAt,
-                        isActive: conversation.isActive,
-                        preview: this.getConversationPreview(conversation)
-                    });
+            
+            // Get conversations from Firebase if available
+            if (this.useFirebase && this.isOnline && this.isFirebaseReady()) {
+                try {
+                    const firebaseConversations = await this.listConversationsFromFirebase(options);
+                    conversations = firebaseConversations;
+                    
+                    // Update localStorage with Firebase data
+                    for (const conv of conversations) {
+                        const storageKey = `${this.keys.conversations}_${conv.id}`;
+                        localStorage.setItem(storageKey, JSON.stringify(conv));
+                        this.addToIndex(conv.id, conv.createdAt);
+                    }
+                } catch (firebaseError) {
+                    console.warn('Firebase list failed, using local data:', firebaseError);
+                }
+            }
+            
+            // Fallback to localStorage if Firebase failed or unavailable
+            if (conversations.length === 0) {
+                const index = this.getConversationIndex();
+                
+                // Load conversation summaries from localStorage
+                for (const entry of index) {
+                    const conversation = await this.loadConversation(entry.id);
+                    if (conversation) {
+                        conversations.push({
+                            id: conversation.id,
+                            mode: conversation.mode,
+                            context: conversation.context,
+                            messageCount: conversation.messageCount,
+                            createdAt: conversation.createdAt,
+                            updatedAt: conversation.updatedAt,
+                            lastMessageAt: conversation.lastMessageAt,
+                            isActive: conversation.isActive,
+                            preview: this.getConversationPreview(conversation)
+                        });
+                    }
                 }
             }
 
@@ -296,6 +441,60 @@ class ConversationStorage {
             console.error('Failed to list conversations:', error);
             return [];
         }
+    }
+
+    /**
+     * List conversations from Firebase
+     * @param {Object} options - Query options
+     * @returns {Array} Array of conversations
+     */
+    async listConversationsFromFirebase(options = {}) {
+        if (!this.isFirebaseReady()) {
+            return [];
+        }
+
+        let query = window.firebaseUtils.db
+            .collection('users')
+            .doc(window.firebaseUtils.auth.currentUser.uid)
+            .collection('conversations')
+            .orderBy('updatedAt', 'desc');
+
+        // Apply filters
+        if (options.mode) {
+            query = query.where('mode', '==', options.mode);
+        }
+
+        if (options.isActive !== undefined) {
+            query = query.where('isActive', '==', options.isActive);
+        }
+
+        // Apply limit
+        const limit = options.limit || 20;
+        query = query.limit(limit);
+
+        const snapshot = await query.get();
+        const conversations = [];
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Convert Firebase timestamps
+            if (data.updatedAt && data.updatedAt.toDate) {
+                data.updatedAt = data.updatedAt.toDate().toISOString();
+            }
+            if (data.createdAt && data.createdAt.toDate) {
+                data.createdAt = data.createdAt.toDate().toISOString();
+            }
+            if (data.lastMessageAt && data.lastMessageAt.toDate) {
+                data.lastMessageAt = data.lastMessageAt.toDate().toISOString();
+            }
+            
+            conversations.push({
+                ...data,
+                preview: this.getConversationPreview(data)
+            });
+        });
+
+        return conversations;
     }
 
     /**
@@ -628,6 +827,131 @@ class ConversationStorage {
         } catch (error) {
             console.error('Failed to update cleanup timestamp:', error);
         }
+    }
+
+    /**
+     * Add item to sync queue
+     */
+    addToSyncQueue(type, data) {
+        this.syncQueue.push({ type, data, timestamp: Date.now() });
+        
+        // Limit queue size
+        if (this.syncQueue.length > 100) {
+            this.syncQueue = this.syncQueue.slice(-100);
+        }
+    }
+
+    /**
+     * Process sync queue when online
+     */
+    async processSyncQueue() {
+        if (!this.isOnline || !this.isFirebaseReady()) return;
+
+        console.log(`Processing ${this.syncQueue.length} items in sync queue...`);
+        
+        const itemsToSync = [...this.syncQueue];
+        this.syncQueue = [];
+
+        for (const item of itemsToSync) {
+            try {
+                if (item.type === 'conversation') {
+                    await this.saveConversationToFirebase(item.data);
+                    
+                    // Update local storage to mark as synced
+                    item.data.synced = true;
+                    const storageKey = `${this.keys.conversations}_${item.data.id}`;
+                    localStorage.setItem(storageKey, JSON.stringify(item.data));
+                }
+            } catch (error) {
+                console.error('Sync queue item failed:', error);
+                // Re-add to queue for retry
+                this.addToSyncQueue(item.type, item.data);
+            }
+        }
+        
+        console.log('Sync queue processing completed');
+    }
+
+    /**
+     * Sync with Firebase - pull latest conversations
+     */
+    async syncWithFirebase() {
+        if (!this.isFirebaseReady()) return;
+
+        try {
+            console.log('Syncing conversations with Firebase...');
+            
+            // Get all conversations from Firebase
+            const firebaseConversations = await this.listConversationsFromFirebase({ limit: 100 });
+            
+            // Update localStorage with Firebase data
+            for (const conversation of firebaseConversations) {
+                const storageKey = `${this.keys.conversations}_${conversation.id}`;
+                const localData = localStorage.getItem(storageKey);
+                
+                if (!localData) {
+                    // New conversation from Firebase
+                    localStorage.setItem(storageKey, JSON.stringify(conversation));
+                    this.addToIndex(conversation.id, conversation.createdAt);
+                } else {
+                    // Check if Firebase version is newer
+                    const localConversation = JSON.parse(localData);
+                    if (new Date(conversation.updatedAt) > new Date(localConversation.updatedAt)) {
+                        localStorage.setItem(storageKey, JSON.stringify(conversation));
+                    }
+                }
+            }
+            
+            console.log(`Synced ${firebaseConversations.length} conversations from Firebase`);
+        } catch (error) {
+            console.error('Firebase sync failed:', error);
+        }
+    }
+
+    /**
+     * Force sync all local data to Firebase
+     */
+    async forceSyncToFirebase() {
+        if (!this.isFirebaseReady()) {
+            throw new Error('Firebase not ready');
+        }
+
+        try {
+            const index = this.getConversationIndex();
+            let syncedCount = 0;
+            
+            for (const entry of index) {
+                const conversation = await this.loadConversation(entry.id);
+                if (conversation && !conversation.synced) {
+                    await this.saveConversationToFirebase(conversation);
+                    
+                    // Mark as synced
+                    conversation.synced = true;
+                    const storageKey = `${this.keys.conversations}_${conversation.id}`;
+                    localStorage.setItem(storageKey, JSON.stringify(conversation));
+                    
+                    syncedCount++;
+                }
+            }
+            
+            console.log(`Force synced ${syncedCount} conversations to Firebase`);
+            return syncedCount;
+        } catch (error) {
+            console.error('Force sync failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get sync status
+     */
+    getSyncStatus() {
+        return {
+            isOnline: this.isOnline,
+            isFirebaseReady: this.isFirebaseReady(),
+            queueSize: this.syncQueue.length,
+            lastSync: localStorage.getItem('lastConversationSync')
+        };
     }
 }
 

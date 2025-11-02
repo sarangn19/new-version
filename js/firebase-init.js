@@ -30,9 +30,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Sign in anonymously with error handling
             try {
                 await auth.signInAnonymously();
+                console.log('✅ Firebase authentication successful');
             } catch (error) {
                 console.warn('Firebase auth failed, continuing with localStorage only:', error.message);
                 // Continue without Firebase auth - app will work with localStorage
+                // Set up mock Firebase utilities for offline mode
+                window.firebaseUtils = {
+                    auth: { currentUser: null },
+                    db: null,
+                    storage: null,
+                    async saveData() { return null; },
+                    async getData() { return []; }
+                };
             }
             console.log('Firebase initialized successfully');
             

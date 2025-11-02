@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Fixes Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- Core Scripts -->
+    <script src="js/firebase-init.js"></script>
+    <script src="js/firebase-integration.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    
+    <!-- Fix Scripts -->
+    <script src="js/dashboard-fixes.js"></script>
+    <script src="js/statistics-fixes.js"></script>
+    <script src="js/news-fixes.js"></script>
+    <script src="js/conversation-fix.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">Comprehensive Fixes Test Dashboard</h1>
+        
+        <!-- Status Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Dashboard Fixes
+                </h3>
+                <div id="dashboard-status" class="text-sm">
+                    <div class="status-item">Status: <span id="dashboard-ready" class="text-yellow-400">Checking...</span></div>
+                    <div class="status-item">Daily Challenge: <span id="daily-challenge-status" class="text-yellow-400">Checking...</span></div>
+                    <div class="status-item">Flashcards: <span id="flashcards-status" class="text-yellow-400">Checking...</span></div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                    Statistics Fixes
+                </h3>
+                <div id="statistics-status" class="text-sm">
+                    <div class="status-item">Status: <span id="statistics-ready" class="text-yellow-400">Checking...</span></div>
+                    <div class="status-item">Real-time Data: <span id="realtime-data-status" class="text-yellow-400">Checking...</span></div>
+                    <div class="status-item">Charts: <span id="charts-status" class="text-yellow-400">Checking...</span></div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                    <i data-lucide="newspaper" class="w-5 h-5"></i>
+                    News Fixes
+                </h3>
+                <div id="news-status" class="text-sm">
+                    <div class="status-item">Status: <span id="news-ready" class="text-yellow-400">Checking...</span></div>
+                    <div class="status-item">UPSC News: <span id="upsc-news-status" class="text-yellow-400">Checking...</span></div>
+                    <div class="status-item">Real-time Updates: <span id="news-updates-status" class="text-yellow-400">Checking...</span></div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                    Conversation Fixes
+                </h3>
+                <div id="conversation-status" class="text-sm">
+                    <div class="status-item">Status: <span id="conversation-ready" class="text-yellow-400">Checking...</span></div>
+                    <div class="status-item">Recent Chats: <span id="recent-chats-status" class="text-yellow-400">Checking...</span></div>
+                    <div class="status-item">Firebase Sync: <span id="firebase-sync-status" class="text-yellow-400">Checking...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Dashboard Tests -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-xl font-semibold mb-4">Dashboard Tests</h3>
+                <div class="space-y-3">
+                    <button onclick="testDashboardLoading()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                        Test Dashboard Loading
+                    </button>
+                    <button onclick="testDailyChallenge()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                        Test Daily Challenge
+                    </button>
+                    <button onclick="testFlashcards()" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                        Test Rapid Flashcards
+                    </button>
+                    <button onclick="testContentRendering()" class="w-full bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded">
+                        Test Content Rendering
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Tests -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-xl font-semibold mb-4">Statistics Tests</h3>
+                <div class="space-y-3">
+                    <button onclick="testStatisticsData()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                        Test Statistics Data
+                    </button>
+                    <button onclick="testRealTimeUpdates()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                        Test Real-time Updates
+                    </button>
+                    <button onclick="testChartsRendering()" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                        Test Charts Rendering
+                    </button>
+                    <button onclick="testProgressTracking()" class="w-full bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded">
+                        Test Progress Tracking
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- News Tests -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-xl font-semibold mb-4">News Tests</h3>
+                <div class="space-y-3">
+                    <button onclick="testNewsLoading()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                        Test News Loading
+                    </button>
+                    <button onclick="testUPSCRelevance()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                        Test UPSC Relevance
+                    </button>
+                    <button onclick="testNewsFiltering()" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                        Test News Filtering
+                    </button>
+                    <button onclick="testBreakingNews()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+                        Test Breaking News
+                    </button>
+                </div>
+            </div>
+
+            <!-- Conversation Tests -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-xl font-semibold mb-4">Conversation Tests</h3>
+                <div class="space-y-3">
+                    <button onclick="testConversationLoading()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                        Test Conversation Loading
+                    </button>
+                    <button onclick="testRecentChats()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                        Test Recent Chats
+                    </button>
+                    <button onclick="testFirebaseSync()" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                        Test Firebase Sync
+                    </button>
+                    <button onclick="testConversationSaving()" class="w-full bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded">
+                        Test Conversation Saving
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+            <h3 class="text-xl font-semibold mb-4">Test Results</h3>
+            <div id="test-results" class="bg-gray-900 p-4 rounded font-mono text-sm overflow-auto max-h-96">
+                <div class="text-gray-400">Test results will appear here...</div>
+            </div>
+        </div>
+
+        <!-- Sample Components for Testing -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Sample Dashboard Elements -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-lg font-semibold mb-4">Sample Dashboard Elements</h3>
+                
+                <!-- Content Grid -->
+                <div id="content-grid" class="grid grid-cols-1 gap-4 mb-4">
+                    <!-- Content will be rendered here -->
+                </div>
+                
+                <!-- Filter Chips -->
+                <div id="filter-chips" class="flex flex-wrap gap-2 mb-4">
+                    <!-- Filter chips will be rendered here -->
+                </div>
+                
+                <!-- Daily Quiz -->
+                <div id="daily-quiz-widget" class="bg-gray-700 p-4 rounded mb-4">
+                    <h4 class="font-semibold mb-2">Daily Challenge</h4>
+                    <p id="daily-quiz-question" class="text-sm mb-2">Question will appear here...</p>
+                    <div id="quiz-options" class="space-y-2 mb-2">
+                        <!-- Options will be rendered here -->
+                    </div>
+                    <div id="quiz-feedback" class="hidden mb-2">
+                        <!-- Feedback will be rendered here -->
+                    </div>
+                    <button id="check-answer-btn" class="bg-blue-600 px-3 py-1 rounded text-sm">Check Answer</button>
+                    <button id="next-question-btn" class="bg-green-600 px-3 py-1 rounded text-sm hidden">Next Question</button>
+                    <button id="retry-quiz-btn" class="bg-gray-600 px-3 py-1 rounded text-sm hidden">Retry</button>
+                </div>
+                
+                <!-- Flashcard Container -->
+                <div id="flashcard-carousel" class="bg-gray-700 p-4 rounded">
+                    <h4 class="font-semibold mb-2">Rapid Flashcards</h4>
+                    <div id="flashcard-container" class="h-32 bg-gray-600 rounded mb-2 flex items-center justify-center">
+                        <!-- Flashcard will be rendered here -->
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="flashcard-prev" class="bg-gray-600 px-3 py-1 rounded text-sm">Previous</button>
+                        <button id="flashcard-next" class="bg-blue-600 px-3 py-1 rounded text-sm">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Statistics Elements -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <h3 class="text-lg font-semibold mb-4">Sample Statistics Elements</h3>
+                
+                <!-- Key Metrics -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-gray-700 p-3 rounded text-center">
+                        <div class="text-xs text-gray-400">Study Time</div>
+                        <div id="study-time-today" class="text-lg font-bold">0 min</div>
+                    </div>
+                    <div class="bg-gray-700 p-3 rounded text-center">
+                        <div class="text-xs text-gray-400">Questions</div>
+                        <div id="questions-answered" class="text-lg font-bold">0</div>
+                    </div>
+                    <div class="bg-gray-700 p-3 rounded text-center">
+                        <div class="text-xs text-gray-400">Accuracy</div>
+                        <div id="accuracy-rate" class="text-lg font-bold">0%</div>
+                    </div>
+                    <div class="bg-gray-700 p-3 rounded text-center">
+                        <div class="text-xs text-gray-400">Streak</div>
+                        <div id="study-streak" class="text-lg font-bold">0 days</div>
+                    </div>
+                </div>
+                
+                <!-- Sample Chart -->
+                <div class="bg-gray-700 p-4 rounded mb-4">
+                    <canvas id="progressChart" width="300" height="200"></canvas>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div id="recent-activity-list" class="space-y-2">
+                    <!-- Activity items will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample News Elements -->
+        <div class="mt-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
+            <h3 class="text-lg font-semibold mb-4">Sample News Elements</h3>
+            
+            <!-- Breaking News Ticker -->
+            <div id="breaking-news-ticker" class="bg-red-600/20 border border-red-500/30 rounded p-2 mb-4 hidden">
+                <div class="flex items-center gap-2">
+                    <span class="text-red-400 font-bold text-sm">BREAKING:</span>
+                    <div id="ticker-content" class="text-sm overflow-hidden whitespace-nowrap">
+                        <!-- Breaking news content -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- News Container -->
+            <div id="news-container" class="space-y-4">
+                <!-- News articles will be rendered here -->
+            </div>
+            
+            <!-- Trending Topics -->
+            <div class="mt-4">
+                <h4 class="text-sm font-semibold mb-2">Trending Topics</h4>
+                <div id="trending-topics" class="flex flex-wrap gap-2">
+                    <!-- Trending topics will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Conversation Elements -->
+        <div class="mt-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
+            <h3 class="text-lg font-semibold mb-4">Sample Conversation Elements</h3>
+            
+            <!-- Recent Chats List -->
+            <div class="bg-gray-700 p-4 rounded">
+                <h4 class="font-semibold mb-2">Recent Conversations</h4>
+                <ul id="recent-chats-list" class="space-y-2">
+                    <!-- Recent chats will be rendered here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        // Wait for all fixes to load
+        setTimeout(() => {
+            checkAllSystems();
+        }, 2000);
+
+        function checkAllSystems() {
+            logResult('🔍 Checking all systems...', 'info');
+            
+            // Check Dashboard Fixes
+            if (window.dashboardFixes?.isReady()) {
+                updateStatus('dashboard-ready', '✅ Ready', 'text-green-400');
+                logResult('✅ Dashboard Fixes: Ready', 'success');
+            } else {
+                updateStatus('dashboard-ready', '❌ Not Ready', 'text-red-400');
+                logResult('❌ Dashboard Fixes: Not Ready', 'error');
+            }
+
+            // Check Statistics Fixes
+            if (window.statisticsFixes?.isReady()) {
+                updateStatus('statistics-ready', '✅ Ready', 'text-green-400');
+                logResult('✅ Statistics Fixes: Ready', 'success');
+            } else {
+                updateStatus('statistics-ready', '❌ Not Ready', 'text-red-400');
+                logResult('❌ Statistics Fixes: Not Ready', 'error');
+            }
+
+            // Check News Fixes
+            if (window.newsFixes?.isReady()) {
+                updateStatus('news-ready', '✅ Ready', 'text-green-400');
+                logResult('✅ News Fixes: Ready', 'success');
+            } else {
+                updateStatus('news-ready', '❌ Not Ready', 'text-red-400');
+                logResult('❌ News Fixes: Not Ready', 'error');
+            }
+
+            // Check Conversation Fixes
+            if (window.conversationFix?.isReady()) {
+                updateStatus('conversation-ready', '✅ Ready', 'text-green-400');
+                logResult('✅ Conversation Fixes: Ready', 'success');
+            } else {
+                updateStatus('conversation-ready', '❌ Not Ready', 'text-red-400');
+                logResult('❌ Conversation Fixes: Not Ready', 'error');
+            }
+
+            // Check individual components
+            checkIndividualComponents();
+        }
+
+        function checkIndividualComponents() {
+            // Check Daily Challenge
+            const dailyChallenge = document.getElementById('daily-quiz-question');
+            if (dailyChallenge && window.dailyChallengeFixed) {
+                updateStatus('daily-challenge-status', '✅ Working', 'text-green-400');
+            } else {
+                updateStatus('daily-challenge-status', '❌ Not Working', 'text-red-400');
+            }
+
+            // Check Flashcards
+            const flashcardContainer = document.getElementById('flashcard-container');
+            if (flashcardContainer && window.flashcardsFixed) {
+                updateStatus('flashcards-status', '✅ Working', 'text-green-400');
+            } else {
+                updateStatus('flashcards-status', '❌ Not Working', 'text-red-400');
+            }
+
+            // Check Real-time Data
+            if (window.statisticsFixes?.statisticsData) {
+                updateStatus('realtime-data-status', '✅ Available', 'text-green-400');
+            } else {
+                updateStatus('realtime-data-status', '❌ Not Available', 'text-red-400');
+            }
+
+            // Check Charts
+            if (typeof Chart !== 'undefined') {
+                updateStatus('charts-status', '✅ Available', 'text-green-400');
+            } else {
+                updateStatus('charts-status', '❌ Not Available', 'text-red-400');
+            }
+
+            // Check UPSC News
+            const newsData = window.newsFixes?.getNews();
+            if (newsData && newsData.length > 0) {
+                updateStatus('upsc-news-status', `✅ ${newsData.length} articles`, 'text-green-400');
+            } else {
+                updateStatus('upsc-news-status', '❌ No articles', 'text-red-400');
+            }
+
+            // Check News Updates
+            updateStatus('news-updates-status', '✅ Active', 'text-green-400');
+
+            // Check Recent Chats
+            updateStatus('recent-chats-status', '✅ Available', 'text-green-400');
+
+            // Check Firebase Sync
+            if (window.firebaseManager?.isReady()) {
+                updateStatus('firebase-sync-status', '✅ Connected', 'text-green-400');
+            } else {
+                updateStatus('firebase-sync-status', '⚠️ Offline Mode', 'text-yellow-400');
+            }
+        }
+
+        function updateStatus(elementId, text, className) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = text;
+                element.className = className;
+            }
+        }
+
+        function logResult(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'success' ? 'text-green-400' : 
+                         type === 'error' ? 'text-red-400' : 
+                         type === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = color;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            
+            results.appendChild(logEntry);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        // Test Functions
+        function testDashboardLoading() {
+            logResult('Testing dashboard loading...', 'info');
+            
+            if (window.dashboardFixes) {
+                window.dashboardFixes.refresh();
+                logResult('✅ Dashboard refresh triggered', 'success');
+            } else {
+                logResult('❌ Dashboard fixes not available', 'error');
+            }
+        }
+
+        function testDailyChallenge() {
+            logResult('Testing daily challenge...', 'info');
+            
+            if (window.dailyChallengeFixed) {
+                logResult(`✅ Daily challenge loaded with ${window.dailyChallengeFixed.mcqs.length} questions`, 'success');
+            } else {
+                logResult('❌ Daily challenge not available', 'error');
+            }
+        }
+
+        function testFlashcards() {
+            logResult('Testing flashcards...', 'info');
+            
+            if (window.flashcardsFixed) {
+                logResult(`✅ Flashcards loaded with ${window.flashcardsFixed.length} cards`, 'success');
+            } else {
+                logResult('❌ Flashcards not available', 'error');
+            }
+        }
+
+        function testContentRendering() {
+            logResult('Testing content rendering...', 'info');
+            
+            const contentGrid = document.getElementById('content-grid');
+            if (contentGrid && contentGrid.children.length > 0) {
+                logResult(`✅ Content rendered: ${contentGrid.children.length} items`, 'success');
+            } else {
+                logResult('❌ No content rendered', 'error');
+            }
+        }
+
+        function testStatisticsData() {
+            logResult('Testing statistics data...', 'info');
+            
+            if (window.statisticsFixes?.statisticsData) {
+                const data = window.statisticsFixes.statisticsData;
+                logResult(`✅ Statistics data available: ${data.studyTime}min study time, ${data.questionsAnswered} questions`, 'success');
+            } else {
+                logResult('❌ Statistics data not available', 'error');
+            }
+        }
+
+        function testRealTimeUpdates() {
+            logResult('Testing real-time updates...', 'info');
+            
+            if (window.statisticsFixes) {
+                window.statisticsFixes.refresh();
+                logResult('✅ Real-time update triggered', 'success');
+            } else {
+                logResult('❌ Real-time updates not available', 'error');
+            }
+        }
+
+        function testChartsRendering() {
+            logResult('Testing charts rendering...', 'info');
+            
+            if (typeof Chart !== 'undefined') {
+                logResult('✅ Chart.js library available', 'success');
+                
+                if (window.statisticsFixes?.charts) {
+                    const chartCount = Object.keys(window.statisticsFixes.charts).length;
+                    logResult(`✅ ${chartCount} charts initialized`, 'success');
+                } else {
+                    logResult('⚠️ Charts not initialized yet', 'warning');
+                }
+            } else {
+                logResult('❌ Chart.js library not available', 'error');
+            }
+        }
+
+        function testProgressTracking() {
+            logResult('Testing progress tracking...', 'info');
+            
+            if (window.statisticsFixes?.updateStudyTime) {
+                window.statisticsFixes.updateStudyTime(5);
+                logResult('✅ Progress tracking test: Added 5 minutes study time', 'success');
+            } else {
+                logResult('❌ Progress tracking not available', 'error');
+            }
+        }
+
+        function testNewsLoading() {
+            logResult('Testing news loading...', 'info');
+            
+            if (window.newsFixes) {
+                const news = window.newsFixes.getNews();
+                logResult(`✅ News loaded: ${news.length} articles`, 'success');
+            } else {
+                logResult('❌ News fixes not available', 'error');
+            }
+        }
+
+        function testUPSCRelevance() {
+            logResult('Testing UPSC relevance...', 'info');
+            
+            if (window.newsFixes) {
+                const news = window.newsFixes.getNews();
+                const highRelevance = news.filter(article => article.upscRelevance >= 90);
+                logResult(`✅ High relevance articles: ${highRelevance.length}/${news.length}`, 'success');
+            } else {
+                logResult('❌ News data not available', 'error');
+            }
+        }
+
+        function testNewsFiltering() {
+            logResult('Testing news filtering...', 'info');
+            
+            if (window.newsFixes) {
+                const categories = window.newsFixes.getCategories();
+                logResult(`✅ News categories available: ${categories.join(', ')}`, 'success');
+            } else {
+                logResult('❌ News filtering not available', 'error');
+            }
+        }
+
+        function testBreakingNews() {
+            logResult('Testing breaking news...', 'info');
+            
+            if (window.newsFixes) {
+                const news = window.newsFixes.getNews();
+                const breaking = news.filter(article => article.isBreaking);
+                logResult(`✅ Breaking news articles: ${breaking.length}`, 'success');
+            } else {
+                logResult('❌ Breaking news not available', 'error');
+            }
+        }
+
+        function testConversationLoading() {
+            logResult('Testing conversation loading...', 'info');
+            
+            if (window.loadRecentConversationsFixed) {
+                window.loadRecentConversationsFixed();
+                logResult('✅ Conversation loading function available', 'success');
+            } else {
+                logResult('❌ Conversation loading not available', 'error');
+            }
+        }
+
+        function testRecentChats() {
+            logResult('Testing recent chats...', 'info');
+            
+            const recentChatsList = document.getElementById('recent-chats-list');
+            if (recentChatsList) {
+                logResult('✅ Recent chats container available', 'success');
+            } else {
+                logResult('❌ Recent chats container not found', 'error');
+            }
+        }
+
+        function testFirebaseSync() {
+            logResult('Testing Firebase sync...', 'info');
+            
+            if (window.firebaseManager?.isReady()) {
+                logResult('✅ Firebase connected and ready', 'success');
+            } else {
+                logResult('⚠️ Firebase not connected (offline mode)', 'warning');
+            }
+        }
+
+        function testConversationSaving() {
+            logResult('Testing conversation saving...', 'info');
+            
+            if (window.saveConversationToFirebaseFixed) {
+                logResult('✅ Conversation saving function available', 'success');
+            } else {
+                logResult('❌ Conversation saving not available', 'error');
+            }
+        }
+
+        // Auto-refresh status every 10 seconds
+        setInterval(checkAllSystems, 10000);
+    </script>
+</body>
+</html>

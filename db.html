@@ -83,6 +83,7 @@
         }
     </script>
     <script src="js/profile-manager.js"></script>
+    <script src="js/dashboard-fixes.js"></script>
     <link href="styles/glassmorphism.css" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Montserrat:wght@400&family=Roboto:wght@300&display=swap"
@@ -470,15 +471,85 @@
     <script>
         // Content data - will be loaded from user's actual study materials
         const contentData = [
-            // Empty - will be populated with user's actual content
+            {
+                id: 1,
+                title: "Indian Constitution - Fundamental Rights",
+                description: "Comprehensive study material covering Articles 12-35 of the Indian Constitution, including fundamental rights, their scope, limitations, and landmark judgments.",
+                date: "Dec 15, 2024",
+                tag: "Revision",
+                imageUrl: "image/constitution.jpg",
+                bookmarked: false
+            },
+            {
+                id: 2,
+                title: "Economic Survey 2024 - Key Highlights",
+                description: "Analysis of India's economic performance, growth projections, sectoral developments, and policy recommendations from Economic Survey 2024.",
+                date: "Dec 14, 2024",
+                tag: "New",
+                imageUrl: "image/economy.jpg",
+                bookmarked: true
+            },
+            {
+                id: 3,
+                title: "Environment & Climate Change",
+                description: "Current environmental challenges, climate policies, international agreements, and India's commitments to sustainable development goals.",
+                date: "Dec 13, 2024",
+                tag: "Mock Test",
+                imageUrl: "image/environment.jpg",
+                bookmarked: false
+            },
+            {
+                id: 4,
+                title: "Modern History - Freedom Struggle",
+                description: "Detailed coverage of India's independence movement, key personalities, major events, and their impact on contemporary India.",
+                date: "Dec 12, 2024",
+                tag: "Unattempted",
+                imageUrl: "image/history.jpg",
+                bookmarked: false
+            }
         ];
 
-        const flashcards = [];
+        const flashcards = [
+            {
+                id: 1,
+                front: "What is the basic structure doctrine?",
+                back: "The basic structure doctrine is a judicial principle that certain fundamental features of the Constitution cannot be altered by Parliament through constitutional amendments."
+            },
+            {
+                id: 2,
+                front: "Who coined the term 'Satyagraha'?",
+                back: "Mahatma Gandhi coined the term 'Satyagraha', which means 'holding onto truth' or non-violent resistance."
+            },
+            {
+                id: 3,
+                front: "What is GDP deflator?",
+                back: "GDP deflator is a measure of the level of prices of all new, domestically produced, final goods and services in an economy."
+            }
+        ];
 
         // Daily Challenge Data - will be generated based on user progress
         const dailyChallenge = {
-            mcqs: [],
-            flashcards: [],
+            mcqs: [
+                {
+                    question: "Which Article of the Indian Constitution deals with the Right to Equality?",
+                    options: ["Article 14", "Article 15", "Article 16", "All of the above"],
+                    answerIndex: 3,
+                    explanation: "Articles 14, 15, and 16 all deal with different aspects of the Right to Equality. Article 14 provides equality before law, Article 15 prohibits discrimination, and Article 16 ensures equality of opportunity in public employment."
+                },
+                {
+                    question: "The Economic Survey is presented by which ministry?",
+                    options: ["Ministry of Finance", "Ministry of Commerce", "NITI Aayog", "RBI"],
+                    answerIndex: 0,
+                    explanation: "The Economic Survey is an annual document prepared by the Economic Division of the Department of Economic Affairs, Ministry of Finance, Government of India."
+                },
+                {
+                    question: "Which gas is primarily responsible for global warming?",
+                    options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
+                    answerIndex: 2,
+                    explanation: "Carbon dioxide (CO2) is the primary greenhouse gas responsible for global warming, mainly released through burning fossil fuels and deforestation."
+                }
+            ],
+            flashcards: flashcards,
             currentMCQ: 0,
             currentFlashcard: 0
         };

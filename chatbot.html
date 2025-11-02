@@ -15,6 +15,8 @@
     <script src="js/ai-service-manager.js"></script>
     <script src="js/mock-ai-responses.js"></script>
     <script src="js/ai-config.js"></script>
+    <script src="js/conversation-fix.js"></script>
+    <script src="js/conversation-manager-fix.js"></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -396,33 +398,7 @@
                 </ul>
             </div>
 
-            <div>
-                <h3 class="text-xs uppercase tracking-wider text-white/50 mb-3">Quick Help</h3>
-                <div class="space-y-2 text-xs">
-                    <div class="bg-white/5 rounded-lg p-3">
-                        <h4 class="font-medium text-white/80 mb-2">💡 Pro Tips</h4>
-                        <ul class="space-y-1 text-white/60">
-                            <li>• Use specific mode chips for better responses</li>
-                            <li>• Upload documents for detailed analysis</li>
-                            <li>• Save important responses to your study materials</li>
-                            <li>• Ask follow-up questions for deeper understanding</li>
-                        </ul>
-                    </div>
-                    <div class="bg-white/5 rounded-lg p-3">
-                        <h4 class="font-medium text-white/80 mb-2">🎯 Example Questions</h4>
-                        <ul class="space-y-1 text-white/60">
-                            <li>• "Explain federalism in Indian Constitution"</li>
-                            <li>• "Analyze this MCQ: [paste question]"</li>
-                            <li>• "Review my essay on climate change"</li>
-                            <li>• "What's important in today's news?"</li>
-                        </ul>
-                    </div>
-                    <button id="help-btn"
-                        class="w-full mt-3 px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg text-sm hover:bg-blue-600/30 transition-colors">
-                        <i data-lucide="help-circle" class="w-4 h-4 mr-2 inline"></i>
-                        View Full Guide
-                    </button>
-                </div>
+
         </aside>
 
     </div>
@@ -443,128 +419,7 @@
                 }
             }, 1000);
 
-            // Help functionality
-            const helpBtn = document.getElementById('help-btn');
-            helpBtn?.addEventListener('click', () => {
-                showHelpModal();
-            });
 
-            function showHelpModal() {
-                const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
-                modal.innerHTML = `
-<div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-hidden border border-white/10">
-<div class="flex items-center justify-between mb-4">
-<h3 class="text-xl font-semibold">AI Assistant Help Guide</h3>
-<button id="close-help-modal" class="text-white/50 hover:text-white">
-<i data-lucide="x" class="w-5 h-5"></i>
-</button>
-</div>
-<div class="overflow-y-auto max-h-[60vh] space-y-6">
-<div>
-<h4 class="font-semibold text-lg mb-3">🎯 AI Assistant Modes</h4>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div class="bg-white/5 rounded-lg p-4">
-<h5 class="font-medium text-blue-400 mb-2">📝 MCQ Analysis Mode</h5>
-<p class="text-sm text-white/70 mb-2">Get detailed explanations for multiple choice questions</p>
-<p class="text-xs text-white/50">Example: "Analyze this MCQ: Which article deals with Right to Education?"</p>
-</div>
-<div class="bg-white/5 rounded-lg p-4">
-<h5 class="font-medium text-green-400 mb-2">✍️ Essay Feedback Mode</h5>
-<p class="text-sm text-white/70 mb-2">Receive structured feedback on your essay writing</p>
-<p class="text-xs text-white/50">Example: "Review my essay on Digital India initiative"</p>
-</div>
-<div class="bg-white/5 rounded-lg p-4">
-<h5 class="font-medium text-purple-400 mb-2">📰 News Analysis Mode</h5>
-<p class="text-sm text-white/70 mb-2">Understand UPSC relevance of current affairs</p>
-<p class="text-xs text-white/50">Example: "Analyze the UPSC relevance of new education policy"</p>
-</div>
-<div class="bg-white/5 rounded-lg p-4">
-<h5 class="font-medium text-orange-400 mb-2">🎯 General Mode</h5>
-<p class="text-sm text-white/70 mb-2">Ask any UPSC preparation related questions</p>
-<p class="text-xs text-white/50">Example: "Explain the concept of federalism in India"</p>
-</div>
-</div>
-</div>
-
-<div>
-<h4 class="font-semibold text-lg mb-3">💾 Saving AI Responses</h4>
-<div class="bg-white/5 rounded-lg p-4">
-<p class="text-sm text-white/70 mb-3">Every AI response includes save buttons:</p>
-<div class="flex flex-wrap gap-2 mb-3">
-<span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">📄 Save to Notes</span>
-<span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">🗂️ Save to Flashcards</span>
-<span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs">❓ Save to MCQs</span>
-<span class="px-3 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs">📋 Copy Response</span>
-</div>
-<p class="text-xs text-white/50">Saved content automatically integrates with your study materials on the Learn page.</p>
-</div>
-</div>
-
-<div>
-<h4 class="font-semibold text-lg mb-3">🚀 Advanced Features</h4>
-<div class="space-y-3">
-<div class="bg-white/5 rounded-lg p-3">
-<h5 class="font-medium text-white/80 mb-1">📎 File Upload</h5>
-<p class="text-sm text-white/60">Upload PDFs, images, or documents for AI analysis. Supports study materials, news articles, and question papers.</p>
-</div>
-<div class="bg-white/5 rounded-lg p-3">
-<h5 class="font-medium text-white/80 mb-1">@ Reference Saved Content</h5>
-<p class="text-sm text-white/60">Type @ to reference your saved notes, flashcards, or MCQs in your questions.</p>
-</div>
-<div class="bg-white/5 rounded-lg p-3">
-<h5 class="font-medium text-white/80 mb-1">🎤 Voice Input</h5>
-<p class="text-sm text-white/60">Click the microphone icon to speak your questions instead of typing.</p>
-</div>
-</div>
-</div>
-
-<div>
-<h4 class="font-semibold text-lg mb-3">💡 Best Practices</h4>
-<div class="bg-white/5 rounded-lg p-4">
-<ul class="space-y-2 text-sm text-white/70">
-<li>• <strong>Be Specific:</strong> Instead of "Tell me about economics", ask "Explain the difference between fiscal and monetary policy"</li>
-<li>• <strong>Use Context:</strong> Mention your preparation level and specific needs</li>
-<li>• <strong>Follow Up:</strong> Ask for examples, clarifications, or deeper explanations</li>
-<li>• <strong>Save Important Responses:</strong> Build your personalized study library</li>
-<li>• <strong>Switch Modes:</strong> Use appropriate modes for different types of questions</li>
-</ul>
-</div>
-</div>
-
-<div>
-<h4 class="font-semibold text-lg mb-3">⌨️ Keyboard Shortcuts</h4>
-<div class="bg-white/5 rounded-lg p-4">
-<div class="grid grid-cols-2 gap-4 text-sm">
-<div><kbd class="bg-white/10 px-2 py-1 rounded text-xs">Ctrl + Shift + A</kbd> Open AI Assistant</div>
-<div><kbd class="bg-white/10 px-2 py-1 rounded text-xs">Enter</kbd> Send Message</div>
-<div><kbd class="bg-white/10 px-2 py-1 rounded text-xs">Shift + Enter</kbd> New Line</div>
-<div><kbd class="bg-white/10 px-2 py-1 rounded text-xs">Esc</kbd> Close Modals</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-`;
-
-                document.body.appendChild(modal);
-
-                // Add event listeners
-                modal.querySelector('#close-help-modal').addEventListener('click', () => {
-                    document.body.removeChild(modal);
-                });
-
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        document.body.removeChild(modal);
-                    }
-                });
-
-                // Initialize icons in modal
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons(modal);
-                }
-            }
 
             // Single-select mode chips
             const chips = document.querySelectorAll('.mode-chip');
@@ -737,6 +592,7 @@
             const newChatBtn = document.getElementById('new-chat-btn');
             const greetingSection = document.getElementById('greeting-section');
             let isFirstMessage = true;
+            let currentConversationId = null;
 
             newChatBtn?.addEventListener('click', () => {
                 // Clear chat feed
@@ -745,6 +601,12 @@
                 // Show greeting again
                 greetingSection.style.display = 'block';
                 isFirstMessage = true;
+
+                // Reset conversation
+                currentConversationId = null;
+                if (window.aiServiceManager) {
+                    window.aiServiceManager.clearContext();
+                }
 
                 // Reset mode
                 selectedMode = null;
@@ -836,11 +698,36 @@
 
                     // Get AI response
                     const response = await window.aiServiceManager.sendMessage(text, {
+                        conversationId: currentConversationId,
                         context: {
                             selectedMode: selectedMode,
                             timestamp: new Date().toISOString()
                         }
                     });
+
+                    // Store conversation ID for continuity and save to Firebase
+                    if (response.conversationId && !currentConversationId) {
+                        currentConversationId = response.conversationId;
+                        console.log('New conversation started:', currentConversationId);
+                        
+                        // Save new conversation to Firebase - use enhanced version if available
+                        if (window.saveConversationEnhanced) {
+                            await window.saveConversationEnhanced(currentConversationId, text, response.content);
+                        } else {
+                            await saveConversationToFirebase(currentConversationId, text, response.content);
+                        }
+                    } else if (response.conversationId) {
+                        console.log('Continuing conversation:', response.conversationId);
+                        
+                        // Update existing conversation in Firebase - use enhanced version if available
+                        if (window.saveConversationEnhanced) {
+                            await window.saveConversationEnhanced(currentConversationId, text, response.content);
+                        } else {
+                            await updateConversationInFirebase(currentConversationId, text, response.content);
+                        }
+                    } else {
+                        console.warn('No conversation ID in response:', response);
+                    }
 
                     // Update AI response with actual content
                     const aiContent = aiWrap.querySelector('.text-sm');
@@ -945,63 +832,296 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
                 feed.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
                 // Update recent conversations
-                setTimeout(() => {
-                    loadRecentConversations();
+                setTimeout(async () => {
+                    try {
+                        if (window.loadRecentConversationsEnhanced) {
+                            await window.loadRecentConversationsEnhanced();
+                        } else if (window.loadRecentConversations) {
+                            await window.loadRecentConversations();
+                        }
+                        console.log('Recent conversations updated. Current conversation ID:', currentConversationId);
+                    } catch (error) {
+                        console.error('Error updating recent conversations:', error);
+                    }
                 }, 1000);
             });
 
-            // Function to save AI responses to different sections
-            function saveAIResponse(content, type, originalQuestion) {
+            // Function to save AI responses to Firebase (with localStorage fallback)
+            async function saveAIResponse(content, type, originalQuestion) {
                 const timestamp = new Date().toISOString();
-                const savedData = {
-                    content: content,
-                    question: originalQuestion,
-                    timestamp: timestamp,
-                    mode: selectedMode || 'general'
+                
+                try {
+                    console.log(`🔄 Saving AI response to ${type}...`);
+                    showSaveNotification(`💾 Saving to ${type}...`, 'loading');
+                    
+                    let savedData;
+                    
+                    switch (type) {
+                        case 'note':
+                            savedData = {
+                                id: Date.now(),
+                                title: originalQuestion.length > 50 ? originalQuestion.substring(0, 50) + '...' : originalQuestion,
+                                content: content,
+                                richContent: content.replace(/\n/g, '<br>'),
+                                subject: getSubjectFromMode(selectedMode),
+                                tags: ['ai-generated', selectedMode || 'general'],
+                                attachments: [],
+                                createdAt: timestamp,
+                                updatedAt: timestamp,
+                                color: 'blue',
+                                isFavorite: false,
+                                isArchived: false,
+                                source: 'AI Generated',
+                                mode: selectedMode
+                            };
+                            
+                            // Save to Firebase first
+                            if (window.firebaseManager?.isReady()) {
+                                try {
+                                    const firebaseId = await window.firebaseManager.saveNote(savedData);
+                                    savedData.firebaseId = firebaseId;
+                                    savedData.synced = true;
+                                    console.log(`✅ Saved note to Firebase with ID: ${firebaseId}`);
+                                } catch (firebaseError) {
+                                    console.warn('Firebase save failed, using localStorage:', firebaseError);
+                                    savedData.synced = false;
+                                }
+                            } else {
+                                savedData.synced = false;
+                            }
+                            
+                            // Also save to localStorage for offline access
+                            const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+                            notes.unshift(savedData);
+                            localStorage.setItem('userNotes', JSON.stringify(notes));
+                            break;
+
+                        case 'flashcard':
+                            savedData = {
+                                id: Date.now(),
+                                front: originalQuestion,
+                                back: content,
+                                subject: getSubjectFromMode(selectedMode),
+                                tags: ['ai-generated', selectedMode || 'general'],
+                                difficulty: 'medium',
+                                createdAt: timestamp,
+                                updatedAt: timestamp,
+                                lastReviewed: null,
+                                reviewCount: 0,
+                                correctCount: 0,
+                                source: 'AI Generated',
+                                mode: selectedMode
+                            };
+                            
+                            // Save to Firebase first
+                            if (window.firebaseManager?.isReady()) {
+                                try {
+                                    const firebaseId = await window.firebaseManager.saveFlashcard(savedData);
+                                    savedData.firebaseId = firebaseId;
+                                    savedData.synced = true;
+                                    console.log(`✅ Saved flashcard to Firebase with ID: ${firebaseId}`);
+                                } catch (firebaseError) {
+                                    console.warn('Firebase save failed, using localStorage:', firebaseError);
+                                    savedData.synced = false;
+                                }
+                            } else {
+                                savedData.synced = false;
+                            }
+                            
+                            // Also save to localStorage for offline access
+                            const flashcards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+                            flashcards.unshift(savedData);
+                            localStorage.setItem('flashcards', JSON.stringify(flashcards));
+                            break;
+
+                        case 'mcq':
+                            savedData = {
+                                id: Date.now(),
+                                question: originalQuestion,
+                                explanation: content,
+                                subject: getSubjectFromMode(selectedMode),
+                                tags: ['ai-generated', selectedMode || 'general'],
+                                difficulty: 'medium',
+                                createdAt: timestamp,
+                                updatedAt: timestamp,
+                                attempts: 0,
+                                correctAttempts: 0,
+                                source: 'AI Generated',
+                                type: 'explanation',
+                                mode: selectedMode
+                            };
+                            
+                            // Save to Firebase first
+                            if (window.firebaseManager?.isReady()) {
+                                try {
+                                    const firebaseId = await window.firebaseManager.saveMCQ(savedData);
+                                    savedData.firebaseId = firebaseId;
+                                    savedData.synced = true;
+                                    console.log(`✅ Saved MCQ to Firebase with ID: ${firebaseId}`);
+                                } catch (firebaseError) {
+                                    console.warn('Firebase save failed, using localStorage:', firebaseError);
+                                    savedData.synced = false;
+                                }
+                            } else {
+                                savedData.synced = false;
+                            }
+                            
+                            // Also save to localStorage for offline access
+                            const mcqs = JSON.parse(localStorage.getItem('mcqs') || '[]');
+                            mcqs.unshift(savedData);
+                            localStorage.setItem('mcqs', JSON.stringify(mcqs));
+                            break;
+
+                        default:
+                            throw new Error(`Unknown save type: ${type}`);
+                    }
+
+                    // Show success notification
+                    const typeLabel = type === 'note' ? 'Notes' : type === 'flashcard' ? 'Flashcards' : 'MCQs';
+                    const syncStatus = savedData.synced ? '☁️ Saved to cloud' : '💾 Saved locally';
+                    showSaveNotification(`✅ Content saved to ${typeLabel} successfully! ${syncStatus}`);
+                    
+                    // Update counts on learn page
+                    updateLearnPageCounts();
+                    
+                    console.log(`✅ Successfully saved AI response to ${type}:`, savedData);
+                    return savedData;
+
+                } catch (error) {
+                    console.error(`❌ Error saving to ${type}:`, error);
+                    showSaveNotification(`❌ Error saving to ${type}. Please try again.`, 'error');
+                    throw error;
+                }
+            }
+
+            // Helper function to get subject from AI mode
+            function getSubjectFromMode(mode) {
+                const subjectMap = {
+                    'news': 'Current Affairs',
+                    'mcq': 'MCQ Analysis', 
+                    'essay': 'Essay Writing',
+                    'flashcard': 'Study Materials',
+                    'answer_evaluation': 'Answer Writing',
+                    'concept': 'Concept Learning',
+                    'revision': 'Revision Notes'
                 };
+                return subjectMap[mode] || 'General Studies';
+            }
 
-                switch (type) {
-                    case 'note':
-                        const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-                        notes.unshift({
-                            id: Date.now(),
-                            title: originalQuestion.substring(0, 50) + '...',
-                            content: content,
-                            timestamp: timestamp,
-                            tags: ['ai-generated'],
-                            category: 'AI Responses'
-                        });
-                        localStorage.setItem('notes', JSON.stringify(notes));
-                        break;
+            // Helper function to update counts on learn page
+            function updateLearnPageCounts() {
+                try {
+                    // Calculate current counts
+                    const notes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+                    const flashcards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+                    const mcqs = JSON.parse(localStorage.getItem('mcqs') || '[]');
+                    
+                    // Dispatch events for cross-tab communication
+                    const counts = {
+                        notes: notes.length,
+                        flashcards: flashcards.length,
+                        mcqs: mcqs.length
+                    };
+                    
+                    // Send update event
+                    const event = new CustomEvent('contentCountsUpdated', {
+                        detail: counts
+                    });
+                    window.dispatchEvent(event);
+                    
+                    console.log('📊 Updated content counts:', counts);
+                } catch (error) {
+                    console.error('Error updating counts:', error);
+                }
+            }
 
-                    case 'flashcard':
-                        const flashcards = JSON.parse(localStorage.getItem('flashcards') || '[]');
-                        flashcards.unshift({
-                            id: Date.now(),
-                            front: originalQuestion,
-                            back: content,
-                            timestamp: timestamp,
-                            tags: ['ai-generated'],
-                            difficulty: 'medium'
-                        });
-                        localStorage.setItem('flashcards', JSON.stringify(flashcards));
-                        break;
+            // Helper function to update content counts
+            async function updateContentCounts() {
+                try {
+                    // Get counts from localStorage and Firebase
+                    let notesCount = 0;
+                    let flashcardsCount = 0;
+                    let mcqsCount = 0;
+                    
+                    // Try to get from Firebase first
+                    if (window.firebaseManager?.isReady()) {
+                        try {
+                            const [notes, flashcards, mcqs] = await Promise.all([
+                                window.firebaseManager.getNotes(1000),
+                                window.firebaseManager.getFlashcards ? window.firebaseManager.getFlashcards(1000) : [],
+                                window.firebaseManager.getMCQs ? window.firebaseManager.getMCQs(1000) : []
+                            ]);
+                            
+                            notesCount = notes.length;
+                            flashcardsCount = flashcards.length;
+                            mcqsCount = mcqs.length;
+                        } catch (firebaseError) {
+                            console.warn('Firebase count fetch failed, using localStorage:', firebaseError);
+                        }
+                    }
+                    
+                    // Fallback to localStorage
+                    if (notesCount === 0 && flashcardsCount === 0 && mcqsCount === 0) {
+                        const localNotes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+                        const localBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+                        
+                        notesCount = localNotes.length;
+                        flashcardsCount = localBookmarks.filter(b => b.metadata?.type === 'flashcard').length;
+                        mcqsCount = localBookmarks.filter(b => b.metadata?.type === 'mcq').length;
+                    }
+                    
+                    // Dispatch update event
+                    window.dispatchEvent(new CustomEvent('updateCount', {
+                        detail: { 
+                            notes: notesCount,
+                            flashcards: flashcardsCount,
+                            mcq: mcqsCount
+                        }
+                    }));
+                    
+                } catch (error) {
+                    console.error('Error updating content counts:', error);
+                }
+            }
 
-                    case 'mcq':
-                        // For MCQ, we'll save it as a study material reference
-                        const mcqData = JSON.parse(localStorage.getItem('mcq-explanations') || '[]');
-                        mcqData.unshift({
-                            id: Date.now(),
-                            question: originalQuestion,
-                            explanation: content,
-                            timestamp: timestamp,
-                            source: 'AI Generated'
-                        });
-                        localStorage.setItem('mcq-explanations', JSON.stringify(mcqData));
-                        break;
+            // Helper function to show save notifications
+            function showSaveNotification(message, type = 'success') {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.save-notification');
+                existingNotifications.forEach(n => n.remove());
+                
+                const notification = document.createElement('div');
+                notification.className = `save-notification fixed top-4 right-4 z-50 px-4 py-3 rounded-lg text-white text-sm font-medium shadow-lg transition-all duration-300 ${
+                    type === 'error' ? 'bg-red-600' : 
+                    type === 'loading' ? 'bg-blue-600' : 'bg-green-600'
+                }`;
+                notification.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="${
+                            type === 'error' ? 'x-circle' : 
+                            type === 'loading' ? 'loader-2' : 'check-circle'
+                        }" class="w-4 h-4 ${type === 'loading' ? 'animate-spin' : ''}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Initialize icon
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons(notification);
                 }
 
-                console.log(`Saved AI response to ${type}:`, savedData);
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
             }
 
             // Load saved profile picture
@@ -1012,26 +1132,71 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
                 parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
             }
 
-            // Load recent conversations
-            loadRecentConversations();
+            // Load recent conversations (async) - use enhanced version if available
+            setTimeout(() => {
+                if (window.loadRecentConversationsEnhanced) {
+                    window.loadRecentConversationsEnhanced().catch(error => {
+                        console.error('Error loading recent conversations (enhanced):', error);
+                    });
+                } else if (window.loadRecentConversations) {
+                    window.loadRecentConversations().catch(error => {
+                        console.error('Error loading recent conversations:', error);
+                    });
+                }
+            }, 2000);
         });
 
-        // Load recent conversations
-        function loadRecentConversations() {
-            if (window.aiServiceManager) {
-                const recentChats = window.aiServiceManager.getRecentConversations(10);
+        // Load recent conversations from Firebase (with localStorage fallback)
+        async function loadRecentConversations() {
+            try {
                 const recentChatsList = document.getElementById('recent-chats-list');
+                let recentChats = [];
+
+                // Try to get conversations from Firebase first
+                if (window.firebaseManager?.isReady()) {
+                    try {
+                        recentChats = await window.firebaseManager.getConversations(15);
+                        console.log('📥 Loaded conversations from Firebase:', recentChats.length);
+                    } catch (firebaseError) {
+                        console.warn('Firebase load failed, using localStorage:', firebaseError);
+                    }
+                }
+
+                // Fallback to AI service manager if Firebase failed or no data
+                if (recentChats.length === 0 && window.aiServiceManager) {
+                    recentChats = window.aiServiceManager.getRecentConversations(15);
+                    console.log('📥 Loaded conversations from localStorage:', recentChats.length);
+                }
 
                 if (recentChats.length === 0) {
                     recentChatsList.innerHTML = '<li class="text-white/50 text-center py-4">No recent chats</li>';
                 } else {
                     recentChatsList.innerHTML = recentChats.map(chat => `
-                        <li class="cursor-pointer hover:bg-white/5 rounded-lg px-3 py-2 transition-colors" onclick="loadConversation('${chat.id}')">
-                            <div class="text-white/80 text-sm leading-relaxed">${chat.title || chat.preview}</div>
+                        <li class="cursor-pointer hover:bg-white/5 rounded-lg px-3 py-2 transition-colors group" onclick="loadConversation('${chat.id}')">
+                            <div class="text-white/80 text-sm leading-relaxed mb-1">${chat.title || chat.preview || getConversationPreview(chat)}</div>
+                            <div class="text-white/40 text-xs flex items-center gap-1">
+                                ${formatChatTime(chat.timestamp || chat.createdAt)}
+                                ${chat.synced !== false ? '<span class="text-green-400">☁️</span>' : '<span class="text-yellow-400">💾</span>'}
+                            </div>
                         </li>
                     `).join('');
                 }
+            } catch (error) {
+                console.error('Error loading recent conversations:', error);
+                const recentChatsList = document.getElementById('recent-chats-list');
+                recentChatsList.innerHTML = '<li class="text-red-400 text-center py-4">Error loading conversations</li>';
             }
+        }
+
+        // Helper function to get conversation preview
+        function getConversationPreview(conversation) {
+            if (conversation.messages && conversation.messages.length > 0) {
+                const firstUserMessage = conversation.messages.find(msg => msg.role === 'user');
+                if (firstUserMessage) {
+                    return firstUserMessage.content.substring(0, 60) + (firstUserMessage.content.length > 60 ? '...' : '');
+                }
+            }
+            return conversation.context?.topic || 'New conversation';
         }
 
         // Format chat timestamp
@@ -1050,12 +1215,227 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
             return date.toLocaleDateString();
         }
 
-        // Load specific conversation
-        function loadConversation(conversationId) {
-            // This would load the conversation history
-            console.log('Loading conversation:', conversationId);
-            // For now, just show a message
-            showNotification('Conversation loading feature will be implemented soon', 'info');
+        // Save conversation to Firebase
+        async function saveConversationToFirebase(conversationId, userMessage, aiResponse) {
+            try {
+                if (!window.firebaseManager?.isReady()) {
+                    console.log('Firebase not ready, conversation will be saved locally only');
+                    return;
+                }
+
+                const conversationData = {
+                    id: conversationId,
+                    title: userMessage.length > 50 ? userMessage.substring(0, 50) + '...' : userMessage,
+                    preview: userMessage.substring(0, 100) + (userMessage.length > 100 ? '...' : ''),
+                    mode: selectedMode || 'general',
+                    messages: [
+                        {
+                            id: `msg_${Date.now()}_user`,
+                            role: 'user',
+                            content: userMessage,
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: `msg_${Date.now()}_ai`,
+                            role: 'assistant',
+                            content: aiResponse,
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    messageCount: 2,
+                    lastMessageAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    isActive: true,
+                    context: {
+                        mode: selectedMode || 'general',
+                        subject: getSubjectFromMode(selectedMode)
+                    }
+                };
+
+                await window.firebaseManager.saveConversation(conversationData);
+                console.log('✅ Conversation saved to Firebase:', conversationId);
+            } catch (error) {
+                console.error('❌ Error saving conversation to Firebase:', error);
+            }
+        }
+
+        // Update conversation in Firebase
+        async function updateConversationInFirebase(conversationId, userMessage, aiResponse) {
+            try {
+                if (!window.firebaseManager?.isReady()) {
+                    console.log('Firebase not ready, conversation update will be saved locally only');
+                    return;
+                }
+
+                // Get existing conversation
+                const conversations = await window.firebaseManager.getConversations(50);
+                const existingConversation = conversations.find(conv => conv.id === conversationId);
+
+                if (existingConversation) {
+                    // Add new messages
+                    const newMessages = [
+                        {
+                            id: `msg_${Date.now()}_user`,
+                            role: 'user',
+                            content: userMessage,
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: `msg_${Date.now()}_ai`,
+                            role: 'assistant',
+                            content: aiResponse,
+                            timestamp: new Date().toISOString()
+                        }
+                    ];
+
+                    existingConversation.messages = [...(existingConversation.messages || []), ...newMessages];
+                    existingConversation.messageCount = existingConversation.messages.length;
+                    existingConversation.lastMessageAt = new Date().toISOString();
+                    existingConversation.updatedAt = new Date().toISOString();
+
+                    await window.firebaseManager.saveConversation(existingConversation);
+                    console.log('✅ Conversation updated in Firebase:', conversationId);
+                }
+            } catch (error) {
+                console.error('❌ Error updating conversation in Firebase:', error);
+            }
+        }
+
+        // Load specific conversation from Firebase (with localStorage fallback)
+        async function loadConversation(conversationId) {
+            console.log('🔄 Loading conversation:', conversationId);
+            try {
+                // Get DOM elements
+                const feed = document.getElementById('chat-feed');
+                const greetingSection = document.getElementById('greeting-section');
+                
+                if (!feed) {
+                    console.error('Chat feed element not found');
+                    return;
+                }
+                
+                // Clear current chat
+                feed.innerHTML = '';
+                if (greetingSection) {
+                    greetingSection.style.display = 'none';
+                }
+                isFirstMessage = false;
+                currentConversationId = conversationId;
+
+                let conversation = null;
+
+                // Try to get conversation from Firebase first
+                if (window.firebaseManager?.isReady()) {
+                    try {
+                        const conversations = await window.firebaseManager.getConversations(100);
+                        conversation = conversations.find(conv => conv.id === conversationId);
+                        console.log('📥 Loaded conversation from Firebase:', conversationId);
+                    } catch (firebaseError) {
+                        console.warn('Firebase load failed, using localStorage:', firebaseError);
+                    }
+                }
+
+                // Fallback to AI service manager if Firebase failed
+                if (!conversation && window.aiServiceManager) {
+                    const recentChats = window.aiServiceManager.getRecentConversations(50);
+                    conversation = recentChats.find(chat => chat.id === conversationId);
+                    console.log('📥 Loaded conversation from localStorage:', conversationId);
+                }
+
+                // Additional fallback - try to load from conversation storage
+                if (!conversation && window.ConversationStorage) {
+                    try {
+                        const conversationStorage = new window.ConversationStorage();
+                        conversation = await conversationStorage.loadConversation(conversationId);
+                        console.log('📥 Loaded conversation from ConversationStorage:', conversationId);
+                    } catch (error) {
+                        console.warn('ConversationStorage load failed:', error);
+                    }
+                }
+
+                if (conversation) {
+                    // Add AI welcome message
+                    const aiWelcome = document.createElement('div');
+                    aiWelcome.className = 'flex items-start gap-3';
+                    aiWelcome.innerHTML = `
+                        <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
+                        <div class="text-sm text-white/90">
+                            <p>Continuing conversation: "${conversation.title || conversation.preview || 'Untitled'}"</p>
+                            <div class="text-xs text-white/60 mt-1">
+                                ${conversation.messageCount || 0} messages • ${conversation.synced !== false ? '☁️ Synced' : '💾 Local only'}
+                            </div>
+                        </div>
+                    `;
+                    feed.appendChild(aiWelcome);
+
+                    // Show conversation messages if available
+                    if (conversation.messages && conversation.messages.length > 0) {
+                        // Show last few messages for context
+                        const recentMessages = conversation.messages.slice(-4); // Show last 4 messages
+                        
+                        recentMessages.forEach(message => {
+                            const messageDiv = document.createElement('div');
+                            
+                            if (message.role === 'user') {
+                                messageDiv.className = 'flex justify-end mt-4';
+                                messageDiv.innerHTML = `
+                                    <div class="rounded-full bg-white/[0.06] border border-white/10 px-4 py-2 text-sm flex items-center gap-2">
+                                        <span>${message.content}</span>
+                                        <span class="w-6 h-6 rounded-full bg-[#2C7A7B] text-white text-xs flex items-center justify-center">JD</span>
+                                    </div>
+                                `;
+                            } else if (message.role === 'assistant') {
+                                messageDiv.className = 'flex items-start gap-3 mt-4';
+                                const cleanContent = message.content
+                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                    .replace(/\n/g, '<br>');
+                                    
+                                messageDiv.innerHTML = `
+                                    <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
+                                    <div class="text-sm text-white/90 leading-6">
+                                        <div class="prose prose-invert max-w-none text-sm leading-relaxed">${cleanContent}</div>
+                                    </div>
+                                `;
+                            }
+                            
+                            feed.appendChild(messageDiv);
+                        });
+                    } else if (conversation.lastMessage) {
+                        // Fallback to lastMessage if messages array not available
+                        const aiResponse = document.createElement('div');
+                        aiResponse.className = 'flex items-start gap-3 mt-4';
+                        aiResponse.innerHTML = `
+                            <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
+                            <div class="text-sm text-white/90 leading-6">
+                                <div class="prose prose-invert max-w-none text-sm leading-relaxed">${conversation.lastMessage.substring(0, 300)}${conversation.lastMessage.length > 300 ? '...' : ''}</div>
+                            </div>
+                        `;
+                        feed.appendChild(aiResponse);
+                    }
+
+                    // Set conversation context if available
+                    if (conversation.mode && conversation.mode !== 'general') {
+                        selectedMode = conversation.mode;
+                        const modeChip = document.querySelector(`[data-mode="${selectedMode}"]`);
+                        if (modeChip) {
+                            setChipActive(modeChip);
+                        }
+                    }
+
+                    showNotification('Conversation loaded successfully', 'success');
+                } else {
+                    showNotification('Conversation not found', 'error');
+                }
+
+                // Scroll to show loaded content
+                feed.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                
+            } catch (error) {
+                console.error('Error loading conversation:', error);
+                showNotification('Error loading conversation', 'error');
+            }
         }
 
         // Simple notification function
@@ -1082,7 +1462,99 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
                     greetingName.textContent = firstName;
                 }
             }
+
+            // Add Firebase status indicator
+            addFirebaseStatusIndicator();
+            
+            // Check Firebase connection periodically
+            setInterval(updateFirebaseStatus, 5000);
         });
+
+        // Add Firebase status indicator to the UI
+        function addFirebaseStatusIndicator() {
+            const statusIndicator = document.createElement('div');
+            statusIndicator.id = 'firebase-status';
+            statusIndicator.className = 'fixed bottom-4 left-4 z-50 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300';
+            statusIndicator.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <div id="status-icon" class="w-2 h-2 rounded-full"></div>
+                    <span id="status-text">Checking connection...</span>
+                </div>
+            `;
+            document.body.appendChild(statusIndicator);
+            
+            // Initial status check
+            updateFirebaseStatus();
+        }
+
+        // Update Firebase connection status
+        function updateFirebaseStatus() {
+            const statusIndicator = document.getElementById('firebase-status');
+            const statusIcon = document.getElementById('status-icon');
+            const statusText = document.getElementById('status-text');
+            
+            if (!statusIndicator) return;
+
+            const isOnline = navigator.onLine;
+            const isFirebaseReady = window.firebaseManager?.isReady();
+            
+            if (isFirebaseReady && isOnline) {
+                statusIndicator.className = 'fixed bottom-4 left-4 z-50 px-3 py-2 rounded-lg text-xs font-medium bg-green-600/20 text-green-400 border border-green-500/30';
+                statusIcon.className = 'w-2 h-2 rounded-full bg-green-400';
+                statusText.textContent = 'Connected to Firebase';
+            } else if (!isOnline) {
+                statusIndicator.className = 'fixed bottom-4 left-4 z-50 px-3 py-2 rounded-lg text-xs font-medium bg-yellow-600/20 text-yellow-400 border border-yellow-500/30';
+                statusIcon.className = 'w-2 h-2 rounded-full bg-yellow-400';
+                statusText.textContent = 'Offline - Using local storage';
+            } else {
+                statusIndicator.className = 'fixed bottom-4 left-4 z-50 px-3 py-2 rounded-lg text-xs font-medium bg-red-600/20 text-red-400 border border-red-500/30';
+                statusIcon.className = 'w-2 h-2 rounded-full bg-red-400';
+                statusText.textContent = 'Firebase disconnected';
+            }
+        }
+
+        // Force sync all data to Firebase
+        async function forceSyncToFirebase() {
+            try {
+                if (!window.firebaseManager?.isReady()) {
+                    throw new Error('Firebase not ready');
+                }
+
+                showSaveNotification('🔄 Syncing all data to Firebase...', 'loading');
+
+                // Sync conversations if ConversationStorage is available
+                if (window.ConversationStorage) {
+                    const conversationStorage = new window.ConversationStorage();
+                    await conversationStorage.forceSyncToFirebase();
+                }
+
+                // Sync other data using firebaseManager
+                await window.firebaseManager.syncLocalDataToFirebase();
+
+                showSaveNotification('✅ All data synced to Firebase successfully!');
+                
+                // Refresh recent conversations
+                await loadRecentConversations();
+                
+            } catch (error) {
+                console.error('Force sync failed:', error);
+                showSaveNotification('❌ Sync failed: ' + error.message, 'error');
+            }
+        }
+
+        // Add sync button to the UI (you can call this manually or add it to a menu)
+        window.addSyncButton = function() {
+            const syncButton = document.createElement('button');
+            syncButton.innerHTML = '🔄 Sync to Cloud';
+            syncButton.className = 'px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm';
+            syncButton.onclick = forceSyncToFirebase;
+            
+            // Add to the new chat area or wherever appropriate
+            const newChatBtn = document.getElementById('new-chat-btn');
+            if (newChatBtn && newChatBtn.parentNode) {
+                newChatBtn.parentNode.insertBefore(syncButton, newChatBtn.nextSibling);
+            }
+        };
     </script>
 
 </body>
