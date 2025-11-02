@@ -1,0 +1,368 @@
+/* Accessibility Enhancement Styles */
+
+/* Skip links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--accent-primary, #3b82f6);
+  color: white;
+  padding: 8px 12px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+  font-weight: 500;
+  transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.sr-only:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  background-color: var(--accent-primary, #3b82f6) !important;
+  color: white !important;
+  border-radius: 4px !important;
+}
+
+/* High contrast mode enhancements */
+.high-contrast {
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #cccccc;
+  --accent-primary: #ffff00;
+  --accent-secondary: #ffcc00;
+  --border-color: #ffffff;
+  --shadow-color: rgba(255, 255, 255, 0.3);
+}
+
+.high-contrast button,
+.high-contrast .btn,
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select {
+  border: 2px solid var(--border-color) !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.high-contrast a {
+  color: var(--accent-primary) !important;
+  text-decoration: underline !important;
+}
+
+.high-contrast .card,
+.high-contrast .modal,
+.high-contrast .dropdown-menu {
+  border: 2px solid var(--border-color) !important;
+  box-shadow: 0 4px 8px var(--shadow-color) !important;
+}
+
+/* Colorblind-friendly enhancements */
+.colorblind-friendly {
+  --success-color: #0173b2; /* Blue instead of green */
+  --warning-color: #d55e00; /* Orange */
+  --error-color: #cc78bc; /* Pink instead of red */
+  --info-color: #029e73; /* Teal */
+}
+
+.colorblind-friendly .status-success,
+.colorblind-friendly .text-success,
+.colorblind-friendly .bg-success {
+  color: var(--success-color) !important;
+  background-color: var(--success-color) !important;
+}
+
+.colorblind-friendly .status-error,
+.colorblind-friendly .text-error,
+.colorblind-friendly .bg-error {
+  color: var(--error-color) !important;
+  background-color: var(--error-color) !important;
+}
+
+.colorblind-friendly .status-warning,
+.colorblind-friendly .text-warning,
+.colorblind-friendly .bg-warning {
+  color: var(--warning-color) !important;
+  background-color: var(--warning-color) !important;
+}
+
+/* Add symbols for colorblind users */
+.colorblind-friendly .status-success::before,
+.colorblind-friendly .text-success::before {
+  content: "✓ ";
+  font-weight: bold;
+}
+
+.colorblind-friendly .status-error::before,
+.colorblind-friendly .text-error::before {
+  content: "✗ ";
+  font-weight: bold;
+}
+
+.colorblind-friendly .status-warning::before,
+.colorblind-friendly .text-warning::before {
+  content: "⚠ ";
+  font-weight: bold;
+}
+
+.colorblind-friendly .status-info::before,
+.colorblind-friendly .text-info::before {
+  content: "ℹ ";
+  font-weight: bold;
+}
+
+/* Reduced motion preferences */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduced-motion .animate-pulse,
+.reduced-motion .animate-bounce,
+.reduced-motion .animate-spin,
+.reduced-motion .animate-ping {
+  animation: none !important;
+}
+
+/* Keyboard navigation enhancements */
+.keyboard-navigation *:focus {
+  outline: 2px solid var(--accent-primary, #3b82f6) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+.keyboard-navigation button:focus,
+.keyboard-navigation input:focus,
+.keyboard-navigation textarea:focus,
+.keyboard-navigation select:focus,
+.keyboard-navigation a:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Focus indicators */
+.focused {
+  position: relative;
+}
+
+.focused::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--accent-primary, #3b82f6);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* Screen reader optimizations */
+.screen-reader-optimized h1,
+.screen-reader-optimized h2,
+.screen-reader-optimized h3,
+.screen-reader-optimized h4,
+.screen-reader-optimized h5,
+.screen-reader-optimized h6 {
+  position: relative;
+}
+
+.screen-reader-optimized h1::before {
+  content: "Heading level 1: ";
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.screen-reader-optimized h2::before {
+  content: "Heading level 2: ";
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.screen-reader-optimized h3::before {
+  content: "Heading level 3: ";
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.screen-reader-optimized button[aria-expanded="true"]::after {
+  content: " (expanded)";
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.screen-reader-optimized button[aria-expanded="false"]::after {
+  content: " (collapsed)";
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Form accessibility enhancements */
+.form-group {
+  position: relative;
+}
+
+.form-help {
+  font-size: 0.875rem;
+  color: var(--text-muted, #666);
+  margin-top: 0.25rem;
+}
+
+.form-error {
+  font-size: 0.875rem;
+  color: var(--error-color, #dc2626);
+  margin-top: 0.25rem;
+}
+
+.form-error::before {
+  content: "Error: ";
+  font-weight: bold;
+}
+
+/* Required field indicators */
+.required::after {
+  content: " *";
+  color: var(--error-color, #dc2626);
+  font-weight: bold;
+}
+
+.sr-only.required-indicator::after {
+  content: " (required)";
+}
+
+/* Loading states for screen readers */
+.loading[aria-busy="true"]::after {
+  content: " Loading...";
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Progress indicators */
+.progress-bar {
+  position: relative;
+}
+
+.progress-bar::after {
+  content: attr(aria-valuenow) "% complete";
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Modal accessibility */
+.modal[aria-hidden="true"] {
+  display: none !important;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1040;
+}
+
+/* Tooltip accessibility */
+.tooltip[role="tooltip"] {
+  position: absolute;
+  z-index: 1070;
+  background-color: var(--bg-tertiary, #2a2a2a);
+  color: var(--text-primary, #ffffff);
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  max-width: 200px;
+}
+
+/* Print accessibility */
+@media print {
+  .sr-only {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+  }
+  
+  .skip-link {
+    display: none !important;
+  }
+}
+
+/* Mobile accessibility */
+@media (max-width: 768px) {
+  .keyboard-navigation *:focus {
+    outline-width: 3px !important;
+    outline-offset: 3px !important;
+  }
+  
+  button, input, select, textarea {
+    min-height: 44px; /* Minimum touch target size */
+    min-width: 44px;
+  }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

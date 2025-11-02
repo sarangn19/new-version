@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Data Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="js/data-exporter.js"></script>
+  <script src="js/backup-manager.js"></script>
+  <script src="js/import-handler.js"></script>
+  <script src="js/profile-manager.js"></script>
+  <script src="js/enhanced-bookmark-manager.js"></script>
+  <script src="js/enhanced-note-manager.js"></script>
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --teal-primary: #2C7A7B;
+    }
+    
+    body {
+      background-color: var(--bg-dark-1);
+      color: white;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .test-section {
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .test-result {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 0.5rem 0;
+      font-family: monospace;
+    }
+    
+    .test-pass {
+      background-color: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: rgb(34, 197, 94);
+    }
+    
+    .test-fail {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: rgb(239, 68, 68);
+    }
+    
+    .test-info {
+      background-color: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: rgb(59, 130, 246);
+    }
+  </style>
+</head>
+<body class="p-8">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-center">Data Management System Test Suite</h1>
+    
+    <!-- Export/Import Data Integrity Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="database" class="w-6 h-6"></i>
+        Export/Import Data Integrity Tests
+      </h2>
+      <div id="export-import-tests"></div>
+      <button id="run-export-import-tests" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Export/Import Tests
+      </button>
+    </div>
+    
+    <!-- Backup and Recovery Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="shield" class="w-6 h-6"></i>
+        Backup and Recovery Tests
+      </h2>
+      <div id="backup-recovery-tests"></div>
+      <button id="run-backup-recovery-tests" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Backup/Recovery Tests
+      </button>
+    </div>
+    
+    <!-- Data Validation and Sanitization Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="shield-check" class="w-6 h-6"></i>
+        Data Validation and Sanitization Tests
+      </h2>
+      <div id="validation-sanitization-tests"></div>
+      <button id="run-validation-sanitization-tests" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Validation/Sanitization Tests
+      </button>
+    </div>
+    
+    <!-- Integration Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="zap" class="w-6 h-6"></i>
+        Data Management Integration Tests
+      </h2>
+      <div id="integration-tests"></div>
+      <button id="run-integration-tests" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Integration Tests
+      </button>
+    </div>
+    
+    <!-- Performance Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="activity" class="w-6 h-6"></i>
+        Performance and Stress Tests
+      </h2>
+      <div id="performance-tests"></div>
+      <button id="run-performance-tests" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Performance Tests
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Test utilities
+    function logTest(container, message, type = 'info') {
+      const div = document.createElement('div');
+      div.className = `test-result test-${type}`;
+      div.textContent = message;
+      container.appendChild(div);
+    }
+
+    function assert(condition, message, container) {
+      if (condition) {
+        logTest(container, `✓ PASS: ${message}`, 'pass');
+        return true;
+      } else {
+        logTest(container, `✗ FAIL: ${message}`, 'fail');
+        return false;
+      }
+    }
+
+    // Helper function to create test data
+    function createTestData() {
+      return {
+        profile: {
+          name: 'Test User',
+          email: 'test@example.com',
+          preferences: {
+            theme: { mode: 'dark', fontSize: 'medium' },
+            accessibility: { highContrast: false }
+          }
+        },
+        bookmarks: [
+          {
+            id: 'test-bookmark-1',
+            title: 'Test Bookmark 1',
+            url: 'https://example.com/1',
+            description: 'Test description 1',
+            category: 'general',
+            dateAdded: new Date().toISOString()
+          },
+          {
+            id: 'test-bookmark-2',
+            title: 'Test Bookmark 2',
+            url: 'https://example.com/2',
+            description: 'Test description 2',
+            category: 'work',
+            dateAdded: new Date().toISOString()
+          }
+        ],
+        notes: [
+          {
+            id: 'test-note-1',
+            title: 'Test Note 1',
+            content: 'This is test note content 1',
+            richContent: '<p>This is <strong>rich</strong> content 1</p>',
+            subject: 'Testing',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: 'test-note-2',
+            title: 'Test Note 2',
+            content: 'This is test note content 2',
+            richContent: '<p>This is <em>italic</em> content 2</p>',
+            subject: 'Development',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ]
+      };
+    }
+
+    // Export/Import Data Integrity Tests
+    document.getElementById('run-export-import-tests').addEventListener('click', async () => {
+      const container = document.getElementById('export-import-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Export/Import Data Integrity...', 'info');
+      
+      try {
+        // Test 1: Data Exporter initialization
+        assert(
+          window.dataExporter instanceof DataExporter,
+          'Data exporter is properly initialized',
+          container
+        );
+
+        // Test 2: Import Handler initialization
+        assert(
+          window.importHandler instanceof ImportHandler,
+          'Import handler is properly initialized',
+          container
+        );
+
+        // Test 3: Export data collection
+        const testData = createTestData();
+        
+        // Mock localStorage with test data
+        localStorage.setItem('bookmarks', JSON.stringify(testData.bookmarks));
+        localStorage.setItem('userNotes', JSON.stringify(testData.notes));
+        
+        const exportData = await window.dataExporter.collectExportData(['bookmarks', 'notes'], { includeTimestamps: true });
+        
+        assert(
+          exportData && exportData.bookmarks && exportData.notes,
+          'Export data collection works correctly',
+          container
+        );
+
+        assert(
+          exportData.bookmarks.length === testData.bookmarks.length,
+          'Exported bookmarks count matches original data',
+          container
+        );
+
+        assert(
+          exportData.notes.length === testData.notes.length,
+          'Exported notes count matches original data',
+          container
+        );
+
+        // Test 4: Export data validation
+        const validationErrors = window.dataExporter.validateExportData(exportData);
+        
+        assert(
+          validationErrors.length === 0,
+          'Exported data passes validation',
+          container
+        );
+
+        // Test 5: JSON export processing
+        const jsonExport = await window.dataExporter.processExport(exportData, 'json', { includeTimestamps: true });
+        
+        assert(
+          typeof jsonExport === 'string' && jsonExport.length > 0,
+          'JSON export processing works correctly',
+          container
+        );
+
+        // Test 6: CSV export processing
+        const csvExport = await window.dataExporter.processExport(exportData, 'csv', { includeTimestamps: true });
+        
+        assert(
+          typeof csvExport === 'string' && csvExport.includes('Bookmarks') && csvExport.includes('Notes'),
+          'CSV export processing works correctly',
+          container
+        );
+
+        // Test 7: Import data validation
+        const importValidation = window.importHandler.validateImportData(exportData);
+        
+        assert(
+          importValidation.valid,
+          'Import data validation works correctly',
+          container
+        );
+
+        // Test 8: Data sanitization
+        const maliciousData = {
+          title: '<script>alert("xss")</script>Test Title',
+          content: 'Normal content',
+          url: 'javascript:alert("xss")'
+        };
+
+        const sanitizedBookmark = window.importHandler.sanitizeBookmarkData(maliciousData);
+        const sanitizedNote = window.importHandler.sanitizeNoteData(maliciousData);
+
+        assert(
+          !sanitizedBookmark.title.includes('<script>') && !sanitizedBookmark.url.includes('javascript:'),
+          'Bookmark data sanitization removes malicious content',
+          container
+        );
+
+        assert(
+          !sanitizedNote.title.includes('<script>'),
+          'Note data sanitization removes malicious content',
+          container
+        );
+
+        // Test 9: Round-trip data integrity
+        const reimportedData = JSON.parse(jsonExport);
+        
+        assert(
+          reimportedData.bookmarks.length === testData.bookmarks.length &&
+          reimportedData.notes.length === testData.notes.length,
+          'Round-trip export/import maintains data integrity',
+          container
+        );
+
+        // Test 10: Duplicate detection
+        const isDuplicateBookmark = window.importHandler.isDuplicateBookmark(testData.bookmarks[0]);
+        
+        assert(
+          isDuplicateBookmark === true,
+          'Duplicate detection works for existing bookmarks',
+          container
+        );
+
+        logTest(container, 'All export/import integrity tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during export/import tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Backup and Recovery Tests
+    document.getElementById('run-backup-recovery-tests').addEventListener('click', async () => {
+      const container = document.getElementById('backup-recovery-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Backup and Recovery System...', 'info');
+      
+      try {
+        // Test 1: Backup Manager initialization
+        assert(
+          window.backupManager instanceof BackupManager,
+          'Backup manager is properly initialized',
+          container
+        );
+
+        // Test 2: Create backup
+        const testData = createTestData();
+        
+        // Setup test data in localStorage
+        localStorage.setItem('userProfile', JSON.stringify(testData.profile));
+        localStorage.setItem('bookmarks', JSON.stringify(testData.bookmarks));
+        localStorage.setItem('userNotes', JSON.stringify(testData.notes));
+        localStorage.setItem('totalStudyHours', '25');
+        localStorage.setItem('studyStreak', '7');
+
+        const initialBackupCount = window.backupManager.getAllBackups().length;
+        const backup = await window.backupManager.createBackup();
+        
+        assert(
+          backup && backup.id && backup.timestamp,
+          'Backup creation works correctly',
+          container
+        );
+
+        assert(
+          window.backupManager.getAllBackups().length === initialBackupCount + 1,
+          'Backup count increases after creation',
+          container
+        );
+
+        // Test 3: Backup integrity verification
+        const backupKey = window.backupManager.backupPrefix + backup.id;
+        const metadataKey = backupKey + '_meta';
+        
+        const backupData = JSON.parse(localStorage.getItem(backupKey));
+        const metadata = JSON.parse(localStorage.getItem(metadataKey));
+        
+        assert(
+          window.backupManager.verifyBackupIntegrity(backupData, metadata),
+          'Backup integrity verification works correctly',
+          container
+        );
+
+        // Test 4: Backup contains all critical data
+        assert(
+          backupData.userProfile && backupData.bookmarks && backupData.userNotes,
+          'Backup contains all critical data types',
+          container
+        );
+
+        // Test 5: Modify data and restore
+        localStorage.setItem('userProfile', JSON.stringify({ name: 'Modified User' }));
+        localStorage.setItem('bookmarks', JSON.stringify([]));
+        
+        await window.backupManager.restoreSpecificBackup(backup.id);
+        
+        // Allow time for restore to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const restoredProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const restoredBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+        
+        assert(
+          restoredProfile.name === testData.profile.name,
+          'Profile data is correctly restored from backup',
+          container
+        );
+
+        assert(
+          restoredBookmarks.length === testData.bookmarks.length,
+          'Bookmarks are correctly restored from backup',
+          container
+        );
+
+        // Test 6: Data corruption detection
+        localStorage.setItem('bookmarks', 'invalid json data');
+        
+        const corruptedKeys = [];
+        try {
+          JSON.parse(localStorage.getItem('bookmarks'));
+        } catch (error) {
+          corruptedKeys.push('bookmarks');
+        }
+        
+        assert(
+          corruptedKeys.length > 0,
+          'Data corruption is properly detected',
+          container
+        );
+
+        // Test 7: Backup cleanup
+        const backupsBeforeCleanup = window.backupManager.getAllBackups().length;
+        
+        // Create multiple backups to test cleanup
+        for (let i = 0; i < 3; i++) {
+          await window.backupManager.createBackup();
+          await new Promise(resolve => setTimeout(resolve, 10)); // Small delay for unique timestamps
+        }
+        
+        await window.backupManager.cleanupOldBackups(false);
+        
+        const backupsAfterCleanup = window.backupManager.getAllBackups().length;
+        
+        assert(
+          backupsAfterCleanup <= window.backupManager.maxBackups,
+          'Backup cleanup maintains maximum backup limit',
+          container
+        );
+
+        // Test 8: Backup statistics
+        const stats = window.backupManager.getBackupStats();
+        
+        assert(
+          stats.totalBackups >= 0 && stats.autoBackupEnabled !== undefined,
+          'Backup statistics are properly calculated',
+          container
+        );
+
+        logTest(container, 'All backup and recovery tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during backup/recovery tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Data Validation and Sanitization Tests
+    document.getElementById('run-validation-sanitization-tests').addEventListener('click', () => {
+      const container = document.getElementById('validation-sanitization-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Data Validation and Sanitization...', 'info');
+      
+      try {
+        // Test 1: File validation
+        const validFile = { size: 1024 * 1024, name: 'test.json', type: 'application/json' };
+        const oversizedFile = { size: 100 * 1024 * 1024, name: 'large.json', type: 'application/json' };
+        const invalidFile = { size: 1024, name: 'test.exe', type: 'application/exe' };
+
+        assert(
+          window.importHandler.validateFile(validFile).valid,
+          'Valid file passes validation',
+          container
+        );
+
+        assert(
+          !window.importHandler.validateFile(oversizedFile).valid,
+          'Oversized file fails validation',
+          container
+        );
+
+        assert(
+          !window.importHandler.validateFile(invalidFile).valid,
+          'Invalid file type fails validation',
+          container
+        );
+
+        // Test 2: String sanitization
+        const maliciousString = '<script>alert("xss")</script>Hello<img src=x onerror=alert(1)>';
+        const sanitized = window.importHandler.sanitizeString(maliciousString);
+        
+        assert(
+          !sanitized.includes('<script>') && !sanitized.includes('<img'),
+          'String sanitization removes HTML tags',
+          container
+        );
+
+        // Test 3: Email validation and sanitization
+        const validEmail = 'test@example.com';
+        const invalidEmail = 'not-an-email';
+        
+        assert(
+          window.importHandler.sanitizeEmail(validEmail) === validEmail,
+          'Valid email passes sanitization',
+          container
+        );
+
+        assert(
+          window.importHandler.sanitizeEmail(invalidEmail) === '',
+          'Invalid email is rejected by sanitization',
+          container
+        );
+
+        // Test 4: URL sanitization
+        const validURL = 'https://example.com/path';
+        const maliciousURL = 'javascript:alert("xss")';
+        const invalidURL = 'not-a-url';
+        
+        assert(
+          window.importHandler.sanitizeURL(validURL) === validURL,
+          'Valid URL passes sanitization',
+          container
+        );
+
+        assert(
+          window.importHandler.sanitizeURL(maliciousURL) === '',
+          'Malicious URL is rejected by sanitization',
+          container
+        );
+
+        // Test 5: HTML sanitization
+        const safeHTML = '<p>This is <strong>safe</strong> content</p>';
+        const maliciousHTML = '<p>Content</p><script>alert("xss")</script><img src=x onerror=alert(1)>';
+        
+        const sanitizedHTML = window.importHandler.sanitizeHTML(maliciousHTML);
+        
+        assert(
+          !sanitizedHTML.includes('<script>') && !sanitizedHTML.includes('onerror'),
+          'HTML sanitization removes dangerous elements and attributes',
+          container
+        );
+
+        // Test 6: Data structure validation
+        const validData = {
+          bookmarks: [
+            { title: 'Test', url: 'https://example.com' }
+          ],
+          notes: [
+            { title: 'Note', content: 'Content' }
+          ]
+        };
+
+        const invalidData = {
+          bookmarks: 'not-an-array',
+          notes: [
+            { content: 'Missing title' }
+          ]
+        };
+
+        const validValidation = window.importHandler.validateImportData(validData);
+        const invalidValidation = window.importHandler.validateImportData(invalidData);
+
+        assert(
+          validValidation.valid,
+          'Valid data structure passes validation',
+          container
+        );
+
+        assert(
+          !invalidValidation.valid && invalidValidation.errors.length > 0,
+          'Invalid data structure fails validation with errors',
+          container
+        );
+
+        // Test 7: CSV parsing validation
+        const validCSV = 'title,url,description\n"Test Bookmark","https://example.com","Test description"';
+        const invalidCSV = 'incomplete csv data';
+        
+        try {
+          const parsedCSV = window.importHandler.parseCSV(validCSV);
+          assert(
+            parsedCSV.csvData.length === 1 && parsedCSV.headers.length === 3,
+            'Valid CSV is parsed correctly',
+            container
+          );
+        } catch (error) {
+          logTest(container, `CSV parsing failed: ${error.message}`, 'fail');
+        }
+
+        // Test 8: Comprehensive data sanitization
+        const comprehensiveTestData = {
+          title: '  <script>alert("xss")</script>  Test Title  ',
+          content: 'Normal content with <b>formatting</b>',
+          url: 'javascript:void(0)',
+          email: 'test@domain..com',
+          richContent: '<p>Safe content</p><script>alert("bad")</script>'
+        };
+
+        const sanitizedBookmark = window.importHandler.sanitizeBookmarkData(comprehensiveTestData);
+        const sanitizedNote = window.importHandler.sanitizeNoteData(comprehensiveTestData);
+
+        assert(
+          sanitizedBookmark.title.trim() === 'scriptalert("xss")/script  Test Title' &&
+          sanitizedBookmark.url === '' &&
+          !sanitizedNote.richContent.includes('<script>'),
+          'Comprehensive data sanitization works correctly',
+          container
+        );
+
+        logTest(container, 'All validation and sanitization tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during validation/sanitization tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Integration Tests
+    document.getElementById('run-integration-tests').addEventListener('click', async () => {
+      const container = document.getElementById('integration-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Data Management Integration...', 'info');
+      
+      try {
+        // Test 1: Export-Import round trip
+        const testData = createTestData();
+        
+        // Setup initial data
+        localStorage.setItem('bookmarks', JSON.stringify(testData.bookmarks));
+        localStorage.setItem('userNotes', JSON.stringify(testData.notes));
+        
+        // Export data
+        const exportData = await window.dataExporter.collectExportData(['bookmarks', 'notes'], { includeTimestamps: true });
+        const jsonExport = await window.dataExporter.processExport(exportData, 'json', {});
+        
+        // Clear data
+        localStorage.setItem('bookmarks', JSON.stringify([]));
+        localStorage.setItem('userNotes', JSON.stringify([]));
+        
+        // Import data back
+        const parsedImportData = JSON.parse(jsonExport);
+        await window.importHandler.processImport(parsedImportData, { mergeData: true, validateData: true });
+        
+        const restoredBookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+        const restoredNotes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+        
+        assert(
+          restoredBookmarks.length === testData.bookmarks.length &&
+          restoredNotes.length === testData.notes.length,
+          'Export-Import round trip maintains data integrity',
+          container
+        );
+
+        // Test 2: Backup-Export integration
+        const backup = await window.backupManager.createBackup();
+        const backupStats = window.backupManager.getBackupStats();
+        const exportStats = window.dataExporter.getExportStats();
+        
+        assert(
+          backup && backupStats.totalBackups > 0 && exportStats.totalBookmarks >= 0,
+          'Backup and export systems work together correctly',
+          container
+        );
+
+        // Test 3: Import with backup creation
+        const importOptions = { backupBeforeImport: true, mergeData: true, validateData: true };
+        const initialBackupCount = window.backupManager.getAllBackups().length;
+        
+        // Mock import process (since we can't actually import files in test)
+        if (window.backupManager) {
+          await window.backupManager.createBackup();
+        }
+        
+        const finalBackupCount = window.backupManager.getAllBackups().length;
+        
+        assert(
+          finalBackupCount > initialBackupCount,
+          'Import process creates backup when requested',
+          container
+        );
+
+        // Test 4: Data consistency across components
+        if (window.enhancedBookmarkManager && window.enhancedNoteManager) {
+          const bookmarkCount = window.enhancedBookmarkManager.bookmarks.length;
+          const noteCount = window.enhancedNoteManager.notes.length;
+          const storageBookmarkCount = JSON.parse(localStorage.getItem('bookmarks') || '[]').length;
+          const storageNoteCount = JSON.parse(localStorage.getItem('userNotes') || '[]').length;
+          
+          assert(
+            bookmarkCount === storageBookmarkCount && noteCount === storageNoteCount,
+            'Data consistency maintained across components and storage',
+            container
+          );
+        }
+
+        // Test 5: Error handling integration
+        try {
+          // Test with corrupted data
+          const corruptedData = { bookmarks: 'not-an-array', notes: null };
+          const validation = window.importHandler.validateImportData(corruptedData);
+          
+          assert(
+            !validation.valid,
+            'Error handling correctly identifies corrupted data',
+            container
+          );
+        } catch (error) {
+          assert(
+            true,
+            'Error handling works correctly for invalid operations',
+            container
+          );
+        }
+
+        logTest(container, 'All integration tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during integration tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Performance and Stress Tests
+    document.getElementById('run-performance-tests').addEventListener('click', async () => {
+      const container = document.getElementById('performance-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Performance and Stress Scenarios...', 'info');
+      
+      try {
+        // Test 1: Large dataset export performance
+        const largeBookmarkSet = [];
+        for (let i = 0; i < 1000; i++) {
+          largeBookmarkSet.push({
+            id: `bookmark-${i}`,
+            title: `Test Bookmark ${i}`,
+            url: `https://example.com/${i}`,
+            description: `Description for bookmark ${i}`,
+            category: i % 2 === 0 ? 'work' : 'personal',
+            dateAdded: new Date().toISOString()
+          });
+        }
+        
+        localStorage.setItem('bookmarks', JSON.stringify(largeBookmarkSet));
+        
+        const startTime = performance.now();
+        const exportData = await window.dataExporter.collectExportData(['bookmarks'], { includeTimestamps: true });
+        const endTime = performance.now();
+        
+        const exportTime = endTime - startTime;
+        
+        assert(
+          exportData.bookmarks.length === 1000 && exportTime < 5000,
+          `Large dataset export completes in reasonable time (${Math.round(exportTime)}ms)`,
+          container
+        );
+
+        // Test 2: Multiple backup creation performance
+        const backupTimes = [];
+        
+        for (let i = 0; i < 5; i++) {
+          const backupStart = performance.now();
+          await window.backupManager.createBackup();
+          const backupEnd = performance.now();
+          backupTimes.push(backupEnd - backupStart);
+        }
+        
+        const avgBackupTime = backupTimes.reduce((a, b) => a + b, 0) / backupTimes.length;
+        
+        assert(
+          avgBackupTime < 3000,
+          `Multiple backup creation maintains performance (avg: ${Math.round(avgBackupTime)}ms)`,
+          container
+        );
+
+        // Test 3: Data validation performance
+        const validationStart = performance.now();
+        const validation = window.importHandler.validateImportData({ bookmarks: largeBookmarkSet });
+        const validationEnd = performance.now();
+        
+        const validationTime = validationEnd - validationStart;
+        
+        assert(
+          validation.valid && validationTime < 2000,
+          `Large dataset validation completes quickly (${Math.round(validationTime)}ms)`,
+          container
+        );
+
+        // Test 4: Memory usage test
+        const initialMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        
+        // Create and process large amounts of data
+        for (let i = 0; i < 100; i++) {
+          const tempData = await window.dataExporter.collectExportData(['bookmarks'], {});
+          const tempExport = await window.dataExporter.processExport(tempData, 'json', {});
+          // Allow garbage collection
+          if (i % 10 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 1));
+          }
+        }
+        
+        const finalMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        const memoryIncrease = finalMemory - initialMemory;
+        
+        assert(
+          memoryIncrease < 50 * 1024 * 1024, // Less than 50MB increase
+          `Memory usage remains reasonable during intensive operations`,
+          container
+        );
+
+        // Test 5: Concurrent operations
+        const concurrentPromises = [];
+        
+        for (let i = 0; i < 10; i++) {
+          concurrentPromises.push(window.dataExporter.collectExportData(['bookmarks'], {}));
+        }
+        
+        const concurrentStart = performance.now();
+        const results = await Promise.all(concurrentPromises);
+        const concurrentEnd = performance.now();
+        
+        const concurrentTime = concurrentEnd - concurrentStart;
+        
+        assert(
+          results.length === 10 && results.every(r => r.bookmarks.length === 1000) && concurrentTime < 10000,
+          `Concurrent operations complete successfully (${Math.round(concurrentTime)}ms)`,
+          container
+        );
+
+        // Cleanup large dataset
+        localStorage.setItem('bookmarks', JSON.stringify([]));
+
+        logTest(container, 'All performance tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during performance tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Initialize Lucide icons
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

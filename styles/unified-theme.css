@@ -1,0 +1,265 @@
+/* Unified Theme Configuration for Learning Platform */
+
+:root {
+  /* Base Colors - Dark Theme */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #2a2a2a;
+  --bg-dark-1: #1F1F1F;
+  --bg-dark-2: #1A1A1A;
+  
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-muted: #666666;
+  --text-faded: rgba(255, 255, 255, 0.5);
+  
+  /* Accent Colors */
+  --accent-primary: #3b82f6;
+  --accent-secondary: #1d4ed8;
+  --teal-primary: #2C7A7B;
+  
+  /* Border and Shadow */
+  --border-color: rgba(255, 255, 255, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  
+  /* Glassmorphism Variables */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --glass-blur: 12px;
+  
+  /* Search Glass */
+  --search-bg-glass: rgba(255, 255, 255, 0.02);
+  --search-border-glass: rgba(255, 255, 255, 0.05);
+  
+  /* Panel Colors */
+  --panel-bg: #1B1B1B;
+  --panel-border: rgba(255, 255, 255, 0.06);
+  --muted: rgba(255, 255, 255, 0.6);
+  --ring: rgba(132, 208, 247, 0.35);
+  
+  /* Animation Duration */
+  --animation-duration: 0.3s;
+  --base-font-size: 16px;
+}
+
+/* Light Theme Override */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #e2e8f0;
+  --bg-dark-1: #f8fafc;
+  --bg-dark-2: #e2e8f0;
+  
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --text-faded: rgba(0, 0, 0, 0.5);
+  
+  --border-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-bg-hover: rgba(0, 0, 0, 0.08);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-hover: rgba(0, 0, 0, 0.2);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
+  
+  --search-bg-glass: rgba(0, 0, 0, 0.02);
+  --search-border-glass: rgba(0, 0, 0, 0.05);
+  
+  --panel-bg: #ffffff;
+  --panel-border: rgba(0, 0, 0, 0.06);
+  --muted: rgba(0, 0, 0, 0.6);
+}
+
+/* High Contrast Mode */
+[data-color-scheme="high-contrast"] {
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #cccccc;
+  --accent-primary: #ffff00;
+  --accent-secondary: #ffcc00;
+  --border-color: #ffffff;
+  --teal-primary: #00ffff;
+}
+
+[data-theme="light"][data-color-scheme="high-contrast"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f0f0f0;
+  --bg-tertiary: #e0e0e0;
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --text-muted: #333333;
+  --accent-primary: #0000ff;
+  --accent-secondary: #000080;
+  --border-color: #000000;
+  --teal-primary: #008080;
+}
+
+/* Colorblind-Friendly Colors */
+[data-color-scheme="colorblind"] {
+  --accent-primary: #0173b2; /* Blue */
+  --accent-secondary: #de8f05; /* Orange */
+  --teal-primary: #029e73; /* Green */
+  --success-color: #029e73;
+  --warning-color: #d55e00;
+  --error-color: #cc78bc;
+}
+
+/* Font Size Adjustments */
+html {
+  font-size: var(--base-font-size);
+}
+
+[data-font-size="small"] {
+  --base-font-size: 14px;
+}
+
+[data-font-size="large"] {
+  --base-font-size: 18px;
+}
+
+/* Dashboard Layout Preferences */
+[data-dashboard-layout="compact"] .dashboard-widget {
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+[data-dashboard-layout="spacious"] .dashboard-widget {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.compact-mode .dashboard-container {
+  max-width: 1200px;
+}
+
+.compact-mode .dashboard-grid {
+  gap: 0.75rem;
+}
+
+/* Animation Controls */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.no-dashboard-animations .animate-pulse,
+.no-dashboard-animations .animate-bounce,
+.no-dashboard-animations .animate-spin {
+  animation: none !important;
+}
+
+/* Theme Transition */
+* {
+  transition: background-color var(--animation-duration) ease,
+              color var(--animation-duration) ease,
+              border-color var(--animation-duration) ease;
+}
+
+.theme-changing * {
+  transition: none !important;
+}
+
+/* Responsive Font Scaling */
+@media (max-width: 768px) {
+  html {
+    font-size: calc(var(--base-font-size) * 0.9);
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: calc(var(--base-font-size) * 0.85);
+  }
+}
+
+/* Unified Component Styles */
+.glass-sidebar {
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--glass-border);
+}
+
+.glass-search-container {
+  background-color: var(--search-bg-glass);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--search-border-glass);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item:hover {
+  transform: translateX(4px);
+  background: rgba(42, 42, 42, 0.8);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(44, 122, 123, 0.2), rgba(42, 42, 42, 0.9));
+  border-left: 3px solid var(--teal-primary);
+}
+
+.arrow-circle-button {
+  width: 44px;
+  height: 44px;
+  background-color: var(--bg-dark-1);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.arrow-circle-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Page Transitions */
+.page-transition {
+  animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Print Styles */
+@media print {
+  [data-theme="dark"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f8f8f8;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-muted: #666666;
+  }
+}

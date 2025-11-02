@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Optimization Tests</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/ui-performance.css">
+    <style>
+        .test-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            background: #1f2937;
+        }
+        
+        .test-message {
+            padding: 12px;
+            border-bottom: 1px solid #374151;
+            color: white;
+        }
+        
+        .test-message:last-child {
+            border-bottom: none;
+        }
+        
+        .test-results {
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            color: white;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .test-section {
+            margin: 24px 0;
+            padding: 20px;
+            background: #1f2937;
+            border-radius: 8px;
+            border: 1px solid #374151;
+        }
+        
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .test-button:hover {
+            background: #2563eb;
+        }
+        
+        .test-button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .success {
+            color: #10b981;
+        }
+        
+        .error {
+            color: #ef4444;
+        }
+        
+        .warning {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white p-6">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Performance Optimization Tests</h1>
+        
+        <!-- AI Response Cache Tests -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">AI Response Cache Tests</h2>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button class="test-button" onclick="testCacheBasicOperations()">Basic Operations</button>
+                <button class="test-button" onclick="testCacheTTL()">TTL Management</button>
+                <button class="test-button" onclick="testCacheInvalidation()">Cache Invalidation</button>
+                <button class="test-button" onclick="testCachePerformance()">Performance</button>
+                <button class="test-button" onclick="testCacheStats()">Statistics</button>
+            </div>
+            <div id="cache-results" class="test-results hidden"></div>
+        </div>
+
+        <!-- Background Processor Tests -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Background Processor Tests</h2>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button class="test-button" onclick="testTaskQueue()">Task Queue</button>
+                <button class="test-button" onclick="testScheduledTasks()">Scheduled Tasks</button>
+                <button class="test-button" onclick="testTaskRetry()">Task Retry</button>
+                <button class="test-button" onclick="testTaskPriority()">Task Priority</button>
+                <button class="test-button" onclick="testProcessorStats()">Processor Stats</button>
+            </div>
+            <div id="processor-results" class="test-results hidden"></div>
+        </div>
+
+        <!-- UI Performance Optimizer Tests -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">UI Performance Optimizer Tests</h2>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button class="test-button" onclick="testVirtualScrolling()">Virtual Scrolling</button>
+                <button class="test-button" onclick="testProgressiveLoading()">Progressive Loading</button>
+                <button class="test-button" onclick="testOptimisticUpdates()">Optimistic Updates</button>
+                <button class="test-button" onclick="testLazyLoading()">Lazy Loading</button>
+                <button class="test-button" onclick="testUIPerformance()">UI Performance</button>
+            </div>
+            <div id="ui-results" class="test-results hidden"></div>
+            
+            <!-- Test Containers -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                    <h3 class="text-lg font-medium mb-2">Virtual Scrolling Test</h3>
+                    <div id="virtual-scroll-container" class="test-container"></div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium mb-2">Progressive Loading Test</h3>
+                    <div id="progressive-load-container" class="test-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Tests -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Integration Tests</h2>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button class="test-button" onclick="testCacheIntegration()">Cache Integration</button>
+                <button class="test-button" onclick="testBackgroundIntegration()">Background Integration</button>
+                <button class="test-button" onclick="testUIIntegration()">UI Integration</button>
+                <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+            </div>
+            <div id="integration-results" class="test-results hidden"></div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Performance Metrics</h2>
+            <div id="performance-metrics" class="test-results">
+                <div>Loading performance metrics...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Dependencies -->
+    <script src="js/ai-response-cache.js"></script>
+    <script src="js/background-processor.js"></script>
+    <script src="js/ui-performance-optimizer.js"></script>
+
+    <script>
+        // Test instances
+        let testCache, testProcessor, testUIOptimizer;
+        let testResults = {};
+
+        // Initialize test components
+        function initializeTestComponents() {
+            try {
+                testCache = new AIResponseCache({
+                    storagePrefix: 'test_cache_',
+                    defaultTTL: 5000, // 5 seconds for testing
+                    maxCacheSize: 10
+                });
+
+                testProcessor = new BackgroundProcessor({
+                    maxConcurrentTasks: 2,
+                    taskTimeout: 5000,
+                    retryAttempts: 2,
+                    queueCheckInterval: 500
+                });
+
+                testUIOptimizer = new UIPerformanceOptimizer({
+                    virtualScrollThreshold: 10,
+                    chunkSize: 5,
+                    debounceDelay: 50
+                });
+
+                console.log('Test components initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize test components:', error);
+            }
+        }
+
+        // Utility functions
+        function showResults(containerId, results) {
+            const container = document.getElementById(containerId);
+            container.classList.remove('hidden');
+            container.innerHTML = formatResults(results);
+        }
+
+        function formatResults(results) {
+            return Object.entries(results).map(([test, result]) => {
+                const status = result.success ? 'success' : 'error';
+                const icon = result.success ? '✓' : '✗';
+                return `<div class="${status}">${icon} ${test}: ${result.message}</div>`;
+            }).join('');
+        }
+
+        function createTestMessage(index) {
+            return {
+                id: `msg_${index}`,
+                role: index % 2 === 0 ? 'user' : 'assistant',
+                content: `Test message ${index}: Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        // AI Response Cache Tests
+        async function testCacheBasicOperations() {
+            const results = {};
+            
+            try {
+                // Test cache set and get
+                const prompt = "What is UPSC?";
+                const options = { temperature: 0.7 };
+                const mode = "general";
+                const response = { content: "UPSC is the Union Public Service Commission..." };
+                
+                testCache.cacheResponse(prompt, options, mode, response);
+                const cached = testCache.getCachedResponse(prompt, options, mode);
+                
+                results.cacheSetGet = {
+                    success: cached && cached.content === response.content,
+                    message: cached ? 'Cache set/get working' : 'Cache set/get failed'
+                };
+
+                // Test cache miss
+                const missResult = testCache.getCachedResponse("Different prompt", options, mode);
+                results.cacheMiss = {
+                    success: missResult === null,
+                    message: missResult === null ? 'Cache miss working' : 'Cache miss failed'
+                };
+
+                // Test cache statistics
+                const stats = testCache.getCacheStats();
+                results.cacheStats = {
+                    success: stats && typeof stats.hits === 'number',
+                    message: stats ? 'Cache stats working' : 'Cache stats failed'
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('cache-results', results);
+        }
+
+        async function testCacheTTL() {
+            const results = {};
+            
+            try {
+                // Create cache with short TTL
+                const shortTTLCache = new AIResponseCache({
+                    storagePrefix: 'test_ttl_',
+                    defaultTTL: 100 // 100ms
+                });
+
+                const prompt = "Test TTL";
+                const response = { content: "TTL test response" };
+                
+                shortTTLCache.cacheResponse(prompt, {}, "general", response);
+                
+                // Immediate retrieval should work
+                let cached = shortTTLCache.getCachedResponse(prompt, {}, "general");
+                results.immediateRetrieval = {
+                    success: cached !== null,
+                    message: cached ? 'Immediate retrieval working' : 'Immediate retrieval failed'
+                };
+
+                // Wait for TTL expiration
+                await new Promise(resolve => setTimeout(resolve, 150));
+                
+                cached = shortTTLCache.getCachedResponse(prompt, {}, "general");
+                results.ttlExpiration = {
+                    success: cached === null,
+                    message: cached === null ? 'TTL expiration working' : 'TTL expiration failed'
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('cache-results', results);
+        }
+
+        async function testCacheInvalidation() {
+            const results = {};
+            
+            try {
+                // Cache multiple responses
+                for (let i = 0; i < 5; i++) {
+                    testCache.cacheResponse(
+                        `Test prompt ${i}`,
+                        {},
+                        "general",
+                        { content: `Response ${i}` },
+                        "common_queries"
+                    );
+                }
+
+                // Test category invalidation
+                const invalidated = testCache.invalidateCache({ category: "common_queries" });
+                results.categoryInvalidation = {
+                    success: invalidated > 0,
+                    message: `Invalidated ${invalidated} entries by category`
+                };
+
+                // Test pattern invalidation
+                testCache.cacheResponse("Pattern test", {}, "general", { content: "Pattern response" });
+                const patternInvalidated = testCache.invalidateCache({ pattern: "Pattern" });
+                results.patternInvalidation = {
+                    success: patternInvalidated > 0,
+                    message: `Invalidated ${patternInvalidated} entries by pattern`
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('cache-results', results);
+        }
+
+        async function testCachePerformance() {
+            const results = {};
+            
+            try {
+                const iterations = 100;
+                
+                // Test cache write performance
+                const writeStart = performance.now();
+                for (let i = 0; i < iterations; i++) {
+                    testCache.cacheResponse(
+                        `Performance test ${i}`,
+                        {},
+                        "general",
+                        { content: `Performance response ${i}` }
+                    );
+                }
+                const writeTime = performance.now() - writeStart;
+                
+                results.writePerformance = {
+                    success: writeTime < 1000, // Should complete in under 1 second
+                    message: `${iterations} writes in ${writeTime.toFixed(2)}ms`
+                };
+
+                // Test cache read performance
+                const readStart = performance.now();
+                for (let i = 0; i < iterations; i++) {
+                    testCache.getCachedResponse(`Performance test ${i}`, {}, "general");
+                }
+                const readTime = performance.now() - readStart;
+                
+                results.readPerformance = {
+                    success: readTime < 500, // Should complete in under 0.5 seconds
+                    message: `${iterations} reads in ${readTime.toFixed(2)}ms`
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('cache-results', results);
+        }
+
+        async function testCacheStats() {
+            const results = {};
+            
+            try {
+                // Clear cache and generate some activity
+                testCache.clearCache();
+                
+                // Generate cache hits and misses
+                testCache.cacheResponse("Stats test", {}, "general", { content: "Stats response" });
+                testCache.getCachedResponse("Stats test", {}, "general"); // Hit
+                testCache.getCachedResponse("Non-existent", {}, "general"); // Miss
+                
+                const stats = testCache.getCacheStats();
+                
+                results.statsStructure = {
+                    success: stats && typeof stats.hits === 'number' && typeof stats.misses === 'number',
+                    message: stats ? 'Stats structure valid' : 'Stats structure invalid'
+                };
+
+                results.hitRateCalculation = {
+                    success: stats && stats.hitRate !== undefined,
+                    message: stats ? `Hit rate: ${stats.hitRate}` : 'Hit rate calculation failed'
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('cache-results', results);
+        }
+
+        // Background Processor Tests
+        async function testTaskQueue() {
+            const results = {};
+            
+            try {
+                let taskExecuted = false;
+                
+                // Add a simple task
+                const taskId = testProcessor.addTask({
+                    type: 'test_task',
+                    handler: async (data) => {
+                        taskExecuted = true;
+                        return { success: true, data };
+                    },
+                    data: { test: 'value' }
+                }, 'high');
+
+                results.taskAdded = {
+                    success: taskId !== null,
+                    message: taskId ? `Task added with ID: ${taskId}` : 'Failed to add task'
+                };
+
+                // Wait for task execution
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                results.taskExecution = {
+                    success: taskExecuted,
+                    message: taskExecuted ? 'Task executed successfully' : 'Task execution failed'
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('processor-results', results);
+        }
+
+        async function testScheduledTasks() {
+            const results = {};
+            
+            try {
+                let executionCount = 0;
+                
+                // Schedule a task to run every 200ms
+                const scheduleId = testProcessor.scheduleTask({
+                    type: 'scheduled_test',
+                    handler: async () => {
+                        executionCount++;
+                        return { executionCount };
+                    }
+                }, 200, 'medium');
+
+                results.taskScheduled = {
+                    success: scheduleId !== null,
+                    message: scheduleId ? `Scheduled task ID: ${scheduleId}` : 'Failed to schedule task'
+                };
+
+                // Wait for multiple executions
+                await new Promise(resolve => setTimeout(resolve, 600));
+
+                results.multipleExecutions = {
+                    success: executionCount >= 2,
+                    message: `Task executed ${executionCount} times`
+                };
+
+                // Cancel the scheduled task
+                testProcessor.cancelScheduledTask(scheduleId);
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('processor-results', results);
+        }
+
+        async function testTaskRetry() {
+            const results = {};
+            
+            try {
+                let attemptCount = 0;
+                
+                // Add a task that fails initially
+                const taskId = testProcessor.addTask({
+                    type: 'retry_test',
+                    handler: async () => {
+                        attemptCount++;
+                        if (attemptCount < 3) {
+                            throw new Error('Simulated failure');
+                        }
+                        return { success: true, attempts: attemptCount };
+                    },
+                    maxAttempts: 3
+                }, 'high');
+
+                results.retryTaskAdded = {
+                    success: taskId !== null,
+                    message: taskId ? 'Retry task added' : 'Failed to add retry task'
+                };
+
+                // Wait for retries to complete
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                results.retryMechanism = {
+                    success: attemptCount === 3,
+                    message: `Task attempted ${attemptCount} times`
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('processor-results', results);
+        }
+
+        async function testTaskPriority() {
+            const results = {};
+            
+            try {
+                const executionOrder = [];
+                
+                // Add tasks with different priorities
+                testProcessor.addTask({
+                    type: 'low_priority',
+                    handler: async () => {
+                        executionOrder.push('low');
+                        return { priority: 'low' };
+                    }
+                }, 'low');
+
+                testProcessor.addTask({
+                    type: 'high_priority',
+                    handler: async () => {
+                        executionOrder.push('high');
+                        return { priority: 'high' };
+                    }
+                }, 'high');
+
+                testProcessor.addTask({
+                    type: 'medium_priority',
+                    handler: async () => {
+                        executionOrder.push('medium');
+                        return { priority: 'medium' };
+                    }
+                }, 'medium');
+
+                // Wait for execution
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                results.priorityOrder = {
+                    success: executionOrder[0] === 'high',
+                    message: `Execution order: ${executionOrder.join(', ')}`
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('processor-results', results);
+        }
+
+        async function testProcessorStats() {
+            const results = {};
+            
+            try {
+                const stats = testProcessor.getProcessorStats();
+                
+                results.statsStructure = {
+                    success: stats && typeof stats.tasksProcessed === 'number',
+                    message: stats ? 'Processor stats structure valid' : 'Invalid stats structure'
+                };
+
+                results.queueSizes = {
+                    success: stats && stats.queueSizes && typeof stats.queueSizes.high === 'number',
+                    message: stats ? `Queue sizes: H:${stats.queueSizes.high}, M:${stats.queueSizes.medium}, L:${stats.queueSizes.low}` : 'Queue sizes invalid'
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('processor-results', results);
+        }
+
+        // UI Performance Optimizer Tests
+        async function testVirtualScrolling() {
+            const results = {};
+            
+            try {
+                const container = document.getElementById('virtual-scroll-container');
+                const items = Array.from({ length: 100 }, (_, i) => createTestMessage(i));
+                
+                const controller = testUIOptimizer.enableVirtualScrolling(
+                    container,
+                    items,
+                    (item, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'test-message';
+                        div.textContent = `${item.role}: ${item.content}`;
+                        return div;
+                    }
+                );
+
+                results.virtualScrollEnabled = {
+                    success: controller.isEnabled,
+                    message: controller.isEnabled ? 'Virtual scrolling enabled' : 'Virtual scrolling not enabled'
+                };
+
+                results.containerSetup = {
+                    success: container.children.length > 0,
+                    message: `Container has ${container.children.length} child elements`
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('ui-results', results);
+        }
+
+        async function testProgressiveLoading() {
+            const results = {};
+            
+            try {
+                const container = document.getElementById('progressive-load-container');
+                let loadCallCount = 0;
+                
+                const controller = testUIOptimizer.enableProgressiveLoading(
+                    container,
+                    async (page, limit) => {
+                        loadCallCount++;
+                        const items = Array.from({ length: limit }, (_, i) => 
+                            createTestMessage(page * limit + i)
+                        );
+                        return {
+                            items,
+                            hasMore: page < 3 // Simulate 4 pages total
+                        };
+                    },
+                    {
+                        threshold: 50,
+                        initialLoad: true,
+                        renderItem: (item) => {
+                            const div = document.createElement('div');
+                            div.className = 'test-message';
+                            div.textContent = `${item.role}: ${item.content}`;
+                            return div;
+                        }
+                    }
+                );
+
+                results.progressiveLoadEnabled = {
+                    success: controller.isEnabled,
+                    message: controller.isEnabled ? 'Progressive loading enabled' : 'Progressive loading not enabled'
+                };
+
+                // Wait for initial load
+                await new Promise(resolve => setTimeout(resolve, 600));
+
+                results.initialLoad = {
+                    success: loadCallCount > 0 && container.children.length > 0,
+                    message: `Load called ${loadCallCount} times, ${container.children.length} items loaded`
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('ui-results', results);
+        }
+
+        async function testOptimisticUpdates() {
+            const results = {};
+            
+            try {
+                const testElement = document.createElement('div');
+                testElement.textContent = 'Original content';
+                document.body.appendChild(testElement);
+
+                const updateId = 'test_update_' + Date.now();
+                const optimisticUpdate = testUIOptimizer.createOptimisticUpdate(
+                    updateId,
+                    testElement,
+                    (element) => {
+                        element.textContent = 'Updated content';
+                        element.style.color = 'blue';
+                    },
+                    (element) => {
+                        element.style.color = 'red';
+                    }
+                );
+
+                results.optimisticUpdateCreated = {
+                    success: testElement.textContent === 'Updated content',
+                    message: testElement.textContent === 'Updated content' ? 'Optimistic update applied' : 'Optimistic update failed'
+                };
+
+                // Test confirmation
+                optimisticUpdate.confirm();
+                
+                results.updateConfirmed = {
+                    success: !testElement.classList.contains('optimistic-update-pending'),
+                    message: 'Update confirmed successfully'
+                };
+
+                // Cleanup
+                document.body.removeChild(testElement);
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('ui-results', results);
+        }
+
+        async function testLazyLoading() {
+            const results = {};
+            
+            try {
+                // Create test element with lazy loading
+                const testElement = document.createElement('div');
+                testElement.innerHTML = '<img data-lazy-src="test.jpg" alt="Test">';
+                document.body.appendChild(testElement);
+
+                testUIOptimizer.setupLazyLoading(testElement);
+
+                const lazyImage = testElement.querySelector('[data-lazy-src]');
+                results.lazyElementSetup = {
+                    success: lazyImage !== null,
+                    message: lazyImage ? 'Lazy loading element set up' : 'Lazy loading setup failed'
+                };
+
+                // Simulate intersection (manual trigger)
+                if (lazyImage) {
+                    testUIOptimizer.loadLazyElement(lazyImage);
+                    
+                    results.lazyLoading = {
+                        success: lazyImage.src === 'test.jpg' && !lazyImage.hasAttribute('data-lazy-src'),
+                        message: lazyImage.src === 'test.jpg' ? 'Lazy loading triggered' : 'Lazy loading failed'
+                    };
+                }
+
+                // Cleanup
+                document.body.removeChild(testElement);
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('ui-results', results);
+        }
+
+        async function testUIPerformance() {
+            const results = {};
+            
+            try {
+                const metrics = testUIOptimizer.getPerformanceMetrics();
+                
+                results.metricsStructure = {
+                    success: metrics && typeof metrics.scrollEvents === 'number',
+                    message: metrics ? 'Performance metrics structure valid' : 'Invalid metrics structure'
+                };
+
+                results.renderTimeTracking = {
+                    success: Array.isArray(metrics.renderTimes),
+                    message: `Render times array: ${metrics.renderTimes.length} entries`
+                };
+
+                results.cacheMetrics = {
+                    success: typeof metrics.cacheHits === 'number' && typeof metrics.cacheMisses === 'number',
+                    message: `Cache hits: ${metrics.cacheHits}, misses: ${metrics.cacheMisses}`
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('ui-results', results);
+        }
+
+        // Integration Tests
+        async function testCacheIntegration() {
+            const results = {};
+            
+            try {
+                // Test cache with background processor
+                let cacheHit = false;
+                
+                const taskId = testProcessor.addTask({
+                    type: 'cache_integration',
+                    handler: async (data) => {
+                        // Try to get from cache
+                        const cached = testCache.getCachedResponse(data.prompt, {}, "general");
+                        if (cached) {
+                            cacheHit = true;
+                            return cached;
+                        }
+                        
+                        // Simulate AI response and cache it
+                        const response = { content: "Integration test response" };
+                        testCache.cacheResponse(data.prompt, {}, "general", response);
+                        return response;
+                    },
+                    data: { prompt: "Integration test prompt" }
+                }, 'high');
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Run the same task again to test cache hit
+                testProcessor.addTask({
+                    type: 'cache_integration',
+                    handler: async (data) => {
+                        const cached = testCache.getCachedResponse(data.prompt, {}, "general");
+                        if (cached) {
+                            cacheHit = true;
+                        }
+                        return cached;
+                    },
+                    data: { prompt: "Integration test prompt" }
+                }, 'high');
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                results.cacheIntegration = {
+                    success: cacheHit,
+                    message: cacheHit ? 'Cache integration working' : 'Cache integration failed'
+                };
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('integration-results', results);
+        }
+
+        async function testBackgroundIntegration() {
+            const results = {};
+            
+            try {
+                // Test background processor with UI updates
+                const container = document.createElement('div');
+                document.body.appendChild(container);
+
+                let uiUpdated = false;
+
+                const taskId = testProcessor.addTask({
+                    type: 'ui_integration',
+                    handler: async (data) => {
+                        // Simulate UI update
+                        const updateId = 'bg_integration_' + Date.now();
+                        testUIOptimizer.createOptimisticUpdate(
+                            updateId,
+                            container,
+                            (element) => {
+                                element.textContent = 'Background task completed';
+                                uiUpdated = true;
+                            },
+                            () => {}
+                        );
+                        
+                        return { success: true };
+                    }
+                }, 'high');
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                results.backgroundUIIntegration = {
+                    success: uiUpdated,
+                    message: uiUpdated ? 'Background-UI integration working' : 'Background-UI integration failed'
+                };
+
+                // Cleanup
+                document.body.removeChild(container);
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('integration-results', results);
+        }
+
+        async function testUIIntegration() {
+            const results = {};
+            
+            try {
+                // Test UI optimizer with cache
+                const container = document.createElement('div');
+                container.style.height = '200px';
+                container.style.overflow = 'auto';
+                document.body.appendChild(container);
+
+                // Create items and enable progressive loading with cache
+                const controller = testUIOptimizer.enableProgressiveLoading(
+                    container,
+                    async (page, limit) => {
+                        const cacheKey = `page_${page}`;
+                        let cached = testCache.getCachedResponse(cacheKey, {}, "pagination");
+                        
+                        if (cached) {
+                            return cached;
+                        }
+                        
+                        const items = Array.from({ length: limit }, (_, i) => 
+                            createTestMessage(page * limit + i)
+                        );
+                        
+                        const result = { items, hasMore: page < 2 };
+                        testCache.cacheResponse(cacheKey, {}, "pagination", result);
+                        
+                        return result;
+                    },
+                    {
+                        initialLoad: true,
+                        renderItem: (item) => {
+                            const div = document.createElement('div');
+                            div.className = 'test-message';
+                            div.textContent = `${item.role}: ${item.content}`;
+                            return div;
+                        }
+                    }
+                );
+
+                await new Promise(resolve => setTimeout(resolve, 600));
+
+                results.uiCacheIntegration = {
+                    success: container.children.length > 0,
+                    message: `UI-Cache integration: ${container.children.length} items loaded`
+                };
+
+                // Cleanup
+                document.body.removeChild(container);
+
+            } catch (error) {
+                results.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('integration-results', results);
+        }
+
+        async function runAllTests() {
+            const allResults = {};
+            
+            try {
+                // Run all test categories
+                await testCacheBasicOperations();
+                await testTaskQueue();
+                await testVirtualScrolling();
+                await testCacheIntegration();
+                
+                allResults.allTestsCompleted = {
+                    success: true,
+                    message: 'All test categories completed'
+                };
+
+                // Collect performance metrics
+                const cacheStats = testCache.getCacheStats();
+                const processorStats = testProcessor.getProcessorStats();
+                const uiMetrics = testUIOptimizer.getPerformanceMetrics();
+
+                allResults.performanceMetrics = {
+                    success: true,
+                    message: `Cache hit rate: ${cacheStats.hitRate}, Tasks processed: ${processorStats.tasksProcessed}, UI render times: ${uiMetrics.renderTimes.length}`
+                };
+
+            } catch (error) {
+                allResults.error = {
+                    success: false,
+                    message: `Error: ${error.message}`
+                };
+            }
+
+            showResults('integration-results', allResults);
+        }
+
+        // Update performance metrics display
+        function updatePerformanceMetrics() {
+            try {
+                const cacheStats = testCache ? testCache.getCacheStats() : {};
+                const processorStats = testProcessor ? testProcessor.getProcessorStats() : {};
+                const uiMetrics = testUIOptimizer ? testUIOptimizer.getPerformanceMetrics() : {};
+
+                const metricsHtml = `
+                    <h3 class="text-lg font-semibold mb-2">Cache Metrics</h3>
+                    <div>Hit Rate: ${cacheStats.hitRate || '0%'}</div>
+                    <div>Total Entries: ${cacheStats.totalEntries || 0}</div>
+                    <div>Cache Size: ${cacheStats.totalSize || '0 KB'}</div>
+                    
+                    <h3 class="text-lg font-semibold mb-2 mt-4">Processor Metrics</h3>
+                    <div>Tasks Processed: ${processorStats.tasksProcessed || 0}</div>
+                    <div>Success Rate: ${processorStats.tasksSucceeded || 0}/${processorStats.tasksProcessed || 0}</div>
+                    <div>Active Tasks: ${processorStats.activeTasks || 0}</div>
+                    
+                    <h3 class="text-lg font-semibold mb-2 mt-4">UI Metrics</h3>
+                    <div>Average Render Time: ${uiMetrics.averageRenderTime || 0}ms</div>
+                    <div>Cache Hit Rate: ${uiMetrics.cacheHitRate || 0}%</div>
+                    <div>Scroll Events: ${uiMetrics.scrollEvents || 0}</div>
+                `;
+
+                document.getElementById('performance-metrics').innerHTML = metricsHtml;
+            } catch (error) {
+                document.getElementById('performance-metrics').innerHTML = `<div class="error">Error loading metrics: ${error.message}</div>`;
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTestComponents();
+            updatePerformanceMetrics();
+            
+            // Update metrics every 5 seconds
+            setInterval(updatePerformanceMetrics, 5000);
+        });
+    </script>
+</body>
+</html>

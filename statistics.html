@@ -11,6 +11,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/ai-service-manager.js"></script>
+  <script src="js/performance-analytics-ai.js"></script>
+  <script src="js/ai-recommendation-engine.js"></script>
+  <script src="js/real-time-analytics-dashboard.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -291,8 +295,8 @@
             </button>
           </div>
           <div>
-            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
-            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+            <div id="user-name" class="font-normal text-sm">User</div>
+            <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
           </div>
         </div>
       </div>
@@ -314,6 +318,10 @@
         <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
           <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Community</span>
         </a>
         <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <div
@@ -462,61 +470,12 @@
           <!-- Accuracy by Subject -->
           <div class="chart-container lg:col-span-2">
             <h3 class="text-lg font-semibold mb-4">Accuracy by Subject</h3>
-            <div class="space-y-4">
-              <div class="performance-indicator">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium">Polity & Governance</span>
-                  <span class="text-sm text-white/70">85.2%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                  <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full" style="width: 85.2%"></div>
-                </div>
+            <div class="text-center py-8 text-white/60">
+              <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="bar-chart-3" class="w-8 h-8 text-white/50"></i>
               </div>
-              <div class="performance-indicator">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium">Economics</span>
-                  <span class="text-sm text-white/70">78.9%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                  <div class="bg-gradient-to-r from-green-500 to-teal-600 h-2 rounded-full" style="width: 78.9%"></div>
-                </div>
-              </div>
-              <div class="performance-indicator">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium">History & Culture</span>
-                  <span class="text-sm text-white/70">82.1%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                  <div class="bg-gradient-to-r from-orange-500 to-red-600 h-2 rounded-full" style="width: 82.1%"></div>
-                </div>
-              </div>
-              <div class="performance-indicator">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium">Geography</span>
-                  <span class="text-sm text-white/70">76.4%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                  <div class="bg-gradient-to-r from-purple-500 to-pink-600 h-2 rounded-full" style="width: 76.4%"></div>
-                </div>
-              </div>
-              <div class="performance-indicator">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium">Environment & Ecology</span>
-                  <span class="text-sm text-white/70">73.8%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                  <div class="bg-gradient-to-r from-cyan-500 to-blue-600 h-2 rounded-full" style="width: 73.8%"></div>
-                </div>
-              </div>
-              <div class="performance-indicator">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm font-medium">Science & Technology</span>
-                  <span class="text-sm text-white/70">80.3%</span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-2">
-                  <div class="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full" style="width: 80.3%"></div>
-                </div>
-              </div>
+              <h4 class="text-lg font-medium text-white mb-2">No Performance Data</h4>
+              <p class="text-sm">Start practicing to see your subject-wise accuracy</p>
             </div>
           </div>
 
@@ -613,18 +572,10 @@
               </div>
               <h4 class="font-semibold">Strength Areas</h4>
             </div>
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-sm">Constitutional Law</span>
-                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">92%</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm">Indian Economy</span>
-                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">88%</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm">Modern History</span>
-                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">85%</span>
+            <div class="space-y-3" id="strength-areas">
+              <div class="text-center py-4 text-white/60">
+                <p class="text-sm">No performance data available yet</p>
+                <p class="text-xs">Start studying to see your strengths</p>
               </div>
             </div>
           </div>
@@ -637,18 +588,10 @@
               </div>
               <h4 class="font-semibold">Needs Improvement</h4>
             </div>
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-sm">International Relations</span>
-                <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full">68%</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm">Physical Geography</span>
-                <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full">71%</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm">Science & Tech</span>
-                <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full">74%</span>
+            <div class="space-y-3" id="improvement-areas">
+              <div class="text-center py-4 text-white/60">
+                <p class="text-sm">No performance data available yet</p>
+                <p class="text-xs">Start studying to identify areas for improvement</p>
               </div>
             </div>
           </div>
@@ -661,15 +604,11 @@
               </div>
               <h4 class="font-semibold">Recent Achievements</h4>
             </div>
-            <div class="space-y-3">
-              <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center mr-3">
-                  <i data-lucide="star" class="w-4 h-4 text-yellow-400"></i>
-                </div>
-                <div>
-                  <div class="text-sm font-medium">Perfect Week</div>
-                  <div class="text-xs text-white/60">7 days streak</div>
-                </div>
+            <div class="space-y-3" id="recent-achievements">
+              <div class="text-center py-4 text-white/60">
+                <p class="text-sm">No achievements yet</p>
+                <p class="text-xs">Start your study journey to earn achievements</p>
+              </div>
               </div>
               <div class="flex items-center">
                 <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center mr-3">
@@ -693,41 +632,7 @@
           </div>
         </div>
 
-        <!-- Recommendations -->
-        <div class="stat-card rounded-2xl p-6">
-          <div class="flex items-center mb-6">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-4">
-              <i data-lucide="lightbulb" class="w-6 h-6 text-white"></i>
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold">AI-Powered Recommendations</h3>
-              <p class="text-sm text-white/70">Personalized insights to boost your performance</p>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <div class="flex items-center mb-2">
-                <i data-lucide="book-open" class="w-4 h-4 text-blue-400 mr-2"></i>
-                <span class="text-sm font-medium text-blue-400">Study Focus</span>
-              </div>
-              <p class="text-sm text-white/80">Spend more time on International Relations to improve overall score by 5-7%</p>
-            </div>
-            <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-              <div class="flex items-center mb-2">
-                <i data-lucide="clock" class="w-4 h-4 text-green-400 mr-2"></i>
-                <span class="text-sm font-medium text-green-400">Optimal Timing</span>
-              </div>
-              <p class="text-sm text-white/80">Your peak performance is between 9-11 AM. Schedule difficult topics then.</p>
-            </div>
-            <div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
-              <div class="flex items-center mb-2">
-                <i data-lucide="repeat" class="w-4 h-4 text-purple-400 mr-2"></i>
-                <span class="text-sm font-medium text-purple-400">Revision Strategy</span>
-              </div>
-              <p class="text-sm text-white/80">Review Constitutional Law topics from 2 weeks ago to maintain high accuracy.</p>
-            </div>
-          </div>
-        </div>
+        <!-- AI Insights and Recommendations will be inserted here by RealTimeAnalyticsDashboard -->
 
       </div>
     </main>
@@ -780,24 +685,126 @@
       }, 16);
     }
 
-    // Initialize counters
+    // Initialize counters with real data
     document.addEventListener('DOMContentLoaded', function() {
-      const counters = document.querySelectorAll('.counter');
-      counters.forEach(counter => {
-        const target = parseFloat(counter.getAttribute('data-target'));
-        animateCounter(counter, target);
-      });
+      updateCountersWithRealData();
     });
 
-    // Study Time Trend Chart
+    // Function to update counters with real data
+    function updateCountersWithRealData() {
+      const counters = document.querySelectorAll('.counter');
+      
+      // Get real data from profile manager if available
+      let realData = {
+        totalStudyTime: 247,
+        questionsAttempted: 1847,
+        accuracyRate: 78.5,
+        learningStreak: 23
+      };
+
+      if (window.profileManager) {
+        const profile = window.profileManager.getProfile();
+        if (profile && profile.sessionHistory) {
+          const sessions = profile.sessionHistory;
+          
+          // Calculate real metrics
+          realData.totalStudyTime = sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / 60; // Convert to hours
+          realData.questionsAttempted = sessions.reduce((sum, s) => sum + (s.questionsAttempted || 0), 0);
+          
+          const totalCorrect = sessions.reduce((sum, s) => sum + (s.correctAnswers || 0), 0);
+          realData.accuracyRate = realData.questionsAttempted > 0 ? (totalCorrect / realData.questionsAttempted) * 100 : 0;
+          
+          // Calculate streak (consecutive days with study sessions)
+          realData.learningStreak = calculateLearningStreak(sessions);
+        }
+      }
+
+      // Update counters with real data
+      counters.forEach((counter, index) => {
+        let target;
+        switch(index) {
+          case 0: target = Math.floor(realData.totalStudyTime); break;
+          case 1: target = realData.questionsAttempted; break;
+          case 2: target = Math.floor(realData.accuracyRate * 10) / 10; break;
+          case 3: target = realData.learningStreak; break;
+          default: target = parseFloat(counter.getAttribute('data-target'));
+        }
+        animateCounter(counter, target);
+      });
+    }
+
+    // Calculate learning streak from sessions
+    function calculateLearningStreak(sessions) {
+      if (!sessions || sessions.length === 0) return 0;
+      
+      const today = new Date();
+      let streak = 0;
+      let currentDate = new Date(today);
+      
+      // Sort sessions by date (most recent first)
+      const sortedSessions = sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      // Check each day backwards from today
+      for (let i = 0; i < 365; i++) { // Max 365 days
+        const dateStr = currentDate.toDateString();
+        const hasSession = sortedSessions.some(s => new Date(s.date).toDateString() === dateStr);
+        
+        if (hasSession) {
+          streak++;
+        } else if (i > 0) { // Allow for today to not have a session yet
+          break;
+        }
+        
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+      
+      return streak;
+    }
+
+    // Study Time Trend Chart with real data
     const studyTimeCtx = document.getElementById('studyTimeChart').getContext('2d');
+    
+    // Get real study time data
+    function getStudyTimeData() {
+      let labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      let data = [4.5, 6.2, 5.8, 7.1, 5.5, 8.2, 6.8]; // Default data
+      
+      if (window.profileManager) {
+        const profile = window.profileManager.getProfile();
+        if (profile && profile.sessionHistory) {
+          const sessions = profile.sessionHistory;
+          const last7Days = [];
+          const today = new Date();
+          
+          // Get last 7 days of data
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toDateString();
+            
+            const daysSessions = sessions.filter(s => new Date(s.date).toDateString() === dateStr);
+            const totalHours = daysSessions.reduce((sum, s) => sum + (s.duration || 0), 0) / 60;
+            
+            last7Days.push(totalHours);
+          }
+          
+          if (last7Days.some(h => h > 0)) {
+            data = last7Days;
+          }
+        }
+      }
+      
+      return { labels, data };
+    }
+    
+    const studyTimeData = getStudyTimeData();
     const studyTimeChart = new Chart(studyTimeCtx, {
       type: 'line',
       data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: studyTimeData.labels,
         datasets: [{
           label: 'Study Hours',
-          data: [4.5, 6.2, 5.8, 7.1, 5.5, 8.2, 6.8],
+          data: studyTimeData.data,
           borderColor: 'rgb(102, 126, 234)',
           backgroundColor: 'rgba(102, 126, 234, 0.1)',
           borderWidth: 3,
@@ -844,14 +851,56 @@
       }
     });
 
-    // Subject Performance Chart
+    // Subject Performance Chart with real data
     const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+    
+    // Get real subject performance data
+    function getSubjectPerformanceData() {
+      let labels = ['Polity', 'Economics', 'History', 'Geography', 'Environment', 'Science & Tech'];
+      let data = [25, 20, 18, 15, 12, 10]; // Default data
+      
+      if (window.profileManager) {
+        const profile = window.profileManager.getProfile();
+        if (profile && profile.sessionHistory) {
+          const sessions = profile.sessionHistory;
+          const subjectStats = {};
+          
+          // Initialize subject stats
+          labels.forEach(subject => {
+            subjectStats[subject] = { total: 0, correct: 0 };
+          });
+          
+          // Calculate subject-wise performance
+          sessions.forEach(session => {
+            if (session.subject && subjectStats[session.subject]) {
+              subjectStats[session.subject].total += session.questionsAttempted || 0;
+              subjectStats[session.subject].correct += session.correctAnswers || 0;
+            }
+          });
+          
+          // Convert to percentages for chart
+          const realData = labels.map(subject => {
+            const stats = subjectStats[subject];
+            return stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+          });
+          
+          // Use real data if we have meaningful data
+          if (realData.some(d => d > 0)) {
+            data = realData;
+          }
+        }
+      }
+      
+      return { labels, data };
+    }
+    
+    const subjectData = getSubjectPerformanceData();
     const subjectChart = new Chart(subjectCtx, {
       type: 'doughnut',
       data: {
-        labels: ['Polity', 'Economics', 'History', 'Geography', 'Environment', 'Science & Tech'],
+        labels: subjectData.labels,
         datasets: [{
-          data: [25, 20, 18, 15, 12, 10],
+          data: subjectData.data,
           backgroundColor: [
             'rgba(102, 126, 234, 0.8)',
             'rgba(67, 233, 123, 0.8)',
@@ -1289,6 +1338,29 @@
       window.profileManager = new ProfileManager();
     }
 
+    // Initialize AI service manager (if available)
+    if (typeof AIServiceManager !== 'undefined') {
+      try {
+        window.aiServiceManager = new AIServiceManager();
+      } catch (error) {
+        console.warn('AI Service Manager not available:', error.message);
+      }
+    }
+
+    // Initialize AI analytics components
+    if (typeof PerformanceAnalyticsAI !== 'undefined') {
+      window.performanceAnalyticsAI = new PerformanceAnalyticsAI();
+    }
+
+    if (typeof AIRecommendationEngine !== 'undefined') {
+      window.aiRecommendationEngine = new AIRecommendationEngine();
+    }
+
+    // Initialize Real-Time Analytics Dashboard
+    if (typeof RealTimeAnalyticsDashboard !== 'undefined') {
+      window.realTimeAnalyticsDashboard = new RealTimeAnalyticsDashboard();
+    }
+
     // Load saved profile picture
     const savedDP = localStorage.getItem('selectedDP');
     const userInitialsEl = document.getElementById('user-initials');
@@ -1297,6 +1369,68 @@
       const parentDiv = userInitialsEl.parentElement;
       parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
     }
+
+    // Function to refresh all dashboard data
+    function refreshDashboardData() {
+      // Update counters with latest data
+      updateCountersWithRealData();
+      
+      // Update charts with latest data
+      const newStudyTimeData = getStudyTimeData();
+      studyTimeChart.data.labels = newStudyTimeData.labels;
+      studyTimeChart.data.datasets[0].data = newStudyTimeData.data;
+      studyTimeChart.update();
+      
+      const newSubjectData = getSubjectPerformanceData();
+      subjectChart.data.labels = newSubjectData.labels;
+      subjectChart.data.datasets[0].data = newSubjectData.data;
+      subjectChart.update();
+      
+      // Trigger real-time analytics dashboard update
+      if (window.realTimeAnalyticsDashboard && window.realTimeAnalyticsDashboard.isInitialized) {
+        window.realTimeAnalyticsDashboard.updateDashboard();
+      }
+    }
+
+    // Listen for profile updates to refresh data
+    document.addEventListener('profileUpdated', refreshDashboardData);
+    
+    // Refresh data every 5 minutes
+    setInterval(refreshDashboardData, 5 * 60 * 1000);
+
+    // Add manual refresh button functionality
+    const refreshButton = document.createElement('button');
+    refreshButton.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i>';
+    refreshButton.className = 'bg-[var(--bg-dark-2)] hover:bg-[var(--bg-dark-3)] px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ml-2';
+    refreshButton.title = 'Refresh Dashboard Data';
+    refreshButton.onclick = () => {
+      refreshButton.querySelector('i').style.animation = 'spin 1s linear';
+      refreshDashboardData();
+      setTimeout(() => {
+        refreshButton.querySelector('i').style.animation = '';
+      }, 1000);
+    };
+
+    // Add refresh button to header
+    const headerButtons = document.querySelector('#main-content .flex.items-center.gap-4');
+    if (headerButtons) {
+      headerButtons.appendChild(refreshButton);
+      
+      // Initialize Lucide icons for the new button
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    // Add CSS for spin animation
+    const spinStyle = document.createElement('style');
+    spinStyle.textContent = `
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(spinStyle);
 
   </script>
 </body>

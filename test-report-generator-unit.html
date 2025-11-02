@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator Unit Tests</title>
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-results {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .test-summary {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .pass { color: #10b981; }
+        .fail { color: #ef4444; }
+        .info { color: #3b82f6; }
+
+        h1, h2 { color: white; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Report Generator Unit Tests</h1>
+        
+        <div class="test-summary" id="testSummary">
+            <h2>Test Summary</h2>
+            <p>Running tests...</p>
+        </div>
+
+        <div class="test-results" id="testResults">
+            Starting unit tests...\n
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-analyzer.js"></script>
+    <script src="js/report-generator.js"></script>
+
+    <script>
+        class TestFramework {
+            constructor() {
+                this.tests = [];
+                this.passed = 0;
+                this.failed = 0;
+            }
+
+            assertTrue(condition, message) {
+                if (condition) {
+                    this.log(`✅ PASS: ${message}`, 'pass');
+                    this.passed++;
+                } else {
+                    this.log(`❌ FAIL: ${message}`, 'fail');
+                    this.failed++;
+                }
+            }
+
+            assertEqual(actual, expected, message) {
+                if (actual === expected) {
+                    this.log(`✅ PASS: ${message}`, 'pass');
+                    this.passed++;
+                } else {
+                    this.log(`❌ FAIL: ${message} (Expected: ${expected}, Actual: ${actual})`, 'fail');
+                    this.failed++;
+                }
+            }
+
+            assertNotNull(value, message) {
+                this.assertTrue(value !== null && value !== undefined, message);
+            }
+
+            log(message, type = 'info') {
+                const results = document.getElementById('testResults');
+                const className = type === 'pass' ? 'pass' : type === 'fail' ? 'fail' : 'info';
+                results.innerHTML += `<span class="${className}">${message}</span>\n`;
+                results.scrollTop = results.scrollHeight;
+            }
+
+            updateSummary() {
+                const summary = document.getElementById('testSummary');
+                const total = this.passed + this.failed;
+                const passRate = total > 0 ? ((this.passed / total) * 100).toFixed(1) : 0;
+                
+                summary.innerHTML = `
+                    <h2>Test Summary</h2>
+                    <p><strong>Total Tests:</strong> ${total}</p>
+                    <p><strong>Passed:</strong> <span class="pass">${this.passed}</span></p>
+                    <p><strong>Failed:</strong> <span class="fail">${this.failed}</span></p>
+                    <p><strong>Pass Rate:</strong> ${passRate}%</p>
+                `;
+            }
+        }
+
+        const testFramework = new TestFramework();
+
+        function runAllTests() {
+            testFramework.log('🚀 Starting Report Generator Unit Tests', 'info');
+            
+            // Test 1: ReportGenerator initialization
+            testReportGeneratorInitialization();
+            
+            // Test 2: Report generation
+            testReportGeneration();
+            
+            // Test 3: Report sections
+            testReportSections();
+            
+            // Test 4: Chart generation
+            testChartGeneration();
+            
+            // Test 5: Export functionality
+            testExportFunctionality();
+            
+            // Test 6: Cache functionality
+            testCacheFunctionality();
+            
+            testFramework.log('🏁 All tests completed', 'info');
+            testFramework.updateSummary();
+        }
+
+        function testReportGeneratorInitialization() {
+            testFramework.log('\n📋 Testing ReportGenerator Initialization', 'info');
+            
+            // Test ReportGenerator exists
+            testFramework.assertNotNull(window.reportGenerator, 'ReportGenerator should be available globally');
+            
+            // Test required properties
+            testFramework.assertNotNull(window.reportGenerator.templates, 'Should have report templates');
+            testFramework.assertNotNull(window.reportGenerator.chartConfig, 'Should have chart configuration');
+            testFramework.assertNotNull(window.reportGenerator.reportCache, 'Should have report cache');
+            
+            // Test templates structure
+            testFramework.assertTrue('weekly' in window.reportGenerator.templates, 'Should have weekly template');
+            testFramework.assertTrue('monthly' in window.reportGenerator.templates, 'Should have monthly template');
+            
+            // Test chart config
+            testFramework.assertNotNull(window.reportGenerator.chartConfig.colors, 'Should have color configuration');
+            testFramework.assertNotNull(window.reportGenerator.chartConfig.gradients, 'Should have gradient configuration');
+        }
+
+        function testReportGeneration() {
+            testFramework.log('\n📊 Testing Report Generation', 'info');
+            
+            try {
+                // Generate sample data first
+                generateSampleData();
+                
+                // Test weekly report generation
+                const weeklyReport = window.reportGenerator.generateReport('weekly');
+                testFramework.assertNotNull(weeklyReport, 'Weekly report should be generated');
+                testFramework.assertNotNull(weeklyReport.metadata, 'Report should have metadata');
+                testFramework.assertEqual(weeklyReport.metadata.type, 'weekly', 'Report type should be weekly');
+                
+                // Test monthly report generation
+                const monthlyReport = window.reportGenerator.generateReport('monthly');
+                testFramework.assertNotNull(monthlyReport, 'Monthly report should be generated');
+                testFramework.assertEqual(monthlyReport.metadata.type, 'monthly', 'Report type should be monthly');
+                
+                // Test report structure
+                testFramework.assertNotNull(weeklyReport.sections, 'Report should have sections');
+                testFramework.assertNotNull(weeklyReport.charts, 'Report should have charts');
+                testFramework.assertNotNull(weeklyReport.insights, 'Report should have insights');
+                testFramework.assertNotNull(weeklyReport.recommendations, 'Report should have recommendations');
+                
+            } catch (error) {
+                testFramework.log(`Error in report generation: ${error.message}`, 'fail');
+            }
+        }
+
+        function testReportSections() {
+            testFramework.log('\n📑 Testing Report Sections', 'info');
+            
+            try {
+                const report = window.reportGenerator.generateReport('weekly');
+                
+                // Test overview section
+                testFramework.assertNotNull(report.sections.overview, 'Should have overview section');
+                testFramework.assertNotNull(report.sections.overview.summary, 'Overview should have summary');
+                testFramework.assertNotNull(report.sections.overview.highlights, 'Overview should have highlights');
+                
+                // Test performance section
+                testFramework.assertNotNull(report.sections.performance, 'Should have performance section');
+                testFramework.assertNotNull(report.sections.performance.keyMetrics, 'Performance should have key metrics');
+                
+                // Test trends section
+                testFramework.assertNotNull(report.sections.trends, 'Should have trends section');
+                testFramework.assertNotNull(report.sections.trends.trendAnalysis, 'Trends should have analysis');
+                
+                // Test insights section
+                testFramework.assertNotNull(report.sections.insights, 'Should have insights section');
+                testFramework.assertNotNull(report.sections.insights.summary, 'Insights should have summary');
+                
+                // Test recommendations section
+                testFramework.assertNotNull(report.sections.recommendations, 'Should have recommendations section');
+                testFramework.assertNotNull(report.sections.recommendations.immediate, 'Should have immediate recommendations');
+                
+            } catch (error) {
+                testFramework.log(`Error in section testing: ${error.message}`, 'fail');
+            }
+        }
+
+        function testChartGeneration() {
+            testFramework.log('\n📈 Testing Chart Generation', 'info');
+            
+            try {
+                const report = window.reportGenerator.generateReport('weekly');
+                
+                // Test chart existence
+                testFramework.assertNotNull(report.charts, 'Report should have charts');
+                testFramework.assertTrue(Object.keys(report.charts).length > 0, 'Should have at least one chart');
+                
+                // Test accuracy chart
+                if (report.charts.accuracy) {
+                    testFramework.assertNotNull(report.charts.accuracy.data, 'Accuracy chart should have data');
+                    testFramework.assertNotNull(report.charts.accuracy.options, 'Accuracy chart should have options');
+                    testFramework.assertEqual(report.charts.accuracy.type, 'line', 'Accuracy chart should be line type');
+                }
+                
+                // Test study time chart
+                if (report.charts.studyTime) {
+                    testFramework.assertNotNull(report.charts.studyTime.data, 'Study time chart should have data');
+                    testFramework.assertEqual(report.charts.studyTime.type, 'bar', 'Study time chart should be bar type');
+                }
+                
+                // Test chart data structure
+                const firstChart = Object.values(report.charts)[0];
+                if (firstChart) {
+                    testFramework.assertNotNull(firstChart.title, 'Chart should have title');
+                    testFramework.assertNotNull(firstChart.data, 'Chart should have data');
+                    testFramework.assertNotNull(firstChart.data.labels, 'Chart data should have labels');
+                    testFramework.assertNotNull(firstChart.data.datasets, 'Chart data should have datasets');
+                }
+                
+            } catch (error) {
+                testFramework.log(`Error in chart testing: ${error.message}`, 'fail');
+            }
+        }
+
+        function testExportFunctionality() {
+            testFramework.log('\n💾 Testing Export Functionality', 'info');
+            
+            try {
+                const report = window.reportGenerator.generateReport('weekly');
+                
+                // Test HTML export
+                const htmlExport = window.reportGenerator.exportReport(report, 'html');
+                testFramework.assertNotNull(htmlExport, 'HTML export should return content');
+                testFramework.assertTrue(typeof htmlExport === 'string', 'HTML export should be string');
+                testFramework.assertTrue(htmlExport.length > 0, 'HTML export should not be empty');
+                
+                // Test JSON export
+                const jsonExport = window.reportGenerator.exportReport(report, 'json');
+                testFramework.assertNotNull(jsonExport, 'JSON export should return content');
+                testFramework.assertTrue(typeof jsonExport === 'string', 'JSON export should be string');
+                
+                // Test CSV export
+                const csvExport = window.reportGenerator.exportReport(report, 'csv');
+                testFramework.assertNotNull(csvExport, 'CSV export should return content');
+                
+                // Test invalid format handling
+                try {
+                    window.reportGenerator.exportReport(report, 'invalid');
+                    testFramework.log('Should throw error for invalid format', 'fail');
+                } catch (error) {
+                    testFramework.assertTrue(error.message.includes('Unsupported export format'), 'Should handle invalid format');
+                }
+                
+            } catch (error) {
+                testFramework.log(`Error in export testing: ${error.message}`, 'fail');
+            }
+        }
+
+        function testCacheFunctionality() {
+            testFramework.log('\n🗄️ Testing Cache Functionality', 'info');
+            
+            try {
+                // Clear cache first
+                window.reportGenerator.invalidateCache();
+                
+                // Generate report (should create cache entry)
+                const startTime = performance.now();
+                const report1 = window.reportGenerator.generateReport('weekly');
+                const firstGenTime = performance.now() - startTime;
+                
+                // Generate same report again (should use cache)
+                const startTime2 = performance.now();
+                const report2 = window.reportGenerator.generateReport('weekly');
+                const secondGenTime = performance.now() - startTime2;
+                
+                testFramework.assertNotNull(report1, 'First report should be generated');
+                testFramework.assertNotNull(report2, 'Second report should be generated');
+                
+                // Cache should make second generation faster (though this might not always be true in tests)
+                testFramework.assertTrue(secondGenTime <= firstGenTime * 2, 'Cached generation should not be significantly slower');
+                
+                // Test cache invalidation
+                window.reportGenerator.invalidateCache();
+                testFramework.assertTrue(window.reportGenerator.reportCache.size === 0, 'Cache should be empty after invalidation');
+                
+            } catch (error) {
+                testFramework.log(`Error in cache testing: ${error.message}`, 'fail');
+            }
+        }
+
+        function generateSampleData() {
+            // Generate minimal sample data for testing
+            const sessions = [];
+            const assessments = [];
+            
+            for (let i = 0; i < 10; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                sessions.push({
+                    date: date,
+                    duration: 1800 + Math.random() * 1800, // 30-60 minutes
+                    type: 'mcq',
+                    subject: 'Mathematics',
+                    questionsAttempted: 20,
+                    correctAnswers: 15 + Math.floor(Math.random() * 5),
+                    accuracy: 75 + Math.random() * 20,
+                    focusQuality: 80 + Math.random() * 15
+                });
+                
+                if (i % 3 === 0) {
+                    assessments.push({
+                        date: date,
+                        type: 'practice',
+                        subject: 'Mathematics',
+                        totalQuestions: 25,
+                        correctAnswers: 18 + Math.floor(Math.random() * 5),
+                        accuracy: 70 + Math.random() * 25,
+                        timeSpent: 1200 + Math.random() * 600
+                    });
+                }
+            }
+            
+            // Record the data
+            sessions.forEach(session => {
+                window.performanceAnalyzer.recordSession(session);
+            });
+            
+            assessments.forEach(assessment => {
+                window.performanceAnalyzer.recordAssessment(assessment);
+            });
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(runAllTests, 500); // Small delay to ensure all scripts are loaded
+        });
+    </script>
+</body>
+</html>

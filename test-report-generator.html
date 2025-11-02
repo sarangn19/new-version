@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator Test</title>
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <link rel="stylesheet" href="styles/theme-system.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .report-output {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .report-preview {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-success { background: #10b981; }
+        .status-warning { background: #f59e0b; }
+        .status-error { background: #ef4444; }
+
+        h1, h2, h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .chart-placeholder {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 15px 0;
+        }
+
+        .insights-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .insights-list li {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .recommendation-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .priority-high { border-left: 4px solid #ef4444; }
+        .priority-medium { border-left: 4px solid #f59e0b; }
+        .priority-low { border-left: 4px solid #10b981; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📊 Report Generator Test Suite</h1>
+        
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <div class="test-controls">
+                <button class="btn primary" onclick="generateWeeklyReport()">Generate Weekly Report</button>
+                <button class="btn primary" onclick="generateMonthlyReport()">Generate Monthly Report</button>
+                <button class="btn success" onclick="generateSampleData()">Generate Sample Data</button>
+                <button class="btn" onclick="testReportExport()">Test Export Functions</button>
+                <button class="btn" onclick="clearOutput()">Clear Output</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Report Preview</h2>
+            <div id="reportPreview" class="report-preview">
+                <p>Click "Generate Weekly Report" or "Generate Monthly Report" to see a preview here.</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Output</h2>
+            <div id="testOutput" class="report-output">
+                Test output will appear here...
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Performance Metrics</h2>
+            <div id="metricsDisplay">
+                <div class="metric-card">
+                    <div class="metric-value" id="reportGenTime">-</div>
+                    <div class="metric-label">Report Generation Time (ms)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="dataPoints">-</div>
+                    <div class="metric-label">Data Points Processed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="cacheHits">-</div>
+                    <div class="metric-label">Cache Hit Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-analyzer.js"></script>
+    <script src="js/report-generator.js"></script>
+
+    <script>
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('testOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const typeIcon = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️'
+            }[type] || 'ℹ️';
+            
+            output.textContent += `[${timestamp}] ${typeIcon} ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('testOutput').textContent = '';
+            document.getElementById('reportPreview').innerHTML = '<p>Output cleared. Generate a new report to see preview.</p>';
+        }
+
+        function generateSampleData() {
+            log('Generating sample performance data...', 'info');
+            
+            try {
+                // Generate sample sessions
+                const sessions = [];
+                const assessments = [];
+                
+                for (let i = 0; i < 30; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    
+                    // Sample study session
+                    sessions.push({
+                        date: date,
+                        duration: Math.random() * 3600 + 1800, // 30-90 minutes
+                        type: ['mcq', 'flashcard', 'notes'][Math.floor(Math.random() * 3)],
+                        subject: ['Mathematics', 'Science', 'History'][Math.floor(Math.random() * 3)],
+                        questionsAttempted: Math.floor(Math.random() * 50) + 10,
+                        correctAnswers: Math.floor(Math.random() * 40) + 5,
+                        accuracy: Math.random() * 40 + 60, // 60-100%
+                        focusQuality: Math.random() * 30 + 70 // 70-100%
+                    });
+                    
+                    // Sample assessment
+                    if (Math.random() > 0.7) { // 30% chance of assessment
+                        assessments.push({
+                            date: date,
+                            type: 'practice',
+                            subject: ['Mathematics', 'Science', 'History'][Math.floor(Math.random() * 3)],
+                            totalQuestions: Math.floor(Math.random() * 30) + 20,
+                            correctAnswers: Math.floor(Math.random() * 25) + 10,
+                            accuracy: Math.random() * 40 + 60,
+                            timeSpent: Math.random() * 1800 + 600 // 10-40 minutes
+                        });
+                    }
+                }
+                
+                // Record the data
+                sessions.forEach(session => {
+                    window.performanceAnalyzer.recordSession(session);
+                });
+                
+                assessments.forEach(assessment => {
+                    window.performanceAnalyzer.recordAssessment(assessment);
+                });
+                
+                log(`Generated ${sessions.length} sessions and ${assessments.length} assessments`, 'success');
+                
+            } catch (error) {
+                log(`Error generating sample data: ${error.message}`, 'error');
+            }
+        }
+
+        function generateWeeklyReport() {
+            log('Generating weekly report...', 'info');
+            
+            try {
+                const startTime = performance.now();
+                const report = window.reportGenerator.generateReport('weekly');
+                const endTime = performance.now();
+                
+                document.getElementById('reportGenTime').textContent = Math.round(endTime - startTime);
+                document.getElementById('dataPoints').textContent = 
+                    report.sections.overview.summary.sessionsCompleted.value;
+                
+                log('Weekly report generated successfully', 'success');
+                log(`Report contains ${Object.keys(report.sections).length} sections`, 'info');
+                log(`Performance score: ${report.sections.overview.summary.performanceScore.formatted}`, 'info');
+                
+                displayReportPreview(report);
+                
+            } catch (error) {
+                log(`Error generating weekly report: ${error.message}`, 'error');
+                console.error('Weekly report error:', error);
+            }
+        }
+
+        function generateMonthlyReport() {
+            log('Generating monthly report...', 'info');
+            
+            try {
+                const startTime = performance.now();
+                const report = window.reportGenerator.generateReport('monthly');
+                const endTime = performance.now();
+                
+                document.getElementById('reportGenTime').textContent = Math.round(endTime - startTime);
+                document.getElementById('dataPoints').textContent = 
+                    report.sections.overview.summary.sessionsCompleted.value;
+                
+                log('Monthly report generated successfully', 'success');
+                log(`Report contains ${Object.keys(report.sections).length} sections`, 'info');
+                log(`Performance score: ${report.sections.overview.summary.performanceScore.formatted}`, 'info');
+                
+                displayReportPreview(report);
+                
+            } catch (error) {
+                log(`Error generating monthly report: ${error.message}`, 'error');
+                console.error('Monthly report error:', error);
+            }
+        }
+
+        function displayReportPreview(report) {
+            const preview = document.getElementById('reportPreview');
+            
+            const html = `
+                <h2>${report.metadata.title}</h2>
+                <p><strong>Period:</strong> ${report.metadata.period.formatted}</p>
+                <p><strong>Generated:</strong> ${report.metadata.generatedAt.toLocaleString()}</p>
+                
+                <h3>📈 Performance Overview</h3>
+                <div class="recommendations-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: #3b82f6;">
+                            ${report.sections.overview.summary.performanceScore.formatted}
+                        </div>
+                        <div class="metric-label" style="color: #666;">Performance Score</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: #10b981;">
+                            ${report.sections.overview.summary.overallAccuracy.formatted}
+                        </div>
+                        <div class="metric-label" style="color: #666;">Overall Accuracy</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: #f59e0b;">
+                            ${report.sections.overview.summary.totalStudyTime.formatted}
+                        </div>
+                        <div class="metric-label" style="color: #666;">Study Time</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: #8b5cf6;">
+                            ${report.sections.overview.summary.sessionsCompleted.formatted}
+                        </div>
+                        <div class="metric-label" style="color: #666;">Sessions Completed</div>
+                    </div>
+                </div>
+                
+                <h3>🎯 Key Insights</h3>
+                <ul class="insights-list">
+                    ${report.sections.overview.highlights.map(highlight => 
+                        `<li><span class="status-indicator status-${highlight.type}"></span>${highlight.message}</li>`
+                    ).join('')}
+                </ul>
+                
+                <h3>📊 Charts Available</h3>
+                <div class="recommendations-grid">
+                    ${Object.keys(report.charts).map(chartType => 
+                        `<div class="chart-placeholder">
+                            <strong>${report.charts[chartType].title}</strong><br>
+                            <small>Chart Type: ${report.charts[chartType].type}</small><br>
+                            <small>Data Points: ${report.charts[chartType].data.labels.length}</small>
+                        </div>`
+                    ).join('')}
+                </div>
+                
+                <h3>💡 Recommendations</h3>
+                <div class="recommendations-grid">
+                    ${report.recommendations.critical.map(rec => 
+                        `<div class="recommendation-card priority-high">
+                            <strong>🔴 Critical:</strong> ${rec.suggestion}<br>
+                            <small>Action: ${rec.action}</small>
+                        </div>`
+                    ).join('')}
+                    ${report.recommendations.important.map(rec => 
+                        `<div class="recommendation-card priority-medium">
+                            <strong>🟡 Important:</strong> ${rec.suggestion}<br>
+                            <small>Action: ${rec.action}</small>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+            
+            preview.innerHTML = html;
+        }
+
+        function testReportExport() {
+            log('Testing report export functions...', 'info');
+            
+            try {
+                const report = window.reportGenerator.generateReport('weekly');
+                
+                // Test HTML export
+                const htmlExport = window.reportGenerator.exportReport(report, 'html');
+                log(`HTML export: ${htmlExport.length} characters`, 'success');
+                
+                // Test JSON export
+                const jsonExport = window.reportGenerator.exportReport(report, 'json');
+                log(`JSON export: ${jsonExport.length} characters`, 'success');
+                
+                // Test CSV export
+                const csvExport = window.reportGenerator.exportReport(report, 'csv');
+                log(`CSV export: ${csvExport.length} characters`, 'success');
+                
+                log('All export functions tested successfully', 'success');
+                
+            } catch (error) {
+                log(`Error testing exports: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize test environment
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Report Generator Test Suite initialized', 'success');
+            log('Available methods:', 'info');
+            log('- generateReport(type, subject, options)', 'info');
+            log('- exportReport(report, format, options)', 'info');
+            log('- renderReportHTML(report, options)', 'info');
+            
+            // Check if dependencies are loaded
+            if (window.reportGenerator) {
+                log('ReportGenerator loaded successfully', 'success');
+            } else {
+                log('ReportGenerator not found', 'error');
+            }
+            
+            if (window.performanceAnalyzer) {
+                log('PerformanceAnalyzer loaded successfully', 'success');
+            } else {
+                log('PerformanceAnalyzer not found', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

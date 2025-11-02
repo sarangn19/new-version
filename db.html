@@ -7,7 +7,81 @@
     <title>Aspirant Dashboard</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Primary icon library -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Fallback icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Robust icon initialization system with fallback
+        let iconInitAttempts = 0;
+        const maxAttempts = 10;
+        let usingFallback = false;
+
+        function initLucideIcons() {
+            iconInitAttempts++;
+
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                try {
+                    window.lucide.createIcons();
+                    console.log('✅ Lucide icons initialized successfully on attempt', iconInitAttempts);
+                    return true;
+                } catch (error) {
+                    console.error('❌ Lucide initialization error:', error);
+                }
+            }
+
+            if (iconInitAttempts < maxAttempts) {
+                setTimeout(initLucideIcons, 200);
+            } else {
+                console.warn('⚠️ Lucide failed, using Font Awesome fallback');
+                useFontAwesomeFallback();
+            }
+            return false;
+        }
+
+        function useFontAwesomeFallback() {
+            if (usingFallback) return;
+            usingFallback = true;
+
+            // Replace Lucide icons with Font Awesome equivalents
+            const iconMap = {
+                'search': 'fas fa-search',
+                'arrow-right': 'fas fa-arrow-right',
+                'zap': 'fas fa-bolt',
+                'bell-off': 'fas fa-bell-slash',
+                'layout-dashboard': 'fas fa-th-large',
+                'book-open': 'fas fa-book-open',
+                'bar-chart-2': 'fas fa-chart-bar',
+                'newspaper': 'fas fa-newspaper',
+                'bookmark': 'fas fa-bookmark',
+                'bell': 'fas fa-bell',
+                'trophy': 'fas fa-trophy',
+                'arrow-left': 'fas fa-arrow-left',
+                'check-circle': 'fas fa-check-circle',
+                'alert-triangle': 'fas fa-exclamation-triangle'
+            };
+
+            document.querySelectorAll('[data-lucide]').forEach(icon => {
+                const lucideName = icon.getAttribute('data-lucide');
+                const faClass = iconMap[lucideName] || 'fas fa-question';
+                icon.className = icon.className.replace(/w-\d+|h-\d+/g, '') + ' ' + faClass;
+                icon.removeAttribute('data-lucide');
+            });
+
+            console.log('✅ Font Awesome fallback icons applied');
+        }
+
+        // Multiple initialization triggers
+        document.addEventListener('DOMContentLoaded', initLucideIcons);
+        window.addEventListener('load', initLucideIcons);
+
+        // Immediate attempt
+        if (document.readyState === 'loading') {
+            setTimeout(initLucideIcons, 100);
+        } else {
+            initLucideIcons();
+        }
+    </script>
     <script src="js/profile-manager.js"></script>
     <link href="styles/glassmorphism.css" rel="stylesheet">
     <link
@@ -212,6 +286,71 @@
             gap: 8px;
         }
 
+        /* --- REVISION ILLUSTRATION STYLES --- */
+        #revision-reading-svg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Define the pivot point for all rotating elements using CSS */
+        #lamp-arm,
+        #light-beam,
+        #lamp-head {
+            transform-origin: 1310px 105px;
+        }
+
+        /* --- REMINDERS BOARD STYLES --- */
+        .reminder-note {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border: 1px solid #F59E0B;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transform: rotate(-1deg);
+            transition: all 0.2s ease;
+        }
+
+        .reminder-note:nth-child(even) {
+            transform: rotate(1deg);
+        }
+
+        .reminder-note:hover {
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            z-index: 10;
+        }
+
+        .reminder-note textarea {
+            background: transparent;
+            border: none;
+            resize: none;
+            outline: none;
+            color: #92400E;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .reminder-note textarea::placeholder {
+            color: #D97706;
+            opacity: 0.7;
+        }
+
+        #reminders-board.minimized #board-content {
+            display: none;
+        }
+
+        #reminders-board.minimized {
+            background: rgba(42, 42, 42, 0.8);
+        }
+
+        .reminder-delete-btn {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .reminder-note:hover .reminder-delete-btn {
+            opacity: 1;
+        }
+
         button:focus-visible,
         a:focus-visible,
         input:focus-visible,
@@ -329,123 +468,17 @@
 
     <!-- JavaScript for Logic and Interactivity -->
     <script>
-        // --- MOCK DATA ---
+        // Content data - will be loaded from user's actual study materials
         const contentData = [
-            { id: 1, title: "Indian Polity", date: "7th Sept", description: "Indian polity refers to the political system of India which is based on the Constitution of India. Notes on Indian polity typically cover...", tag: "New", bookmarked: true, imageUrl: "image/polity.png" },
-            { id: 2, title: "Modern History", date: "29th Sept", description: "Covering the arrival of Europeans, the struggle for independence, and post-independence consolidation...", tag: "Revision", bookmarked: false, imageUrl: "image/history.png" },
-            { id: 3, title: "Environment & Ecology", date: "1st Oct", description: "Deals with biodiversity, climate change, pollution, and international environmental conventions...", tag: "Unattempted", bookmarked: true, imageUrl: "image/environment.png" },
-            { id: 4, title: "Mock Test 1: Full Syllabus", date: "5th Oct", description: "A comprehensive mock test covering all major subjects to simulate exam conditions.", tag: "Mock Test", bookmarked: false, imageUrl: "image/mock-test.png" },
-            { id: 5, title: "Geography Basics", date: "10th Oct", description: "Fundamental concepts of physical and human geography, including climate and resources.", tag: "Unattempted", bookmarked: false, imageUrl: "image/geography.png" },
-            { id: 6, title: "Economic Survey Summary", date: "15th Oct", description: "Key highlights and analysis from the latest annual economic survey.", tag: "New", bookmarked: true, imageUrl: "image/economics.png" }
+            // Empty - will be populated with user's actual content
         ];
 
-        const flashcards = [
-            { id: 1, front: "What is the primary function of the Supreme Court of India?", back: "To uphold the Constitution and interpret its provisions (Judicial Review)." },
-            { id: 2, front: "When was the Quit India Movement launched?", back: "August 8, 1942." },
-            { id: 3, front: "Define carrying capacity in ecology.", back: "The maximum population size of a species that the environment can sustain indefinitely." }
-        ];
+        const flashcards = [];
 
-        // Daily Challenge Data - AI Generated based on student performance
+        // Daily Challenge Data - will be generated based on user progress
         const dailyChallenge = {
-            mcqs: [
-                {
-                    id: 1,
-                    question: "Which Constitutional Amendment is often referred to as a 'Mini-Constitution'?",
-                    options: ["42nd Amendment", "44th Amendment", "52nd Amendment", "61st Amendment"],
-                    answerIndex: 0,
-                    explanation: "The 42nd Amendment (1976) introduced vast changes to the Constitution, drastically changing its structure and earning it the nickname 'Mini-Constitution'."
-                },
-                {
-                    id: 2,
-                    question: "Who was the first President of India?",
-                    options: ["Dr. Rajendra Prasad", "Dr. S. Radhakrishnan", "Dr. Zakir Hussain", "V.V. Giri"],
-                    answerIndex: 0,
-                    explanation: "Dr. Rajendra Prasad was the first President of India, serving from 1950 to 1962."
-                },
-                {
-                    id: 3,
-                    question: "The Quit India Movement was launched in which year?",
-                    options: ["1940", "1942", "1944", "1946"],
-                    answerIndex: 1,
-                    explanation: "The Quit India Movement was launched on August 8, 1942, by Mahatma Gandhi."
-                },
-                {
-                    id: 4,
-                    question: "Which article of the Constitution deals with Right to Education?",
-                    options: ["Article 19", "Article 21", "Article 21A", "Article 22"],
-                    answerIndex: 2,
-                    explanation: "Article 21A provides free and compulsory education to children aged 6-14 years."
-                },
-                {
-                    id: 5,
-                    question: "The concept of 'Basic Structure' was established in which case?",
-                    options: ["Golaknath Case", "Kesavananda Bharati Case", "Minerva Mills Case", "Maneka Gandhi Case"],
-                    answerIndex: 1,
-                    explanation: "The Basic Structure doctrine was established in Kesavananda Bharati v. State of Kerala (1973)."
-                },
-                {
-                    id: 6,
-                    question: "Which Five Year Plan focused on 'Growth with Social Justice'?",
-                    options: ["Eighth Plan", "Ninth Plan", "Tenth Plan", "Eleventh Plan"],
-                    answerIndex: 1,
-                    explanation: "The Ninth Five Year Plan (1997-2002) had the theme 'Growth with Social Justice and Equity'."
-                },
-                {
-                    id: 7,
-                    question: "The National Green Tribunal was established in which year?",
-                    options: ["2008", "2010", "2012", "2014"],
-                    answerIndex: 1,
-                    explanation: "The National Green Tribunal was established in 2010 under the National Green Tribunal Act, 2010."
-                },
-                {
-                    id: 8,
-                    question: "Which committee recommended the creation of Panchayati Raj institutions?",
-                    options: ["Balwant Rai Mehta Committee", "Ashok Mehta Committee", "G.V.K. Rao Committee", "L.M. Singhvi Committee"],
-                    answerIndex: 0,
-                    explanation: "The Balwant Rai Mehta Committee (1957) recommended the establishment of Panchayati Raj institutions."
-                },
-                {
-                    id: 9,
-                    question: "The term 'Secular' was added to the Preamble by which amendment?",
-                    options: ["42nd Amendment", "44th Amendment", "52nd Amendment", "61st Amendment"],
-                    answerIndex: 0,
-                    explanation: "The 42nd Amendment (1976) added 'Socialist' and 'Secular' to the Preamble."
-                },
-                {
-                    id: 10,
-                    question: "Which river is known as the 'Sorrow of Bengal'?",
-                    options: ["Ganga", "Brahmaputra", "Damodar", "Hooghly"],
-                    answerIndex: 2,
-                    explanation: "The Damodar River was known as the 'Sorrow of Bengal' due to frequent floods before the construction of dams."
-                }
-            ],
-            flashcards: [
-                {
-                    id: 1,
-                    front: "What is the primary function of the Supreme Court of India?",
-                    back: "To uphold the Constitution and interpret its provisions (Judicial Review)."
-                },
-                {
-                    id: 2,
-                    front: "When was the Quit India Movement launched?",
-                    back: "August 8, 1942."
-                },
-                {
-                    id: 3,
-                    front: "Define carrying capacity in ecology.",
-                    back: "The maximum population size of a species that the environment can sustain indefinitely."
-                },
-                {
-                    id: 4,
-                    front: "What is the tenure of a Lok Sabha member?",
-                    back: "5 years from the date of its first meeting."
-                },
-                {
-                    id: 5,
-                    front: "Who appoints the Chief Justice of India?",
-                    back: "The President of India appoints the CJI in consultation with judges of SC and HC."
-                }
-            ],
+            mcqs: [],
+            flashcards: [],
             currentMCQ: 0,
             currentFlashcard: 0
         };
@@ -842,10 +875,107 @@
             return 'A';
         }
 
+        // --- REMINDERS BOARD FUNCTIONALITY (GLOBAL SCOPE) ---
+        let reminders = JSON.parse(localStorage.getItem('dashboardReminders')) || [];
+        let reminderIdCounter = Date.now();
+
+        function saveReminders() {
+            localStorage.setItem('dashboardReminders', JSON.stringify(reminders));
+        }
+
+        function toggleBoard() {
+            const board = document.getElementById('reminders-board');
+            const minimizeBtn = document.getElementById('minimize-board-btn');
+            const minimizeIcon = minimizeBtn.querySelector('i');
+
+            board.classList.toggle('minimized');
+
+            if (board.classList.contains('minimized')) {
+                minimizeIcon.setAttribute('data-lucide', 'maximize-2');
+                minimizeBtn.setAttribute('title', 'Maximize Board');
+            } else {
+                minimizeIcon.setAttribute('data-lucide', 'minus');
+                minimizeBtn.setAttribute('title', 'Minimize Board');
+            }
+
+            // Refresh icons
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        function addNewReminder() {
+            const reminder = {
+                id: reminderIdCounter++,
+                text: '',
+                timestamp: Date.now()
+            };
+
+            reminders.unshift(reminder);
+            saveReminders();
+            renderReminders();
+
+            // Focus on the new reminder
+            setTimeout(() => {
+                const newReminderTextarea = document.querySelector(`[data-reminder-id="${reminder.id}"] textarea`);
+                if (newReminderTextarea) {
+                    newReminderTextarea.focus();
+                }
+            }, 100);
+        }
+
+        function deleteReminder(id) {
+            reminders = reminders.filter(r => r.id !== id);
+            saveReminders();
+            renderReminders();
+            showToast('Reminder deleted', 'info');
+        }
+
+        function updateReminder(id, text) {
+            const reminder = reminders.find(r => r.id === id);
+            if (reminder) {
+                reminder.text = text;
+                saveReminders();
+            }
+        }
+
+        function renderReminders() {
+            const container = document.getElementById('reminders-container');
+            const emptyState = document.getElementById('empty-state');
+
+            if (reminders.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            container.innerHTML = reminders.map(reminder => `
+                <div class="reminder-note p-3 rounded-lg relative" data-reminder-id="${reminder.id}">
+                    <button onclick="deleteReminder(${reminder.id})" 
+                        class="reminder-delete-btn absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-xs transition-colors"
+                        title="Delete reminder">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                    <textarea 
+                        placeholder="Type your reminder here..."
+                        class="w-full h-20 pr-8"
+                        oninput="updateReminder(${reminder.id}, this.value)"
+                        onblur="if(!this.value.trim()) deleteReminder(${reminder.id})"
+                    >${reminder.text}</textarea>
+                    <div class="text-xs text-amber-700 mt-1 opacity-70">
+                        ${new Date(reminder.timestamp).toLocaleDateString()}
+                    </div>
+                </div>
+            `).join('');
+
+            // Refresh icons for delete buttons
+            if (window.lucide) window.lucide.createIcons();
+        }
+
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             // Profile information is now handled by profile-manager.js
-            
+
             // Load saved profile picture
             const savedDP = localStorage.getItem('selectedDP');
             const userInitialsEl = document.getElementById('user-initials');
@@ -871,12 +1001,7 @@
             }, 1500);
 
             // Notification functionality
-            const notifications = [
-                { id: 1, title: "New Daily Challenge Available", message: "Complete today's MCQ challenge to maintain your streak!", time: "2 minutes ago", type: "challenge", read: false },
-                { id: 2, title: "Revision Reminder", message: "You have 3 topics due for revision today", time: "1 hour ago", type: "reminder", read: false },
-                { id: 3, title: "New Content Added", message: "Modern History notes have been updated", time: "3 hours ago", type: "content", read: true },
-                { id: 4, title: "Achievement Unlocked", message: "You've completed 50 flashcards this week!", time: "1 day ago", type: "achievement", read: true }
-            ];
+            const notifications = [];
 
             function showNotificationsModal() {
                 const modal = document.createElement('div');
@@ -931,8 +1056,9 @@
                 });
 
                 if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                    window.if (window.iconManager) window.iconManager.refresh();
+                    window.lucide.createIcons();
                 }
+                if (window.iconManager) window.iconManager.refresh();
             }
 
             // Add notification button event listener
@@ -1056,8 +1182,9 @@
                 });
 
                 if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                    window.if (window.iconManager) window.iconManager.refresh();
+                    window.lucide.createIcons();
                 }
+                if (window.iconManager) window.iconManager.refresh();
             }
 
             // Add bookmark button event listener
@@ -1065,8 +1192,129 @@
                 showBookmarksModal();
             });
 
-            // Render Lucide Icons
-            if (window.iconManager) window.iconManager.refresh();
+            // Enhanced icon manager for Lucide icons
+            window.iconManager = {
+                refresh: function () {
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        try {
+                            window.lucide.createIcons();
+                            console.log('🔄 Icons refreshed successfully');
+                        } catch (error) {
+                            console.error('❌ Icon refresh error:', error);
+                        }
+                    } else {
+                        console.warn('⚠️ Lucide not available for refresh');
+                    }
+                }
+            };
+
+            // Multiple icon initialization attempts
+            const iconInitIntervals = [500, 1000, 2000, 3000];
+            iconInitIntervals.forEach(delay => {
+                setTimeout(() => {
+                    if (window.iconManager) {
+                        window.iconManager.refresh();
+                    }
+                }, delay);
+            });
+
+            // --- REVISION ILLUSTRATION ANIMATION ---
+            const revisionSvgContainer = document.getElementById('revision-svg-container');
+            const revisionReadingSvg = document.getElementById('revision-reading-svg');
+            const lightBeam = document.getElementById('light-beam');
+            const lampHead = document.getElementById('lamp-head');
+
+            // Cat eye elements
+            const leftPupilGroup = document.getElementById('left-pupil-group');
+            const rightPupilGroup = document.getElementById('right-pupil-group');
+
+            // --- Lamp Movement Variables ---
+            let targetLampRotation = 0;
+            let currentLampRotation = 0;
+            const LAMP_DAMPING_FACTOR = 0.15;
+            const PIVOT_X_SVG = 1310;
+            const PIVOT_Y_SVG = 105;
+            const INITIAL_LIGHT_ANGLE = 150;
+            const MAX_ROTATION = 15;
+            const MIN_ROTATION = -15;
+
+            // --- Eye Reading Animation Variables ---
+            let pupilPositionX = 0;
+            const MAX_PUPIL_MOVEMENT_X = 2.5; // Max horizontal movement in SVG units
+            const READING_SPEED = 0.005; // Speed of oscillation (lower is slower)
+
+            // Function to convert screen coordinates (clientX, clientY) to SVG coordinates
+            function screenToSvg(clientX, clientY, svgElement) {
+                const CTM = svgElement.getScreenCTM();
+                if (!CTM) return { x: 0, y: 0 };
+                return {
+                    x: (clientX - CTM.e) / CTM.a,
+                    y: (clientY - CTM.f) / CTM.d
+                };
+            }
+
+            // --- Lamp Movement Logic ---
+            function handleMouseMove(event) {
+                if (!revisionReadingSvg) return;
+
+                const cursorSvg = screenToSvg(event.clientX, event.clientY, revisionReadingSvg);
+                const dx = cursorSvg.x - PIVOT_X_SVG;
+                const dy = cursorSvg.y - PIVOT_Y_SVG;
+
+                let angleRad = Math.atan2(dy, dx);
+                let angleDeg = angleRad * (180 / Math.PI);
+
+                let rotation = angleDeg - INITIAL_LIGHT_ANGLE;
+
+                if (rotation > 180) {
+                    rotation -= 360;
+                } else if (rotation < -180) {
+                    rotation += 360;
+                }
+
+                targetLampRotation = Math.max(MIN_ROTATION, Math.min(MAX_ROTATION, rotation));
+            }
+
+            // --- Animation Loop ---
+            function animateLoop(timestamp) {
+                // 1. Lamp Movement (Damping)
+                const difference = targetLampRotation - currentLampRotation;
+                currentLampRotation += difference * LAMP_DAMPING_FACTOR;
+
+                if (lampHead) {
+                    lampHead.style.transform = `rotate(${currentLampRotation}deg)`;
+                }
+                if (lightBeam) {
+                    lightBeam.style.transform = `rotate(${currentLampRotation}deg)`;
+                }
+
+                // 2. Eye Reading Movement (Smooth Sinusoidal Oscillation)
+                // Use Math.sin to get a smooth oscillation between -1 and 1
+                const sinValue = Math.sin(timestamp * READING_SPEED);
+                // Map the value to the desired movement range
+                pupilPositionX = sinValue * MAX_PUPIL_MOVEMENT_X;
+
+                if (leftPupilGroup && rightPupilGroup) {
+                    // Apply the translation
+                    leftPupilGroup.style.transform = `translate(${pupilPositionX}px, 0)`;
+                    rightPupilGroup.style.transform = `translate(${pupilPositionX}px, 0)`;
+                }
+
+                // Request the next frame to keep the animation going
+                requestAnimationFrame(animateLoop);
+            }
+
+            // Initialize revision illustration with enhanced setup
+            if (revisionSvgContainer && revisionReadingSvg) {
+                revisionSvgContainer.addEventListener('mousemove', handleMouseMove);
+                revisionReadingSvg.setAttribute('role', 'img');
+                revisionReadingSvg.setAttribute('aria-label', 'Interactive illustration of a cat reading in bed with a lamp that follows your cursor and eyes that move while reading');
+                // Start the continuous animation loop
+                animateLoop(0); // Start timestamp at 0
+            }
+
+            // Initialize reminders board
+            renderReminders();
         });
 
     </script>
@@ -1096,9 +1344,9 @@
                         </button>
                     </div>
                     <div>
-                        <div id="user-name" class="font-normal text-sm">Jane Doe</div>
+                        <div id="user-name" class="font-normal text-sm">User</div>
                         <!-- REDUCED from text-base -->
-                        <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+                        <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
                     </div>
                 </div>
             </div>
@@ -1120,6 +1368,10 @@
                 <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
                     <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
                     <span class="font-normal text-sm text-white opacity-50">News</span>
+                </a>
+                <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Community</span>
                 </a>
                 <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
                     <div
@@ -1162,34 +1414,138 @@
             <div class="lg:grid lg:grid-cols-[1fr_360px] lg:gap-8 w-full max-w-7xl mx-auto">
 
                 <!-- LEFT COLUMN: Revision Card, Filters, and Content List -->
-                <div class="space-y-6"> <!-- Reduced space-y -->
+                <div class="space-y-6">
 
                     <!-- Revision Due Today Card -->
                     <div
-                        class="bg-gradient-to-br from-[var(--teal-primary)] to-[var(--teal-secondary)] glass-card rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between overflow-hidden w-full shadow-2xl p-6 md:p-8 space-y-4 sm:space-y-0 hover:shadow-3xl transition-all duration-300 border border-white/10">
-                        <div class="space-y-3"> <!-- Reduced space-y -->
-                            <h2 class="text-xl font-medium text-white leading-tight">Revision Due Today</h2>
-                            <!-- REDUCED from text-3xl -->
-                            <p class="text-white/80 max-w-lg text-xs"> <!-- REDUCED from text-sm -->
-                                You have critical topics flagged for revision based on the spaced repetition system.
-                                Don't let your hard work slip!
-                            </p>
-                            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-2">
-                                <button
-                                    class="btn-primary-gradient btn-unified w-fit px-5 py-1.5 text-white font-medium text-sm shadow-lg">
-                                    <!-- REDUCED from text-base, reduced padding -->
-                                    <i data-lucide="zap" class="w-4 h-4 mr-1 inline-block"></i> Start Now
-                                </button>
-                                <button onclick="handleSnooze()"
-                                    class="btn-secondary-subtle btn-unified w-fit px-4 py-1.5 text-white font-normal text-sm flex items-center justify-center">
-                                    <!-- REDUCED from text-base, reduced padding -->
-                                    <i data-lucide="bell-off" class="w-4 h-4 mr-1"></i> Snooze (24 Hrs)
-                                </button>
-                            </div>
+                        class="relative glass-card rounded-2xl overflow-hidden w-full shadow-2xl hover:shadow-3xl transition-all duration-300 border border-white/10 min-h-[200px]">
+                        <!-- Background SVG Animation -->
+                        <div id="revision-svg-container" class="absolute inset-0 w-full h-full">
+                            <svg id="revision-reading-svg" width="100%" height="100%" viewBox="0 0 1338 394" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="w-full h-full block"
+                                preserveAspectRatio="xMaxYMid slice">
+                                <g clip-path="url(#clip0_187_723)">
+                                    <rect width="1338" height="394" fill="white" />
+                                    <!-- Yellow Background Shapes (Background Fill) -->
+                                    <ellipse cx="732.91" cy="213.853" rx="116.088" ry="105.3" fill="#FCD54C" />
+                                    <ellipse cx="687.854" cy="78.0308" rx="116.088" ry="105.3" fill="#FCD54C" />
+                                    <ellipse cx="1241.03" cy="319.154" rx="116.088" ry="105.3" fill="#FCD54C" />
+                                    <circle cx="778.544" cy="373.5" r="153.357" fill="#FCD54C" />
+                                    <rect x="-87.3691" y="-111.869" width="1447.51" height="596.088" fill="#FCD54C" />
+                                    <!-- Light Beam (ID required for rotation) -->
+                                    <path id="light-beam"
+                                        d="M1194.09 65.5721C1217.74 61.2582 1232.34 90.521 1214.68 106.82L279.304 969.944C267.555 980.785 248.691 977.326 241.553 963.022L-75.1602 328.337C-82.298 314.033 -73.7194 296.88 -57.993 294.011L1194.09 65.5721Z"
+                                        fill="#FBE89C" />
+                                    <!-- Bed/Pillow/Figure Container (White Shapes) -->
+                                    <rect x="964.442" y="160.428" width="205.385" height="134.538" rx="20"
+                                        fill="white" />
+                                    <rect x="899.051" y="280.428" width="328.514" height="134.538" rx="20"
+                                        fill="white" />
+                                    <rect x="911.535" y="183.622" width="303.718" height="110.844" rx="3.5"
+                                        stroke="white" />
+                                    <!-- Cat Head/Ears/Body -->
+                                    <path
+                                        d="M1018.69 107.906C1018.48 104.554 1022.35 102.531 1025.11 104.551L1040.16 115.564C1042.54 117.309 1042.3 120.872 1039.71 122.23L1025.79 129.503C1023.2 130.861 1020.01 129.092 1019.83 126.194L1018.69 107.906Z"
+                                        fill="#EEB34F" />
+                                    <path
+                                        d="M1093.11 104.23C1095.4 101.719 1099.57 102.942 1100.05 106.265L1102.68 124.415C1103.1 127.302 1100.34 129.676 1097.52 128.85L1082.39 124.414C1079.57 123.588 1078.62 120.125 1080.61 117.943L1093.11 104.23Z"
+                                        fill="#EEB34F" />
+                                    <path
+                                        d="M1027.23 181.188C1041.96 151.658 1084.1 151.658 1098.82 181.188L1109.35 202.286C1122.61 228.879 1103.27 260.138 1073.55 260.138H1052.51C1022.79 260.138 1003.45 228.879 1016.71 202.286L1027.23 181.188Z"
+                                        fill="#FECD5F" />
+                                    <path
+                                        d="M1024.64 150.52C1024.64 133.703 1038.27 120.069 1055.09 120.069H1072.14C1088.95 120.069 1102.59 133.703 1102.59 150.52V150.52C1102.59 167.337 1088.95 180.97 1072.14 180.97H1055.09C1038.27 180.97 1024.64 167.337 1024.64 150.52V150.52Z"
+                                        fill="#ECB354" />
+                                    <path
+                                        d="M1022.56 115.772C1022.38 112.366 1026.26 110.302 1028.98 112.367L1043.72 123.573C1046.04 125.34 1045.75 128.921 1043.17 130.29L1029.46 137.57C1026.88 138.939 1023.75 137.174 1023.59 134.259L1022.56 115.772Z"
+                                        fill="#EC755B" />
+                                    <path
+                                        d="M1091.3 111.313C1093.67 108.859 1097.83 110.308 1098.16 113.703L1099.96 132.13C1100.24 135.036 1097.42 137.257 1094.66 136.296L1080 131.187C1077.24 130.226 1076.41 126.731 1078.44 124.631L1091.3 111.313Z"
+                                        fill="#EC755B" />
+                                    <path
+                                        d="M1015.17 144.135C1015.17 129.186 1027.29 117.067 1042.23 117.067H1081.52C1096.47 117.067 1108.59 129.186 1108.59 144.135V144.135C1108.59 162.821 1093.44 177.968 1074.75 177.968H1049C1030.31 177.968 1015.17 162.821 1015.17 144.135V144.135Z"
+                                        fill="#FECD60" />
+                                    <!-- Eyes and Mouth/Nose -->
+                                    <circle cx="1045" cy="142.371" r="9.4953" fill="white" />
+                                    <g id="left-pupil-group">
+                                        <circle cx="1043" cy="147.071" r="4.69958" fill="#1E1E1E" />
+                                    </g>
+                                    <circle cx="1077.23" cy="142.371" r="9.4953" fill="white" />
+                                    <g id="right-pupil-group">
+                                        <circle cx="1075.23" cy="147.071" r="4.69958" fill="#1E1E1E" />
+                                    </g>
+                                    <path
+                                        d="M1059.87 153.969V157.456M1059.87 157.456L1057.4 160.652M1059.87 157.456L1063.5 160.652"
+                                        stroke="#670B0B" />
+                                    <path
+                                        d="M1059.42 155.017C1059.82 155.572 1060.64 155.572 1061.04 155.017L1063.71 151.309C1064.18 150.648 1063.71 149.726 1062.89 149.726H1057.56C1056.75 149.726 1056.28 150.648 1056.75 151.309L1059.42 155.017Z"
+                                        fill="#F05781" />
+                                    <!-- Book -->
+                                    <rect x="1063.83" y="189.148" width="68.7344" height="95.2148" fill="#FF6A10" />
+                                    <rect x="1001.79" y="189.148" width="67.9844" height="95.2148" fill="#E65F0E" />
+                                    <!-- Lamp Fixture (ID required for rotation) -->
+                                    <g id="lamp-head">
+                                        <!-- Lamp Shade -->
+                                        <path
+                                            d="M1231.82 113.901C1236.05 111.267 1239.72 107.826 1242.62 103.774C1245.52 99.7224 1247.6 95.1389 1248.73 90.2854C1249.86 85.432 1250.02 80.4037 1249.2 75.4877C1248.39 70.5716 1246.62 65.8641 1243.98 61.6338C1241.35 57.4036 1237.91 53.8985 1233.86 50.998C1229.8 47.9325 1225.22 45.8586 1220.37 44.7295C1215.51 43.6004 1210.48 43.4384 1205.53 44.4176C1200.61 45.2318 1195.91 47.0063 1191.71 49.6398L1211.77 81.6877L1231.82 113.901Z"
+                                            fill="#6389C2" />
+                                        <!-- Mask and Highlight Group -->
+                                        <mask id="mask0_187_723" style="mask-type:alpha" maskUnits="userSpaceOnUse"
+                                            x="1191" y="43" width="59" height="72">
+                                            <path
+                                                d="M1231.78 114.066C1236.01 111.432 1239.68 107.991 1242.59 103.939C1245.49 99.8874 1247.56 95.3039 1248.69 90.4505C1249.82 85.5971 1249.98 80.5688 1249.17 75.6527C1248.35 70.7367 1246.58 66.0291 1243.94 61.7989C1241.31 57.5686 1237.87 53.8985 1233.82 50.998C1229.77 48.0976 1225.18 46.0236 1220.33 44.8945C1215.51 43.7655 1210.48 43.6034 1205.53 44.4176C1200.61 45.2318 1195.91 47.0063 1191.68 49.6398L1211.73 81.8528L1231.78 114.066Z"
+                                                fill="#6389C2" />
+                                        </mask>
+                                        <g mask="url(#mask0_187_723)">
+                                            <rect x="1202.73" y="-6.39746" width="59.5371" height="149.745"
+                                                transform="rotate(-14.3633 1202.73 -6.39746)" fill="#597DB0" />
+                                        </g>
+                                        <!-- Lamp Arm/Stem (ID required for CSS transform origin) -->
+                                        <path id="lamp-arm"
+                                            d="M1242.64 62.2923C1283.55 32.9865 1305.12 34.0079 1341.47 62.2923"
+                                            stroke="#597DAF" stroke-width="5" />
+                                    </g>
+                                    <!-- Paws holding the book -->
+                                    <path
+                                        d="M998.121 223.252C998.121 220.75 1000.15 218.721 1002.65 218.721H1010.62C1016.23 218.721 1020.78 223.27 1020.78 228.882V228.882C1020.78 234.494 1016.23 239.044 1010.62 239.044H1002.65C1000.15 239.044 998.121 237.015 998.121 234.512V223.252Z"
+                                        fill="#FECD60" />
+                                    <path
+                                        d="M1134.78 223.252C1134.78 220.75 1132.75 218.721 1130.25 218.721H1122.28C1116.67 218.721 1112.12 223.27 1112.12 228.882V228.882C1112.12 234.494 1116.67 239.044 1122.28 239.044H1130.25C1132.75 239.044 1134.78 237.015 1134.78 234.512V223.252Z"
+                                        fill="#FECD60" />
+                                    <!-- Paw details -->
+                                    <line x1="1014.4" y1="226.091" x2="1019.85" y2="226.091" stroke="white"
+                                        stroke-linecap="round" />
+                                    <line x1="1014.4" y1="231.979" x2="1019.85" y2="231.979" stroke="white"
+                                        stroke-linecap="round" />
+                                    <line x1="1113.4" y1="226.091" x2="1118.85" y2="226.091" stroke="white"
+                                        stroke-linecap="round" />
+                                    <line x1="1113.4" y1="231.979" x2="1118.85" y2="231.979" stroke="white"
+                                        stroke-linecap="round" />
+                                </g>
+                                <defs>
+                                    <clipPath id="clip0_187_723">
+                                        <rect width="1338" height="394" fill="white" />
+                                    </clipPath>
+                                </defs>
+                            </svg>
                         </div>
-                        <div class="mt-4 sm:mt-0 flex-shrink-0 w-32 h-32 md:w-48 md:h-48">
-                            <img src="image/revision illustration.png" alt="Revision Illustration"
-                                class="w-full h-full object-contain rounded-lg">
+
+                        <!-- Content Overlay -->
+                        <div class="relative z-10 flex items-center justify-start p-6 md:p-8 h-full">
+                            <div class="space-y-3 max-w-md">
+                                <h2 class="text-xl font-medium text-white leading-tight drop-shadow-lg">Revision Due
+                                    Today</h2>
+                                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-2">
+                                    <button onclick="window.location.href='revision-new.html'"
+                                        class="bg-green-600 hover:bg-green-700 btn-unified w-fit px-5 py-1.5 text-white font-medium text-sm shadow-lg transition-colors">
+                                        <i data-lucide="zap" class="w-4 h-4 mr-1 inline-block"></i> Start Now
+                                    </button>
+                                    <button onclick="handleSnooze()"
+                                        class="bg-white/20 hover:bg-white/30 backdrop-blur-sm btn-unified w-fit px-4 py-1.5 text-white font-normal text-sm flex items-center justify-center transition-colors">
+                                        <i data-lucide="bell-off" class="w-4 h-4 mr-1"></i> Snooze (24 Hrs)
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1200,46 +1556,36 @@
 
                     <!-- Content List Grid -->
                     <h3 class="text-base font-semibold text-white pt-2">Admin Uploaded Content</h3>
-                    <!-- REDUCED from text-xl -->
                     <div id="content-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 content-grid-tight">
-                        <!-- Reduced gap -->
-                        <!-- Content Skeletons or Cards rendered here by JS -->
+                        <!-- Content cards rendered here by JS -->
                     </div>
                 </div>
 
                 <!-- RIGHT COLUMN: Widgets (Quiz & Flashcards) -->
                 <div class="mt-8 lg:mt-0 space-y-6">
 
-                    <!-- Daily Quiz Widget (Consistent Card Style) -->
+                    <!-- Daily Quiz Widget -->
                     <div id="daily-quiz-widget"
                         class="bg-[var(--bg-dark-2)] rounded-2xl p-5 shadow-xl space-y-3 border border-white/10">
-                        <!-- Reduced padding and space-y -->
                         <div class="flex items-center justify-between">
                             <h4 class="text-base font-semibold text-white flex items-center gap-2">
-                                <!-- REDUCED from text-xl -->
                                 Daily Challenge <i data-lucide="trophy" class="w-5 h-5 text-yellow-400"></i>
                             </h4>
                             <span id="question-counter" class="text-xs text-white/60">Question 1 of 10</span>
                         </div>
                         <p id="daily-quiz-question" class="text-white/80 font-normal leading-snug text-sm">
-                            <!-- ADDED text-sm -->
                             <!-- Question will be populated by JS -->
                         </p>
-
-                        <!-- Options List -->
                         <div id="quiz-options" class="space-y-2" role="radiogroup"
-                            aria-labelledby="daily-quiz-question"> <!-- Reduced space-y -->
+                            aria-labelledby="daily-quiz-question">
                             <!-- Options rendered by JS -->
                         </div>
-
-                        <!-- Feedback & Actions -->
                         <div id="quiz-feedback" class="pt-2 hidden">
                             <!-- Feedback rendered by JS -->
                         </div>
-                        <div id="quiz-actions" class="pt-3"> <!-- Reduced padding -->
+                        <div id="quiz-actions" class="pt-3">
                             <button id="check-answer-btn" onclick="checkQuizAnswer()"
                                 class="btn-primary-gradient btn-unified w-full px-4 py-1.5 text-white font-medium text-sm">
-                                <!-- REDUCED from text-base, reduced padding -->
                                 Check Answer
                             </button>
                             <button id="next-question-btn" onclick="nextQuestion()"
@@ -1248,42 +1594,31 @@
                             </button>
                             <button id="retry-quiz-btn" onclick="resetQuiz()"
                                 class="btn-secondary-subtle btn-unified w-full px-4 py-1.5 text-white font-medium text-sm hidden mt-2">
-                                <!-- REDUCED from text-base, reduced padding, reduced mt -->
                                 Restart Challenge
                             </button>
                         </div>
                     </div>
 
-                    <!-- Flashcard Carousel (Consistent Card Style) -->
+                    <!-- Flashcard Carousel -->
                     <div id="flashcard-carousel"
                         class="bg-[var(--bg-dark-2)] rounded-2xl p-5 shadow-xl space-y-3 border border-white/10">
-                        <!-- Reduced padding and space-y -->
                         <h4 class="text-base font-semibold text-white flex items-center justify-between">
-                            <!-- REDUCED from text-xl -->
                             Rapid Flashcards <i data-lucide="zap" class="w-5 h-5 text-red-400"></i>
                         </h4>
-
-                        <!-- Flashcard Card Container (3D Flip) -->
                         <div id="flashcard-container"
                             class="relative h-40 flex items-center justify-center perspective-1000">
                             <!-- Card content goes here -->
                         </div>
-
-                        <!-- Navigation Buttons (Using Consistent Button Styles) -->
                         <div class="flex justify-between space-x-3">
                             <button id="flashcard-prev" onclick="navigateFlashcard('prev')"
                                 class="btn-secondary-subtle w-1/2 px-3 py-1.5 text-white rounded-xl text-sm disabled:opacity-30">
-                                <!-- REDUCED from text-base, reduced padding -->
                                 <i data-lucide="arrow-left" class="w-4 h-4 inline-block mr-1"></i> Back
                             </button>
                             <button id="flashcard-next" onclick="navigateFlashcard('next')"
                                 class="btn-primary-gradient w-1/2 px-3 py-1.5 text-white font-medium rounded-xl text-sm disabled:opacity-30">
-                                <!-- REDUCED from text-base, reduced padding -->
                                 Next <i data-lucide="arrow-right" class="w-4 h-4 inline-block ml-1"></i>
                             </button>
                         </div>
-
-                        <!-- Action Buttons -->
                         <div class="flex justify-center space-x-3 pt-2">
                             <button onclick="flashcardAction('learned')"
                                 class="text-xs font-medium text-green-400 hover:text-green-300 transition">
@@ -1294,6 +1629,44 @@
                                 class="text-xs font-medium text-red-400 hover:text-red-300 transition">
                                 <i data-lucide="alert-triangle" class="w-4 h-4 mr-1 inline-block"></i> Weak Area
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Reminders Board Widget -->
+                    <div id="reminders-board"
+                        class="bg-[var(--bg-dark-2)] rounded-2xl shadow-xl border border-white/10 transition-all duration-300">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between p-4 border-b border-white/10">
+                            <h4 class="text-base font-semibold text-white flex items-center gap-2">
+                                <i data-lucide="sticky-note" class="w-5 h-5 text-yellow-400"></i>
+                                Reminders Board
+                            </h4>
+                            <div class="flex items-center gap-2">
+                                <button id="add-reminder-btn" onclick="addNewReminder()"
+                                    class="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded-lg text-white text-xs font-medium transition-colors"
+                                    title="Add New Reminder">
+                                    <i data-lucide="plus" class="w-3 h-3 mr-1 inline-block"></i> New
+                                </button>
+                                <button id="minimize-board-btn" onclick="toggleBoard()"
+                                    class="text-white/60 hover:text-white p-1 rounded transition-colors"
+                                    title="Minimize Board">
+                                    <i data-lucide="minus" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Board Content -->
+                        <div id="board-content" class="p-4 min-h-[200px] max-h-[400px] overflow-y-auto">
+                            <div id="reminders-container" class="grid grid-cols-1 gap-3">
+                                <!-- Reminders will be added here -->
+                            </div>
+
+                            <!-- Empty State -->
+                            <div id="empty-state" class="text-center py-8 text-white/50">
+                                <i data-lucide="sticky-note" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                                <p class="text-sm">No reminders yet</p>
+                                <p class="text-xs mt-1">Click "New" to add your first reminder</p>
+                            </div>
                         </div>
                     </div>
 

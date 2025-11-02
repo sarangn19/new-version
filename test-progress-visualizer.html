@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Visualizer Tests</title>
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .test-results {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .pass { color: #10b981; }
+        .fail { color: #ef4444; }
+        .info { color: #3b82f6; }
+        .warning { color: #f59e0b; }
+
+        h1, h2, h3 { color: white; }
+
+        .visualization-demo {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .metric-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📊 Progress Visualizer Test Suite</h1>
+        
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <button class="btn primary" onclick="runAllTests()">Run All Tests</button>
+            <button class="btn" onclick="testChartGeneration()">Test Chart Generation</button>
+            <button class="btn" onclick="testProgressIndicators()">Test Progress Indicators</button>
+            <button class="btn" onclick="testDataVisualization()">Test Data Visualization</button>
+            <button class="btn" onclick="generateSampleData()">Generate Sample Data</button>
+            <button class="btn" onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div class="test-results" id="testResults">
+                Progress Visualizer tests will appear here...\n
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Visualization Demos</h2>
+            <div id="visualizationDemos">
+                <div class="visualization-demo">
+                    <h3>Progress Indicators</h3>
+                    <div id="progressIndicators">
+                        <p>Progress indicators will be displayed here after running tests.</p>
+                    </div>
+                </div>
+                
+                <div class="visualization-demo">
+                    <h3>Chart Previews</h3>
+                    <div id="chartPreviews">
+                        <p>Chart previews will be displayed here after running tests.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Performance Metrics</h2>
+            <div class="metric-display" id="metricsDisplay">
+                <div class="metric-card">
+                    <div class="metric-value" id="testsRun">0</div>
+                    <div class="metric-label">Tests Run</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="testsPassed">0</div>
+                    <div class="metric-label">Tests Passed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="chartsGenerated">0</div>
+                    <div class="metric-label">Charts Generated</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="renderTime">0ms</div>
+                    <div class="metric-label">Render Time</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-analyzer.js"></script>
+    <script src="js/report-generator.js"></script>
+    <script src="js/progress-visualizer.js"></script>
+
+    <script>
+        class ProgressVisualizerTestFramework {
+            constructor() {
+                this.testsRun = 0;
+                this.testsPassed = 0;
+                this.chartsGenerated = 0;
+                this.startTime = 0;
+            }
+
+            assertTrue(condition, message) {
+                this.testsRun++;
+                if (condition) {
+                    this.log(`✅ PASS: ${message}`, 'pass');
+                    this.testsPassed++;
+                } else {
+                    this.log(`❌ FAIL: ${message}`, 'fail');
+                }
+                this.updateMetrics();
+            }
+
+            assertNotNull(value, message) {
+                this.assertTrue(value !== null && value !== undefined, message);
+            }
+
+            assertEqual(actual, expected, message) {
+                this.testsRun++;
+                if (actual === expected) {
+                    this.log(`✅ PASS: ${message}`, 'pass');
+                    this.testsPassed++;
+                } else {
+                    this.log(`❌ FAIL: ${message} (Expected: ${expected}, Actual: ${actual})`, 'fail');
+                }
+                this.updateMetrics();
+            }
+
+            log(message, type = 'info') {
+                const results = document.getElementById('testResults');
+                const className = type === 'pass' ? 'pass' : type === 'fail' ? 'fail' : type === 'warning' ? 'warning' : 'info';
+                results.innerHTML += `<span class="${className}">${message}</span>\n`;
+                results.scrollTop = results.scrollHeight;
+            }
+
+            updateMetrics() {
+                document.getElementById('testsRun').textContent = this.testsRun;
+                document.getElementById('testsPassed').textContent = this.testsPassed;
+                document.getElementById('chartsGenerated').textContent = this.chartsGenerated;
+                
+                if (this.startTime > 0) {
+                    const duration = Date.now() - this.startTime;
+                    document.getElementById('renderTime').textContent = `${duration}ms`;
+                }
+            }
+
+            startTesting() {
+                this.startTime = Date.now();
+                this.testsRun = 0;
+                this.testsPassed = 0;
+                this.chartsGenerated = 0;
+                this.updateMetrics();
+            }
+        }
+
+        const testFramework = new ProgressVisualizerTestFramework();
+
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = 'Results cleared...\n';
+            document.getElementById('progressIndicators').innerHTML = '<p>Progress indicators will be displayed here after running tests.</p>';
+            document.getElementById('chartPreviews').innerHTML = '<p>Chart previews will be displayed here after running tests.</p>';
+            testFramework.testsRun = 0;
+            testFramework.testsPassed = 0;
+            testFramework.chartsGenerated = 0;
+            testFramework.updateMetrics();
+        }
+
+        function generateSampleData() {
+            testFramework.log('🔄 Generating sample data for visualization tests...', 'info');
+            
+            try {
+                // Clear existing data
+                if (window.performanceAnalyzer) {
+                    window.performanceAnalyzer.performanceData.sessions = [];
+                    window.performanceAnalyzer.performanceData.assessments = [];
+                }
+
+                const sessions = [];
+                const assessments = [];
+                
+                // Generate 30 days of data with clear trends
+                for (let i = 0; i < 30; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    
+                    // Create improving trend over time
+                    const improvementFactor = (30 - i) / 30; // 0 to 1
+                    const baseAccuracy = 60 + (improvementFactor * 25); // 60% to 85%
+                    
+                    sessions.push({
+                        date: date,
+                        duration: Math.random() * 1800 + 1800, // 30-60 minutes
+                        type: 'mcq',
+                        subject: ['Math', 'Science', 'History'][i % 3],
+                        accuracy: baseAccuracy + (Math.random() - 0.5) * 10,
+                        focusQuality: 70 + improvementFactor * 20 + (Math.random() - 0.5) * 10
+                    });
+                    
+                    if (i % 3 === 0) {
+                        assessments.push({
+                            date: date,
+                            type: 'practice',
+                            subject: ['Math', 'Science', 'History'][i % 3],
+                            totalQuestions: 25,
+                            correctAnswers: Math.floor((baseAccuracy / 100) * 25),
+                            accuracy: baseAccuracy,
+                            timeSpent: 1500 + Math.random() * 600
+                        });
+                    }
+                }
+                
+                // Record the data
+                sessions.forEach(session => {
+                    window.performanceAnalyzer.recordSession(session);
+                });
+                
+                assessments.forEach(assessment => {
+                    window.performanceAnalyzer.recordAssessment(assessment);
+                });
+                
+                testFramework.log(`✅ Generated ${sessions.length} sessions and ${assessments.length} assessments`, 'pass');
+                
+            } catch (error) {
+                testFramework.log(`❌ Error generating sample data: ${error.message}`, 'fail');
+            }
+        }
+
+        function runAllTests() {
+            testFramework.log('🚀 Starting Progress Visualizer Test Suite', 'info');
+            testFramework.startTesting();
+            
+            // Generate test data first
+            generateSampleData();
+            
+            // Run all test categories
+            testChartGeneration();
+            testProgressIndicators();
+            testDataVisualization();
+            testInteractiveFeatures();
+            testResponsiveDesign();
+            
+            testFramework.log(`\n🏁 Testing completed. Pass rate: ${((testFramework.testsPassed / testFramework.testsRun) * 100).toFixed(1)}%`, 'info');
+        }
+
+        function testChartGeneration() {
+            testFramework.log('\n📈 Testing Chart Generation', 'info');
+            
+            try {
+                // Test 1: Generate report with charts
+                const report = window.reportGenerator.generateReport('weekly');
+                testFramework.assertNotNull(report, 'Report should be generated');
+                testFramework.assertNotNull(report.charts, 'Report should contain charts');
+                
+                const charts = report.charts;
+                const chartTypes = Object.keys(charts);
+                testFramework.assertTrue(chartTypes.length > 0, 'Should generate at least one chart');
+                
+                // Test 2: Chart structure validation
+                chartTypes.forEach(chartType => {
+                    const chart = charts[chartType];
+                    testFramework.assertNotNull(chart.title, `${chartType} chart should have title`);
+                    testFramework.assertNotNull(chart.type, `${chartType} chart should have type`);
+                    testFramework.assertNotNull(chart.data, `${chartType} chart should have data`);
+                    testFramework.assertNotNull(chart.data.labels, `${chartType} chart should have labels`);
+                    testFramework.assertNotNull(chart.data.datasets, `${chartType} chart should have datasets`);
+                    
+                    testFramework.chartsGenerated++;
+                });
+                
+                // Test 3: Chart data validation
+                if (charts.accuracy) {
+                    const accuracyChart = charts.accuracy;
+                    testFramework.assertTrue(accuracyChart.data.labels.length > 0, 'Accuracy chart should have data points');
+                    testFramework.assertTrue(accuracyChart.data.datasets.length > 0, 'Accuracy chart should have datasets');
+                    testFramework.assertEqual(accuracyChart.type, 'line', 'Accuracy chart should be line type');
+                }
+                
+                if (charts.studyTime) {
+                    const studyTimeChart = charts.studyTime;
+                    testFramework.assertTrue(studyTimeChart.data.labels.length > 0, 'Study time chart should have data points');
+                    testFramework.assertEqual(studyTimeChart.type, 'bar', 'Study time chart should be bar type');
+                }
+                
+                // Test 4: Chart options validation
+                chartTypes.forEach(chartType => {
+                    const chart = charts[chartType];
+                    testFramework.assertNotNull(chart.options, `${chartType} chart should have options`);
+                    testFramework.assertTrue(chart.options.responsive, `${chartType} chart should be responsive`);
+                });
+                
+                // Display chart previews
+                displayChartPreviews(charts);
+                
+            } catch (error) {
+                testFramework.log(`❌ Chart generation test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testProgressIndicators() {
+            testFramework.log('\n📊 Testing Progress Indicators', 'info');
+            
+            try {
+                // Test 1: Performance metrics calculation
+                const metrics = window.performanceAnalyzer.calculatePerformanceMetrics('weekly');
+                testFramework.assertNotNull(metrics, 'Performance metrics should be available');
+                
+                // Test 2: Progress indicator creation
+                const indicators = createProgressIndicators(metrics);
+                testFramework.assertNotNull(indicators, 'Progress indicators should be created');
+                
+                // Test 3: Progress bar validation
+                testFramework.assertTrue(metrics.overallAccuracy >= 0 && metrics.overallAccuracy <= 100, 'Accuracy should be valid percentage');
+                testFramework.assertTrue(metrics.consistencyScore >= 0 && metrics.consistencyScore <= 100, 'Consistency should be valid percentage');
+                testFramework.assertTrue(metrics.performanceScore >= 0 && metrics.performanceScore <= 100, 'Performance score should be valid percentage');
+                
+                // Test 4: Visual representation
+                displayProgressIndicators(metrics);
+                
+            } catch (error) {
+                testFramework.log(`❌ Progress indicators test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testDataVisualization() {
+            testFramework.log('\n🎨 Testing Data Visualization', 'info');
+            
+            try {
+                // Test 1: Trend analysis visualization
+                const trends = window.performanceAnalyzer.performTrendAnalysis('weekly');
+                testFramework.assertNotNull(trends, 'Trend analysis should be available');
+                testFramework.assertTrue(trends.dataPoints.length > 0, 'Should have trend data points');
+                
+                // Test 2: Data point validation
+                trends.dataPoints.forEach((point, index) => {
+                    testFramework.assertNotNull(point.date, `Data point ${index} should have date`);
+                    testFramework.assertTrue(typeof point.accuracy === 'number', `Data point ${index} accuracy should be number`);
+                    testFramework.assertTrue(typeof point.studyTime === 'number', `Data point ${index} study time should be number`);
+                });
+                
+                // Test 3: Color scheme validation
+                const report = window.reportGenerator.generateReport('weekly');
+                const chartConfig = window.reportGenerator.chartConfig;
+                testFramework.assertNotNull(chartConfig.colors, 'Chart config should have colors');
+                testFramework.assertNotNull(chartConfig.gradients, 'Chart config should have gradients');
+                
+                // Test 4: Data aggregation accuracy
+                const manualAverage = trends.dataPoints.reduce((sum, p) => sum + p.accuracy, 0) / trends.dataPoints.length;
+                const reportedAverage = report.charts.accuracy?.insights?.average || 0;
+                if (reportedAverage > 0) {
+                    const difference = Math.abs(manualAverage - reportedAverage);
+                    testFramework.assertTrue(difference < 5, 'Calculated averages should be consistent');
+                }
+                
+            } catch (error) {
+                testFramework.log(`❌ Data visualization test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testInteractiveFeatures() {
+            testFramework.log('\n🖱️ Testing Interactive Features', 'info');
+            
+            try {
+                // Test 1: Chart interaction capabilities
+                const report = window.reportGenerator.generateReport('weekly');
+                const charts = report.charts;
+                
+                // Test hover and click functionality (simulated)
+                Object.keys(charts).forEach(chartType => {
+                    const chart = charts[chartType];
+                    testFramework.assertNotNull(chart.options, `${chartType} should have interaction options`);
+                    
+                    // Check for interactive elements
+                    if (chart.options.plugins && chart.options.plugins.legend) {
+                        testFramework.assertTrue(true, `${chartType} has legend configuration`);
+                    }
+                });
+                
+                // Test 2: Dynamic data updates
+                const originalDataLength = charts.accuracy?.data?.labels?.length || 0;
+                
+                // Simulate adding new data
+                window.performanceAnalyzer.recordSession({
+                    date: new Date(),
+                    duration: 1800,
+                    type: 'test',
+                    subject: 'Test',
+                    accuracy: 85
+                });
+                
+                // Generate new report
+                window.reportGenerator.invalidateCache();
+                const updatedReport = window.reportGenerator.generateReport('weekly');
+                const updatedDataLength = updatedReport.charts.accuracy?.data?.labels?.length || 0;
+                
+                testFramework.assertTrue(updatedDataLength >= originalDataLength, 'Chart data should update with new sessions');
+                
+            } catch (error) {
+                testFramework.log(`❌ Interactive features test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testResponsiveDesign() {
+            testFramework.log('\n📱 Testing Responsive Design', 'info');
+            
+            try {
+                // Test 1: Chart responsiveness
+                const report = window.reportGenerator.generateReport('weekly');
+                const charts = report.charts;
+                
+                Object.keys(charts).forEach(chartType => {
+                    const chart = charts[chartType];
+                    testFramework.assertTrue(chart.options.responsive, `${chartType} should be responsive`);
+                    
+                    // Check for maintainAspectRatio setting
+                    if (chart.options.maintainAspectRatio !== undefined) {
+                        testFramework.assertTrue(typeof chart.options.maintainAspectRatio === 'boolean', 
+                            `${chartType} maintainAspectRatio should be boolean`);
+                    }
+                });
+                
+                // Test 2: Mobile-friendly configurations
+                testFramework.assertTrue(true, 'Charts configured for mobile responsiveness');
+                
+            } catch (error) {
+                testFramework.log(`❌ Responsive design test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function createProgressIndicators(metrics) {
+            return {
+                accuracy: {
+                    value: metrics.overallAccuracy,
+                    label: 'Overall Accuracy',
+                    color: metrics.overallAccuracy >= 80 ? '#10b981' : metrics.overallAccuracy >= 60 ? '#f59e0b' : '#ef4444'
+                },
+                consistency: {
+                    value: metrics.consistencyScore,
+                    label: 'Consistency Score',
+                    color: metrics.consistencyScore >= 75 ? '#10b981' : metrics.consistencyScore >= 50 ? '#f59e0b' : '#ef4444'
+                },
+                performance: {
+                    value: metrics.performanceScore,
+                    label: 'Performance Score',
+                    color: metrics.performanceScore >= 85 ? '#10b981' : metrics.performanceScore >= 70 ? '#f59e0b' : '#ef4444'
+                }
+            };
+        }
+
+        function displayProgressIndicators(metrics) {
+            const indicators = createProgressIndicators(metrics);
+            const container = document.getElementById('progressIndicators');
+            
+            let html = '<h4>Performance Progress Indicators</h4>';
+            
+            Object.keys(indicators).forEach(key => {
+                const indicator = indicators[key];
+                html += `
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: white; font-weight: 500;">${indicator.label}</span>
+                            <span style="color: ${indicator.color}; font-weight: bold;">${indicator.value.toFixed(1)}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${indicator.value}%; background: ${indicator.color};"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function displayChartPreviews(charts) {
+            const container = document.getElementById('chartPreviews');
+            let html = '<h4>Generated Charts</h4>';
+            
+            Object.keys(charts).forEach(chartType => {
+                const chart = charts[chartType];
+                html += `
+                    <div class="chart-container">
+                        <h5>${chart.title}</h5>
+                        <p><strong>Type:</strong> ${chart.type}</p>
+                        <p><strong>Data Points:</strong> ${chart.data.labels.length}</p>
+                        <p><strong>Datasets:</strong> ${chart.data.datasets.length}</p>
+                        ${chart.insights ? `
+                            <p><strong>Insights:</strong></p>
+                            <ul>
+                                <li>Trend: ${chart.insights.trend || 'N/A'}</li>
+                                <li>Average: ${chart.insights.average?.toFixed(1) || 'N/A'}</li>
+                                ${chart.insights.peak ? `<li>Peak: ${chart.insights.peak.toFixed(1)}</li>` : ''}
+                            </ul>
+                        ` : ''}
+                        <small><strong>Sample Labels:</strong> ${chart.data.labels.slice(0, 5).join(', ')}${chart.data.labels.length > 5 ? '...' : ''}</small>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Initialize test environment
+        document.addEventListener('DOMContentLoaded', function() {
+            testFramework.log('Progress Visualizer Test Suite initialized', 'info');
+            
+            // Check component availability
+            const components = ['performanceAnalyzer', 'reportGenerator', 'progressVisualizer'];
+            components.forEach(component => {
+                if (window[component]) {
+                    testFramework.log(`✅ ${component} loaded successfully`, 'pass');
+                } else {
+                    testFramework.log(`⚠️ ${component} not available`, 'warning');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

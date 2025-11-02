@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automated Integration Tests</title>
+  
+  <!-- Production Components -->
+  <script src="js/error-handler.js"></script>
+  <script src="js/offline-manager.js"></script>
+  <script src="js/performance-optimizer.js"></script>
+  <script src="js/loading-state-manager.js"></script>
+  <script src="js/validation-system.js"></script>
+  
+  <!-- Test Runner -->
+  <script src="test-integration-runner.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background-color: #1a1a1a;
+      color: #00ff00;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .console {
+      background-color: #000;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    
+    .header {
+      color: #00ffff;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    
+    .status.success {
+      background-color: rgba(0, 255, 0, 0.1);
+      border: 1px solid #00ff00;
+    }
+    
+    .status.error {
+      background-color: rgba(255, 0, 0, 0.1);
+      border: 1px solid #ff0000;
+      color: #ff6666;
+    }
+    
+    .status.info {
+      background-color: rgba(0, 255, 255, 0.1);
+      border: 1px solid #00ffff;
+      color: #66ffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧪 Production Integration Test Suite</h1>
+    <p>Automated testing of cross-component communication, error scenarios, and performance</p>
+  </div>
+  
+  <div id="test-status" class="status info">
+    <strong>Status:</strong> Initializing test environment...
+  </div>
+  
+  <div class="console" id="console-output">
+    <div>Waiting for components to initialize...</div>
+  </div>
+  
+  <script>
+    // Capture console output and display it
+    const consoleOutput = document.getElementById('console-output');
+    const testStatus = document.getElementById('test-status');
+    
+    const originalLog = console.log;
+    const originalError = console.error;
+    
+    function addToConsole(message, type = 'log') {
+      const div = document.createElement('div');
+      div.style.color = type === 'error' ? '#ff6666' : '#00ff00';
+      div.style.marginBottom = '5px';
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      consoleOutput.appendChild(div);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+    
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      addToConsole(args.join(' '), 'log');
+    };
+    
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addToConsole(args.join(' '), 'error');
+    };
+    
+    // Update status based on test progress
+    let testRunner;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      testStatus.innerHTML = '<strong>Status:</strong> Components loaded, starting tests...';
+      testStatus.className = 'status info';
+      
+      setTimeout(async () => {
+        try {
+          testRunner = new IntegrationTestRunner();
+          
+          // Override the generateReport method to update UI
+          const originalGenerateReport = testRunner.generateReport.bind(testRunner);
+          testRunner.generateReport = function() {
+            const result = originalGenerateReport();
+            
+            if (result.failedTests === 0) {
+              testStatus.innerHTML = `<strong>Status:</strong> ✅ All ${result.totalTests} tests passed! (${Math.round(result.duration)}ms)`;
+              testStatus.className = 'status success';
+            } else {
+              testStatus.innerHTML = `<strong>Status:</strong> ❌ ${result.failedTests}/${result.totalTests} tests failed (${result.successRate.toFixed(1)}% success rate)`;
+              testStatus.className = 'status error';
+            }
+            
+            return result;
+          };
+          
+          await testRunner.runAllTests();
+          
+        } catch (error) {
+          console.error('Test suite failed to run:', error);
+          testStatus.innerHTML = '<strong>Status:</strong> ❌ Test suite failed to run';
+          testStatus.className = 'status error';
+        }
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

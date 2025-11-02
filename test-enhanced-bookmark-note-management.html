@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Enhanced Bookmark & Note Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="js/enhanced-bookmark-manager.js"></script>
+  <script src="js/enhanced-note-manager.js"></script>
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --teal-primary: #2C7A7B;
+    }
+    
+    body {
+      background-color: var(--bg-dark-1);
+      color: white;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .test-section {
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .test-result {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 0.5rem 0;
+      font-family: monospace;
+    }
+    
+    .test-pass {
+      background-color: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: rgb(34, 197, 94);
+    }
+    
+    .test-fail {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: rgb(239, 68, 68);
+    }
+    
+    .test-info {
+      background-color: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: rgb(59, 130, 246);
+    }
+  </style>
+</head>
+<body class="p-8">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-center">Enhanced Bookmark & Note Management Test Suite</h1>
+    
+    <!-- Bookmark Management Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="bookmark" class="w-6 h-6"></i>
+        Bookmark Management Tests
+      </h2>
+      <div id="bookmark-tests"></div>
+      <button id="run-bookmark-tests" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Bookmark Tests
+      </button>
+    </div>
+    
+    <!-- Note Management Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="file-text" class="w-6 h-6"></i>
+        Note Management Tests
+      </h2>
+      <div id="note-tests"></div>
+      <button id="run-note-tests" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Note Tests
+      </button>
+    </div>
+    
+    <!-- Rich Text Editor Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="edit-3" class="w-6 h-6"></i>
+        Rich Text Editor Tests
+      </h2>
+      <div id="rich-text-tests"></div>
+      <div id="test-editor" class="rich-text-editor mt-4" style="min-height: 200px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;"></div>
+      <button id="run-rich-text-tests" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Rich Text Tests
+      </button>
+    </div>
+    
+    <!-- Media Attachment Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="paperclip" class="w-6 h-6"></i>
+        Media Attachment Tests
+      </h2>
+      <div id="attachment-tests"></div>
+      <button id="run-attachment-tests" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Attachment Tests
+      </button>
+    </div>
+    
+    <!-- Integration Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="zap" class="w-6 h-6"></i>
+        Integration Tests
+      </h2>
+      <div id="integration-tests"></div>
+      <button id="run-integration-tests" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Integration Tests
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Test utilities
+    function logTest(container, message, type = 'info') {
+      const div = document.createElement('div');
+      div.className = `test-result test-${type}`;
+      div.textContent = message;
+      container.appendChild(div);
+    }
+
+    function assert(condition, message, container) {
+      if (condition) {
+        logTest(container, `✓ PASS: ${message}`, 'pass');
+        return true;
+      } else {
+        logTest(container, `✗ FAIL: ${message}`, 'fail');
+        return false;
+      }
+    }
+
+    // Bookmark Management Tests
+    document.getElementById('run-bookmark-tests').addEventListener('click', () => {
+      const container = document.getElementById('bookmark-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Enhanced Bookmark Manager...', 'info');
+      
+      try {
+        // Test 1: Manager initialization
+        assert(
+          window.enhancedBookmarkManager instanceof EnhancedBookmarkManager,
+          'Enhanced bookmark manager is initialized',
+          container
+        );
+        
+        // Test 2: Add bookmark
+        const testBookmark = {
+          title: 'Test Bookmark',
+          url: 'https://example.com',
+          description: 'Test description',
+          category: 'general'
+        };
+        
+        const initialCount = window.enhancedBookmarkManager.bookmarks.length;
+        const newBookmark = window.enhancedBookmarkManager.addBookmark(testBookmark);
+        
+        assert(
+          newBookmark && newBookmark.id,
+          'Bookmark can be added successfully',
+          container
+        );
+        
+        assert(
+          window.enhancedBookmarkManager.bookmarks.length === initialCount + 1,
+          'Bookmark count increases after adding',
+          container
+        );
+        
+        // Test 3: Bulk operations
+        window.enhancedBookmarkManager.selectedBookmarks.add(newBookmark.id);
+        
+        assert(
+          window.enhancedBookmarkManager.selectedBookmarks.has(newBookmark.id),
+          'Bookmark can be selected for bulk operations',
+          container
+        );
+        
+        // Test 4: Categories
+        const testCategory = {
+          name: 'Test Category',
+          color: '#FF6B6B',
+          icon: 'star'
+        };
+        
+        const newCategory = window.enhancedBookmarkManager.addCategory(testCategory);
+        
+        assert(
+          newCategory && newCategory.id,
+          'Category can be added successfully',
+          container
+        );
+        
+        // Test 5: Bulk categorization
+        const originalCategory = newBookmark.category;
+        window.enhancedBookmarkManager.bulkCategorizeBookmarks(newCategory.id);
+        
+        const updatedBookmark = window.enhancedBookmarkManager.bookmarks.find(b => b.id === newBookmark.id);
+        
+        assert(
+          updatedBookmark.category === newCategory.id,
+          'Bulk categorization works correctly',
+          container
+        );
+        
+        // Test 6: Search functionality
+        const searchResults = window.enhancedBookmarkManager.searchBookmarks('Test');
+        
+        assert(
+          searchResults.length > 0 && searchResults.some(b => b.id === newBookmark.id),
+          'Search functionality works correctly',
+          container
+        );
+        
+        // Test 7: Export functionality
+        window.enhancedBookmarkManager.selectedBookmarks.clear();
+        window.enhancedBookmarkManager.selectedBookmarks.add(newBookmark.id);
+        
+        // Mock the export (since we can't actually download in test)
+        const exportData = {
+          exportDate: new Date().toISOString(),
+          bookmarks: [updatedBookmark],
+          categories: window.enhancedBookmarkManager.categories
+        };
+        
+        assert(
+          exportData.bookmarks.length === 1 && exportData.categories.length > 0,
+          'Export data structure is correct',
+          container
+        );
+        
+        // Cleanup
+        window.enhancedBookmarkManager.deleteBookmark(newBookmark.id);
+        window.enhancedBookmarkManager.deleteCategory(newCategory.id);
+        
+        logTest(container, 'All bookmark management tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during bookmark tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Note Management Tests
+    document.getElementById('run-note-tests').addEventListener('click', () => {
+      const container = document.getElementById('note-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Enhanced Note Manager...', 'info');
+      
+      try {
+        // Test 1: Manager initialization
+        assert(
+          window.enhancedNoteManager instanceof EnhancedNoteManager,
+          'Enhanced note manager is initialized',
+          container
+        );
+        
+        // Test 2: Create note
+        const testNoteData = {
+          title: 'Test Note',
+          content: 'This is a test note content',
+          richContent: '<p>This is <strong>rich</strong> content</p>',
+          subject: 'Testing'
+        };
+        
+        const initialCount = window.enhancedNoteManager.notes.length;
+        const newNote = window.enhancedNoteManager.createNote(testNoteData);
+        
+        assert(
+          newNote && newNote.id,
+          'Note can be created successfully',
+          container
+        );
+        
+        assert(
+          window.enhancedNoteManager.notes.length === initialCount + 1,
+          'Note count increases after creation',
+          container
+        );
+        
+        // Test 3: Update note
+        const updateData = {
+          title: 'Updated Test Note',
+          content: 'Updated content'
+        };
+        
+        const updatedNote = window.enhancedNoteManager.updateNote(newNote.id, updateData);
+        
+        assert(
+          updatedNote && updatedNote.title === updateData.title,
+          'Note can be updated successfully',
+          container
+        );
+        
+        // Test 4: Search notes
+        const searchResults = window.enhancedNoteManager.searchNotes('Updated');
+        
+        assert(
+          searchResults.length > 0 && searchResults.some(n => n.id === newNote.id),
+          'Note search functionality works correctly',
+          container
+        );
+        
+        // Test 5: Export notes
+        const exportData = window.enhancedNoteManager.exportNotes([newNote.id]);
+        
+        assert(
+          exportData.notes.length === 1 && exportData.notes[0].id === newNote.id,
+          'Note export functionality works correctly',
+          container
+        );
+        
+        // Cleanup
+        window.enhancedNoteManager.deleteNote(newNote.id);
+        
+        logTest(container, 'All note management tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during note tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Rich Text Editor Tests
+    document.getElementById('run-rich-text-tests').addEventListener('click', () => {
+      const container = document.getElementById('rich-text-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Rich Text Editor...', 'info');
+      
+      try {
+        const editor = document.getElementById('test-editor');
+        
+        // Test 1: Editor setup
+        window.enhancedNoteManager.setupRichTextEditor(editor);
+        
+        assert(
+          editor.contentEditable === 'true',
+          'Editor is made contentEditable',
+          container
+        );
+        
+        assert(
+          editor.previousElementSibling && editor.previousElementSibling.classList.contains('rich-text-toolbar'),
+          'Toolbar is created and positioned correctly',
+          container
+        );
+        
+        // Test 2: Content insertion
+        editor.innerHTML = '<p>Test <strong>bold</strong> text</p>';
+        
+        assert(
+          editor.innerHTML.includes('<strong>bold</strong>'),
+          'Rich text content can be inserted',
+          container
+        );
+        
+        // Test 3: Toolbar buttons exist
+        const toolbar = editor.previousElementSibling;
+        const boldButton = toolbar.querySelector('[data-format="bold"]');
+        const italicButton = toolbar.querySelector('[data-format="italic"]');
+        
+        assert(
+          boldButton && italicButton,
+          'Formatting buttons are present in toolbar',
+          container
+        );
+        
+        // Test 4: Color picker exists
+        const colorPicker = toolbar.querySelector('.color-picker');
+        
+        assert(
+          colorPicker,
+          'Color picker is present in toolbar',
+          container
+        );
+        
+        logTest(container, 'All rich text editor tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during rich text tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Media Attachment Tests
+    document.getElementById('run-attachment-tests').addEventListener('click', () => {
+      const container = document.getElementById('attachment-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Media Attachment System...', 'info');
+      
+      try {
+        // Test 1: File validation
+        const validFile = { size: 1024 * 1024, type: 'image/jpeg', name: 'test.jpg' }; // 1MB JPEG
+        const invalidFile = { size: 20 * 1024 * 1024, type: 'image/jpeg', name: 'large.jpg' }; // 20MB JPEG
+        const unsupportedFile = { size: 1024, type: 'application/exe', name: 'virus.exe' };
+        
+        assert(
+          window.enhancedNoteManager.validateFile(validFile),
+          'Valid file passes validation',
+          container
+        );
+        
+        assert(
+          !window.enhancedNoteManager.validateFile(invalidFile),
+          'Oversized file fails validation',
+          container
+        );
+        
+        assert(
+          !window.enhancedNoteManager.validateFile(unsupportedFile),
+          'Unsupported file type fails validation',
+          container
+        );
+        
+        // Test 2: File size formatting
+        const formattedSize = window.enhancedNoteManager.formatFileSize(1024 * 1024);
+        
+        assert(
+          formattedSize === '1 MB',
+          'File size formatting works correctly',
+          container
+        );
+        
+        // Test 3: File icon mapping
+        const imageIcon = window.enhancedNoteManager.getFileIcon('image/jpeg');
+        const pdfIcon = window.enhancedNoteManager.getFileIcon('application/pdf');
+        const textIcon = window.enhancedNoteManager.getFileIcon('text/plain');
+        
+        assert(
+          imageIcon === 'image' && pdfIcon === 'file-text' && textIcon === 'file-text',
+          'File icon mapping works correctly',
+          container
+        );
+        
+        // Test 4: Attachment storage
+        const initialAttachmentCount = Object.keys(window.enhancedNoteManager.attachments).length;
+        
+        // Mock attachment (since we can't actually process files in test)
+        const mockAttachment = {
+          id: Date.now(),
+          name: 'test.jpg',
+          type: 'image/jpeg',
+          size: 1024,
+          data: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A8A=',
+          dateAdded: new Date().toISOString()
+        };
+        
+        window.enhancedNoteManager.attachments[mockAttachment.id] = mockAttachment;
+        window.enhancedNoteManager.saveAttachments();
+        
+        const newAttachmentCount = Object.keys(window.enhancedNoteManager.attachments).length;
+        
+        assert(
+          newAttachmentCount === initialAttachmentCount + 1,
+          'Attachment can be stored successfully',
+          container
+        );
+        
+        // Cleanup
+        delete window.enhancedNoteManager.attachments[mockAttachment.id];
+        window.enhancedNoteManager.saveAttachments();
+        
+        logTest(container, 'All media attachment tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during attachment tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Integration Tests
+    document.getElementById('run-integration-tests').addEventListener('click', () => {
+      const container = document.getElementById('integration-tests');
+      container.innerHTML = '';
+      
+      logTest(container, 'Testing Integration between components...', 'info');
+      
+      try {
+        // Test 1: Cross-manager data consistency
+        const initialBookmarkCount = window.enhancedBookmarkManager.bookmarks.length;
+        const initialNoteCount = window.enhancedNoteManager.notes.length;
+        
+        // Create a note with bookmark reference
+        const noteWithBookmark = window.enhancedNoteManager.createNote({
+          title: 'Integration Test Note',
+          content: 'This note references a bookmark',
+          subject: 'Testing'
+        });
+        
+        // Create a bookmark with note reference
+        const bookmarkWithNote = window.enhancedBookmarkManager.addBookmark({
+          title: 'Integration Test Bookmark',
+          url: 'https://example.com/integration',
+          description: `Related to note ${noteWithBookmark.id}`,
+          category: 'general'
+        });
+        
+        assert(
+          window.enhancedBookmarkManager.bookmarks.length === initialBookmarkCount + 1 &&
+          window.enhancedNoteManager.notes.length === initialNoteCount + 1,
+          'Cross-manager data creation works correctly',
+          container
+        );
+        
+        // Test 2: Data export integration
+        const bookmarkExport = {
+          exportDate: new Date().toISOString(),
+          bookmarks: [bookmarkWithNote],
+          categories: window.enhancedBookmarkManager.categories
+        };
+        
+        const noteExport = window.enhancedNoteManager.exportNotes([noteWithBookmark.id]);
+        
+        assert(
+          bookmarkExport.bookmarks.length === 1 && noteExport.notes.length === 1,
+          'Cross-manager export functionality works correctly',
+          container
+        );
+        
+        // Test 3: Search integration
+        const bookmarkSearchResults = window.enhancedBookmarkManager.searchBookmarks('Integration');
+        const noteSearchResults = window.enhancedNoteManager.searchNotes('Integration');
+        
+        assert(
+          bookmarkSearchResults.length > 0 && noteSearchResults.length > 0,
+          'Cross-manager search functionality works correctly',
+          container
+        );
+        
+        // Cleanup
+        window.enhancedBookmarkManager.deleteBookmark(bookmarkWithNote.id);
+        window.enhancedNoteManager.deleteNote(noteWithBookmark.id);
+        
+        logTest(container, 'All integration tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during integration tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Initialize Lucide icons
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

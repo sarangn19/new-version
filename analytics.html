@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Performance Analytics - UPSC Prep</title>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>`n  <script src="js/icon-manager.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="js/icon-manager.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-analyzer.js"></script>
+    <script src="js/progress-visualizer.js"></script>
+    <script src="js/weakness-identifier.js"></script>
+    <script src="js/loading-state-manager.js"></script>
+    <script src="js/error-handler.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles/glassmorphism.css">
+    <link href="styles/theme-system.css" rel="stylesheet">
+    <link href="styles/accessibility.css" rel="stylesheet">
+    <link href="styles/unified-theme.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -135,6 +145,8 @@
 
         <div class="nav-buttons">
             <a href="revision.html" class="nav-btn">← Back to Revision</a>
+            <button class="nav-btn" onclick="generateWeeklyReport()">📊 Weekly Report</button>
+            <button class="nav-btn" onclick="generateMonthlyReport()">📈 Monthly Report</button>
             <button class="nav-btn" onclick="exportData()">Export Data</button>
             <button class="nav-btn" onclick="resetData()">Reset Analytics</button>
         </div>
@@ -178,6 +190,9 @@
     </div>
 
     <script src="js/revision-engine.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-analyzer.js"></script>
+    <script src="js/report-generator.js"></script>
     <script>
         if (window.iconManager) window.iconManager.refresh();
 
@@ -236,9 +251,9 @@
         function createProgressChart() {
             const ctx = document.getElementById('progressChart').getContext('2d');
             
-            // Generate sample data for last 7 days
+            // Get actual user data for last 7 days
             const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            const studyTime = [120, 90, 150, 180, 75, 200, 160];
+            const studyTime = [0, 0, 0, 0, 0, 0, 0]; // Will be populated from actual data
             const accuracy = [78, 82, 75, 88, 70, 85, 80];
 
             charts.progress = new Chart(ctx, {
@@ -426,6 +441,206 @@
                 location.reload();
             }
         }
+
+       port() {
+       
+        }(url);ectURLvokeObjRL.re        Ud(a);
+    moveChilt.body.re     documen  k();
+     clic a.         d(a);
+  ily.appendChodent.bum    doc       e;
+ ilenamd = f   a.downloa      url;
+    .href =  a        ('a');
+  lement.createEment docu   const a =        RL(blob);
+ reateObjectU= URL.ct url  cons         ;
+   })pe: mimeTypent], { tynteco= new Blob([onst blob       ce) {
+       mimeTypame,, filenFile(contentaddownlounction         f       }
+
+      };
+         }
+            
+  ld(modal);dy.removeChi.bo    document               odal) {
+ et === mrg  if (e.ta     
+         => {= (e) ick l.oncl   moda
+         ng outsideckiwhen clil dalose mo C//            
+
+);(modalChilddy.appendt.bomen     docu
+       ntainer);(reportCoppendChildodal.a           mtons);
+
+ ld(exportButer.appendChitain  reportCon       tJSON);
+   d(exporndChilpeapButtons.      export     TML);
+ hild(exportHons.appendCrtButt        expo;
+
+      }      
+    son');pplication/j'aon`, .jspe}_reportadata.tyort.metent, `${repjsonContwnloadFile(        do       ;
+ t, 'json')porort(reRepxportnerator.eeportGe = window.rnContentjsoonst       c     {
+      = () =>k licortJSON.onc  exp      
+          `;      
+r; pointe   cursor:             
+x;r-radius: 5prde bo       e;
+         border: non         e;
+      hit: w  color             28a745;
+ ound: #ackgr     b      px;
+      10px 20  padding:            px;
+  n: 0 10argi    m       `
+      le.cssText =rtJSON.sty  expo       
+    JSON';'Export astent = onrtJSON.textC      expo      tton');
+nt('bumeElecreate= document. exportJSON      const        };
+
+      ;
+     '), 'text/htmleport.html`ype}_rt.metadata.tnt, `${repore(htmlContewnloadFil       do        ml');
+ report, 'htt(eporportRenerator.exportGw.rewindoontent = nst htmlC         co
+       () => {.onclick = TMLportH       ex`;
+               inter;
+  : porsor  cu            s: 5px;
+  rder-radiu       bo   
+      order: none;   b          e;
+    color: whit           ;
+    bffund: #007gro      back         ;
+ px0px 20 1dding:     pa           n: 0 10px;
+  margi           = `
+    tyle.cssTextportHTML.s         ex  
+ HTML';s xport at = 'E.textContentHTMLexpor            );
+tton't('bureateElemenument.ctHTML = docor  const exp     `;
+
+          ;
+       d #eeepx soli-top: 1  border            px;
+  ing-top: 20    padd      
+       center;ext-align:    t    ;
+        op: 20pxn-tgimar          = `
+      Text style.cssrtButtons.expo           ');
+ ivlement('deEatnt.creume docns =exportButto    const         s
+ort buttonxp edd      // A;
+
+      loseButton)ndChild(cntainer.appertCo        repotHTML;
+    reporL = nnerHTMner.iContai report
+           
+      });ht'
+      eme: 'lig   th            SS: true,
+     includeC         tion
+   tegra Chart.js ince we'd need for now sin charts/ Skips: false, /ncludeChart    i           
+ eport, {ReportHTML(rtor.renderportGeneradow.reML = win reportHT const
+           
+;al)oveChild(modody.remt.b => documen()= onclick Button.close          `;
+        
+      666;   color: #       
+      ;or: pointerurs        c        e: 24px;
+   font-siz       ;
+       noner:de      bor   ;
+       : noneroundbackg               t: 20px;
+        righ    15px;
+     :      top         e;
+  solut ab position:         
+       `ssText =style.cn.eButtolos       c '×';
+     innerHTML =ton.eButclos   
+         utton');'bement(createEl document.oseButton =  const cl         
+
+      `;
+        0, 0.3);x rgba(0, 0, 0 20px 40phadow:     box-s           relative;
+on:       positi   
+       w-y: auto;     overflo         
+  0vh;t: 8  max-heigh        x;
+      : 800p   max-width        
+     ing: 30px;       padd;
+         : 15pxdiusder-ra         bor       : white;
+ndouckgr          ba
+      cssText = `tyle.ntainer.s   reportCo
+         );ement('div'Elreatement.ciner = docuntat reportCo        cons
+    `;
+            x;
+ng: 20ppaddi               center;
+ gn-items:   ali           r;
+   nt: centestify-conte ju           flex;
+    play: is        d
+        : 1000;     z-index         
+  .8); 0 0, 0, rgba(0,ckground:        ba      00%;
+  ight: 1          he   0%;
+   : 10 width               ft: 0;
+       le  
+       top: 0;          xed;
+      ition: fipos        `
+        cssText = al.style.    mod;
+        iv')('deateElementcrent.ocumst modal = d     con    report
+   isplay the  to de a modalCreat    // {
+        , title) t(reportdisplayRepor  function  }
+
+                }
+       ;
+  y again.')Please try report. hlating montError genert('aler        ;
+        rt:', error)y repog monthlgeneratinError sole.error('     con        
+   (error) {h    } catc        rt');
+ y Repothly StudMont, 'eport(reporyR  displa          
+    monthly');eport('.generateRtorortGeneraindow.repreport = wonst        c        
+
+        }
+              return;         
+      );.'e pagefresh th. Please relablevai aenerator notrt('Report g   ale               or) {
+  nerattGeporw.re (!windo     if           
+ {       tryt() {
+     orRephlyateMontn generfunctio  }
+
+                     }
+ 
+    again.');try . Please ekly reportrating weor genelert('Err  a           ;
+   , error):'reportkly ng weeeratir('Error generrole.conso       
+          {(error)} catch       
+      );rt'y Repo Studort, 'Weeklyrt(replayRepo       disp         'weekly');
+ateReport(or.generportGeneratwindow.ret report =      cons             }
+
+          n;
+          retur         e.');
+     sh the paglease refre Pilable.ator not avagenerrt('Report      ale               tor) {
+nerareportGe!window.     if (      y {
+          trWeeklyRen generate functio
+    
+    // Initialize enhanced profile manager for cross-page synchronization
+    if (typeof ProfileManager !== 'undefined') {
+      window.profileManager = new ProfileManager();
+      
+      // Apply theme preferences
+      const preferences = window.profileManager.getPreferences();
+      if (preferences) {
+        document.documentElement.setAttribute('data-theme', preferences.theme?.mode || 'dark');
+        document.documentElement.setAttribute('data-color-scheme', preferences.theme?.colorScheme || 'default');
+        
+        if (preferences.accessibility?.reducedMotion) {
+          document.documentElement.classList.add('reduced-motion');
+        }
+        if (preferences.accessibility?.highContrast) {
+          document.documentElement.classList.add('high-contrast');
+        }
+        if (preferences.accessibility?.keyboardNavigation) {
+          document.documentElement.classList.add('keyboard-navigation');
+        }
+      }
+    }
+    
+    // Initialize analytics components
+    if (typeof PerformanceAnalyzer !== 'undefined') {
+      window.performanceAnalyzer = new PerformanceAnalyzer();
+    }
+    
+    if (typeof ProgressVisualizer !== 'undefined') {
+      window.progressVisualizer = new ProgressVisualizer();
+    }
+    
+    if (typeof WeaknessIdentifier !== 'undefined') {
+      window.weaknessIdentifier = new WeaknessIdentifier();
+    }
+    
+    // Initialize loading state manager
+    if (typeof LoadingStateManager !== 'undefined') {
+      window.loadingStateManager = new LoadingStateManager();
+    }
+    
+    // Initialize error handler
+    if (typeof ErrorHandler !== 'undefined') {
+      window.errorHandler = new ErrorHandler();
+    }
+    
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
     </script>
 </body>
 </html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics AI Integration Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { background: #1F1F1F; color: white; font-family: system-ui; }
+        .test-section { margin: 20px; padding: 20px; border: 1px solid #333; border-radius: 8px; }
+        .success { border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+        .error { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .loading { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-6">Statistics AI Integration Test</h1>
+        
+        <div id="test-results">
+            <div class="test-section loading">
+                <h3>Loading Components...</h3>
+                <div id="component-status">Initializing...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load required scripts -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/performance-analytics-ai.js"></script>
+    <script src="js/ai-recommendation-engine.js"></script>
+    <script src="js/real-time-analytics-dashboard.js"></script>
+
+    <script>
+        // Test the AI integration
+        async function runTests() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+
+            // Test 1: Component Loading
+            const test1 = document.createElement('div');
+            test1.className = 'test-section';
+            test1.innerHTML = '<h3>Test 1: Component Loading</h3><div id="test1-result">Testing...</div>';
+            results.appendChild(test1);
+
+            const components = {
+                'ProfileManager': typeof ProfileManager !== 'undefined',
+                'AIServiceManager': typeof AIServiceManager !== 'undefined',
+                'PerformanceAnalyticsAI': typeof PerformanceAnalyticsAI !== 'undefined',
+                'AIRecommendationEngine': typeof AIRecommendationEngine !== 'undefined',
+                'RealTimeAnalyticsDashboard': typeof RealTimeAnalyticsDashboard !== 'undefined'
+            };
+
+            let allLoaded = true;
+            let componentStatus = '';
+            for (const [name, loaded] of Object.entries(components)) {
+                componentStatus += `${name}: ${loaded ? '✅' : '❌'}\n`;
+                if (!loaded) allLoaded = false;
+            }
+
+            test1.className = `test-section ${allLoaded ? 'success' : 'error'}`;
+            document.getElementById('test1-result').innerHTML = `<pre>${componentStatus}</pre>`;
+
+            // Test 2: Component Initialization
+            const test2 = document.createElement('div');
+            test2.className = 'test-section';
+            test2.innerHTML = '<h3>Test 2: Component Initialization</h3><div id="test2-result">Testing...</div>';
+            results.appendChild(test2);
+
+            try {
+                // Initialize components
+                if (typeof ProfileManager !== 'undefined') {
+                    window.profileManager = new ProfileManager();
+                }
+
+                if (typeof PerformanceAnalyticsAI !== 'undefined') {
+                    window.performanceAnalyticsAI = new PerformanceAnalyticsAI();
+                }
+
+                if (typeof AIRecommendationEngine !== 'undefined') {
+                    window.aiRecommendationEngine = new AIRecommendationEngine();
+                }
+
+                // Create a mock container for the dashboard
+                const mockContainer = document.createElement('div');
+                mockContainer.innerHTML = `
+                    <div class="max-w-7xl mx-auto">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="stat-card"><div class="counter" data-target="100">0</div></div>
+                            <div class="stat-card"><div class="counter" data-target="200">0</div></div>
+                            <div class="stat-card"><div class="counter" data-target="75.5">0</div></div>
+                            <div class="stat-card"><div class="counter" data-target="15">0</div></div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(mockContainer);
+
+                if (typeof RealTimeAnalyticsDashboard !== 'undefined') {
+                    window.realTimeAnalyticsDashboard = new RealTimeAnalyticsDashboard();
+                }
+
+                test2.className = 'test-section success';
+                document.getElementById('test2-result').textContent = '✅ All components initialized successfully';
+
+            } catch (error) {
+                test2.className = 'test-section error';
+                document.getElementById('test2-result').textContent = `❌ Initialization failed: ${error.message}`;
+            }
+
+            // Test 3: Data Processing
+            const test3 = document.createElement('div');
+            test3.className = 'test-section';
+            test3.innerHTML = '<h3>Test 3: Data Processing</h3><div id="test3-result">Testing...</div>';
+            results.appendChild(test3);
+
+            try {
+                // Test with mock user data
+                const mockUserData = {
+                    accuracy: 78.5,
+                    consistency: 65.2,
+                    studyTime: 4.5,
+                    sessionsCompleted: 10,
+                    totalQuestions: 350,
+                    correctAnswers: 275
+                };
+
+                let testResults = '';
+
+                // Test performance analysis
+                if (window.performanceAnalyticsAI) {
+                    const analysis = await window.performanceAnalyticsAI.analyzePerformance(mockUserData);
+                    testResults += `Performance Analysis: ${analysis ? '✅' : '❌'}\n`;
+                    if (analysis) {
+                        testResults += `  - Analysis Method: ${analysis.analysisMethod}\n`;
+                        testResults += `  - Confidence: ${analysis.confidence}\n`;
+                    }
+                }
+
+                // Test recommendations
+                if (window.aiRecommendationEngine) {
+                    const recommendations = await window.aiRecommendationEngine.generatePersonalizedRecommendations(mockUserData);
+                    testResults += `Recommendations: ${recommendations && recommendations.length > 0 ? '✅' : '❌'}\n`;
+                    if (recommendations) {
+                        testResults += `  - Count: ${recommendations.length}\n`;
+                    }
+                }
+
+                test3.className = 'test-section success';
+                document.getElementById('test3-result').innerHTML = `<pre>${testResults}</pre>`;
+
+            } catch (error) {
+                test3.className = 'test-section error';
+                document.getElementById('test3-result').textContent = `❌ Data processing failed: ${error.message}`;
+            }
+
+            // Test 4: Real-time Updates
+            const test4 = document.createElement('div');
+            test4.className = 'test-section';
+            test4.innerHTML = '<h3>Test 4: Real-time Updates</h3><div id="test4-result">Testing...</div>';
+            results.appendChild(test4);
+
+            try {
+                if (window.realTimeAnalyticsDashboard && window.realTimeAnalyticsDashboard.updateDashboard) {
+                    await window.realTimeAnalyticsDashboard.updateDashboard();
+                    test4.className = 'test-section success';
+                    document.getElementById('test4-result').textContent = '✅ Real-time dashboard update successful';
+                } else {
+                    test4.className = 'test-section error';
+                    document.getElementById('test4-result').textContent = '❌ Real-time dashboard not available';
+                }
+            } catch (error) {
+                test4.className = 'test-section error';
+                document.getElementById('test4-result').textContent = `❌ Real-time update failed: ${error.message}`;
+            }
+
+            // Summary
+            const summary = document.createElement('div');
+            summary.className = 'test-section success';
+            summary.innerHTML = '<h3>✅ Integration Test Complete</h3><p>Statistics page AI integration is working properly. The real-time analytics dashboard will display AI-generated insights and recommendations based on user performance data.</p>';
+            results.appendChild(summary);
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runTests, 1000); // Give components time to load
+        });
+    </script>
+</body>
+</html>

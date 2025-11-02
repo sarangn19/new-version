@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Components Test Suite</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="glass-card p-8 max-w-6xl mx-auto">
+            <h1 class="text-3xl font-bold text-white mb-8 text-center">AI Components Test Suite</h1>
+            
+            <!-- Test Results Display -->
+            <div id="test-results" class="mb-8 p-4 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg">
+                <h2 class="text-xl font-semibold text-white mb-4">Test Results</h2>
+                <div id="results-content" class="text-white"></div>
+            </div>
+
+            <!-- Test Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <button id="test-gemini-client" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Gemini API Client
+                </button>
+                <button id="test-ai-service" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test AI Service Manager
+                </button>
+                <button id="test-conversation-storage" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Conversation Storage
+                </button>
+                <button id="test-mcq-analysis" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test MCQ Analysis Mode
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <button id="test-performance-analytics" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Performance Analytics AI
+                </button>
+                <button id="test-recommendation-engine" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test AI Recommendation Engine
+                </button>
+            </div>
+
+            <!-- Gemini API Client Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Gemini API Client Tests</h2>
+                <div id="gemini-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- AI Service Manager Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">AI Service Manager Tests</h2>
+                <div id="ai-service-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Conversation Storage Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Conversation Storage Tests</h2>
+                <div id="conversation-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- MCQ Analysis Mode Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">MCQ Analysis Mode Tests</h2>
+                <div id="mcq-analysis-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Performance Analytics AI Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Performance Analytics AI Tests</h2>
+                <div id="performance-analytics-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- AI Recommendation Engine Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">AI Recommendation Engine Tests</h2>
+                <div id="recommendation-engine-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Error Handling Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Error Handling & Retry Tests</h2>
+                <div id="error-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Integration Tests -->
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Integration Tests</h2>
+                <button id="run-integration-tests" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 mb-4">
+                    Run Integration Tests
+                </button>
+                <div id="integration-test-results" class="text-white space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load AI Components -->
+    <script src="js/validation-system.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/conversation-storage.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/assistant-mode-manager.js"></script>
+    <script src="js/mcq-analysis-mode.js"></script>
+    <script src="js/performance-analytics-ai.js"></script>
+    <script src="js/ai-recommendation-engine.js"></script>
+
+    <script>
+        // AI Components Test Suite Implementation
+        class AIComponentsTestSuite {
+            constructor() {
+                this.testResults = [];
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.setupTests();
+            }
+
+            setupTests() {
+                this.setupEventListeners();
+                this.runInitialTests();
+            }
+
+            setupEventListeners() {
+                document.getElementById('test-gemini-client').addEventListener('click', () => {
+                    this.testGeminiAPIClient();
+                });
+
+                document.getElementById('test-ai-service').addEventListener('click', () => {
+                    this.testAIServiceManager();
+                });
+
+                document.getElementById('test-conversation-storage').addEventListener('click', () => {
+                    this.testConversationStorage();
+                });
+
+                document.getElementById('run-integration-tests').addEventListener('click', () => {
+                    this.runIntegrationTests();
+                });
+
+                document.getElementById('test-mcq-analysis').addEventListener('click', () => {
+                    this.testMCQAnalysisMode();
+                });
+
+                document.getElementById('test-performance-analytics').addEventListener('click', () => {
+                    this.testPerformanceAnalyticsAI();
+                });
+
+                document.getElementById('test-recommendation-engine').addEventListener('click', () => {
+                    this.testAIRecommendationEngine();
+                });
+            }
+
+            runInitialTests() {
+                this.logResult('System', 'Starting AI Components Test Suite...', 'info');
+                this.testComponentAvailability();
+                this.updateResultsDisplay();
+            }
+
+            testComponentAvailability() {
+                // Test if all required classes are available
+                const components = [
+                    { name: 'GeminiAPIClient', class: window.GeminiAPIClient },
+                    { name: 'ConversationStorage', class: window.ConversationStorage },
+                    { name: 'AIServiceManager', class: window.AIServiceManager },
+                    { name: 'ValidationSystem', class: window.ValidationSystem },
+                    { name: 'AssistantModeManager', class: window.AssistantModeManager },
+                    { name: 'MCQAnalysisMode', class: window.MCQAnalysisMode },
+                    { name: 'PerformanceAnalyticsAI', class: window.PerformanceAnalyticsAI },
+                    { name: 'AIRecommendationEngine', class: window.AIRecommendationEngine }
+                ];
+
+                components.forEach(component => {
+                    if (component.class) {
+                        this.logResult('Component Availability', `${component.name} is available`, 'success');
+                    } else {
+                        this.logResult('Component Availability', `${component.name} is NOT available`, 'error');
+                    }
+                });
+            }
+
+            testGeminiAPIClient() {
+                this.clearResults('gemini-test-results');
+                this.logResult('Gemini API Client', 'Starting Gemini API Client tests...', 'info', 'gemini-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const client = new GeminiAPIClient('test-api-key', {
+                        model: 'gemini-pro',
+                        maxTokens: 1024
+                    });
+                    this.logResult('Gemini API Client', 'Constructor: PASSED', 'success', 'gemini-test-results');
+
+                    // Test 2: Configuration
+                    if (client.config && client.config.model === 'gemini-pro') {
+                        this.logResult('Gemini API Client', 'Configuration: PASSED', 'success', 'gemini-test-results');
+                    } else {
+                        this.logResult('Gemini API Client', 'Configuration: FAILED', 'error', 'gemini-test-results');
+                    }
+
+                    // Test 3: Request formatting
+                    const testPrompt = "Test prompt";
+                    const formattedRequest = client.formatRequest(testPrompt, {});
+                    if (formattedRequest && formattedRequest.contents) {
+                        this.logResult('Gemini API Client', 'Request formatting: PASSED', 'success', 'gemini-test-results');
+                    } else {
+                        this.logResult('Gemini API Client', 'Request formatting: FAILED', 'error', 'gemini-test-results');
+                    }
+
+                    // Test 4: Error handling setup
+                    if (typeof client.handleAPIError === 'function') {
+                        this.logResult('Gemini API Client', 'Error handling methods: PASSED', 'success', 'gemini-test-results');
+                    } else {
+                        this.logResult('Gemini API Client', 'Error handling methods: FAILED', 'error', 'gemini-test-results');
+                    }
+
+                    // Test 5: Retry mechanism
+                    if (typeof client.retryRequest === 'function') {
+                        this.logResult('Gemini API Client', 'Retry mechanism: PASSED', 'success', 'gemini-test-results');
+                    } else {
+                        this.logResult('Gemini API Client', 'Retry mechanism: FAILED', 'error', 'gemini-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('Gemini API Client', `Constructor failed: ${error.message}`, 'error', 'gemini-test-results');
+                }
+            }
+
+            testAIServiceManager() {
+                this.clearResults('ai-service-test-results');
+                this.logResult('AI Service Manager', 'Starting AI Service Manager tests...', 'info', 'ai-service-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const aiService = new AIServiceManager('test-api-key', {
+                        maxContextWindow: 10,
+                        defaultMode: 'general'
+                    });
+                    this.logResult('AI Service Manager', 'Constructor: PASSED', 'success', 'ai-service-test-results');
+
+                    // Test 2: Mode configurations
+                    if (aiService.modeConfigs && aiService.modeConfigs.general && aiService.modeConfigs.mcq) {
+                        this.logResult('AI Service Manager', 'Mode configurations: PASSED', 'success', 'ai-service-test-results');
+                    } else {
+                        this.logResult('AI Service Manager', 'Mode configurations: FAILED', 'error', 'ai-service-test-results');
+                    }
+
+                    // Test 3: Mode switching
+                    aiService.setMode('mcq');
+                    if (aiService.currentMode === 'mcq') {
+                        this.logResult('AI Service Manager', 'Mode switching: PASSED', 'success', 'ai-service-test-results');
+                    } else {
+                        this.logResult('AI Service Manager', 'Mode switching: FAILED', 'error', 'ai-service-test-results');
+                    }
+
+                    // Test 4: Context management
+                    if (typeof aiService.addContext === 'function' && typeof aiService.clearContext === 'function') {
+                        this.logResult('AI Service Manager', 'Context management methods: PASSED', 'success', 'ai-service-test-results');
+                    } else {
+                        this.logResult('AI Service Manager', 'Context management methods: FAILED', 'error', 'ai-service-test-results');
+                    }
+
+                    // Test 5: Conversation integration
+                    if (typeof aiService.getConversationHistory === 'function') {
+                        this.logResult('AI Service Manager', 'Conversation integration: PASSED', 'success', 'ai-service-test-results');
+                    } else {
+                        this.logResult('AI Service Manager', 'Conversation integration: FAILED', 'error', 'ai-service-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('AI Service Manager', `Constructor failed: ${error.message}`, 'error', 'ai-service-test-results');
+                }
+            }
+
+            testConversationStorage() {
+                this.clearResults('conversation-test-results');
+                this.logResult('Conversation Storage', 'Starting Conversation Storage tests...', 'info', 'conversation-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const storage = new ConversationStorage({
+                        storagePrefix: 'test_',
+                        maxConversations: 50
+                    });
+                    this.logResult('Conversation Storage', 'Constructor: PASSED', 'success', 'conversation-test-results');
+
+                    // Test 2: Create conversation
+                    const conversation = storage.createConversation({
+                        mode: 'general',
+                        subject: 'test'
+                    });
+                    if (conversation && conversation.id) {
+                        this.logResult('Conversation Storage', 'Create conversation: PASSED', 'success', 'conversation-test-results');
+                    } else {
+                        this.logResult('Conversation Storage', 'Create conversation: FAILED', 'error', 'conversation-test-results');
+                    }
+
+                    // Test 3: Add message
+                    const message = storage.addMessage(conversation.id, {
+                        role: 'user',
+                        content: 'Test message'
+                    });
+                    if (message && message.id) {
+                        this.logResult('Conversation Storage', 'Add message: PASSED', 'success', 'conversation-test-results');
+                    } else {
+                        this.logResult('Conversation Storage', 'Add message: FAILED', 'error', 'conversation-test-results');
+                    }
+
+                    // Test 4: Get conversation history
+                    const history = storage.getConversationHistory(conversation.id);
+                    if (Array.isArray(history) && history.length > 0) {
+                        this.logResult('Conversation Storage', 'Get conversation history: PASSED', 'success', 'conversation-test-results');
+                    } else {
+                        this.logResult('Conversation Storage', 'Get conversation history: FAILED', 'error', 'conversation-test-results');
+                    }
+
+                    // Test 5: List conversations
+                    const conversations = storage.listConversations();
+                    if (Array.isArray(conversations)) {
+                        this.logResult('Conversation Storage', 'List conversations: PASSED', 'success', 'conversation-test-results');
+                    } else {
+                        this.logResult('Conversation Storage', 'List conversations: FAILED', 'error', 'conversation-test-results');
+                    }
+
+                    // Test 6: Storage statistics
+                    const stats = storage.getStorageStats();
+                    if (stats && typeof stats.conversationCount === 'number') {
+                        this.logResult('Conversation Storage', 'Storage statistics: PASSED', 'success', 'conversation-test-results');
+                    } else {
+                        this.logResult('Conversation Storage', 'Storage statistics: FAILED', 'error', 'conversation-test-results');
+                    }
+
+                    // Cleanup test data
+                    storage.deleteConversation(conversation.id);
+
+                } catch (error) {
+                    this.logResult('Conversation Storage', `Test failed: ${error.message}`, 'error', 'conversation-test-results');
+                }
+            }
+
+            runIntegrationTests() {
+                this.clearResults('integration-test-results');
+                this.logResult('Integration Tests', 'Starting integration tests...', 'info', 'integration-test-results');
+
+                try {
+                    // Test 1: AI Service Manager with Conversation Storage
+                    const aiService = new AIServiceManager('test-api-key');
+                    
+                    // Initialize conversation storage
+                    aiService.conversationStorage = new ConversationStorage({
+                        storagePrefix: 'integration_test_'
+                    });
+
+                    if (aiService.conversationStorage) {
+                        this.logResult('Integration Tests', 'AI Service + Conversation Storage: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'AI Service + Conversation Storage: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 2: Mode switching with context preservation
+                    const conversationId = aiService.conversationStorage.createConversation({
+                        mode: 'general'
+                    }).id;
+
+                    aiService.setMode('mcq');
+                    const context = aiService.conversationStorage.getConversationContext(conversationId);
+                    
+                    if (context && context.conversationId === conversationId) {
+                        this.logResult('Integration Tests', 'Mode switching with context: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Mode switching with context: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 3: Error handling integration
+                    try {
+                        aiService.conversationStorage.addMessage('invalid-id', {
+                            role: 'user',
+                            content: 'test'
+                        });
+                        this.logResult('Integration Tests', 'Error handling: FAILED (should have thrown error)', 'error', 'integration-test-results');
+                    } catch (expectedError) {
+                        this.logResult('Integration Tests', 'Error handling: PASSED', 'success', 'integration-test-results');
+                    }
+
+                    // Cleanup
+                    aiService.conversationStorage.deleteConversation(conversationId);
+
+                } catch (error) {
+                    this.logResult('Integration Tests', `Integration test failed: ${error.message}`, 'error', 'integration-test-results');
+                }
+
+                // Test error handling and retry mechanisms
+                this.testErrorHandling();
+            }
+
+            testErrorHandling() {
+                this.clearResults('error-test-results');
+                this.logResult('Error Handling', 'Testing error handling and retry mechanisms...', 'info', 'error-test-results');
+
+                try {
+                    // Test 1: Gemini API Client error handling
+                    const client = new GeminiAPIClient('invalid-key');
+                    
+                    // Test invalid response handling
+                    const invalidResponse = null;
+                    const validationResult = client.validateResponse(invalidResponse);
+                    if (!validationResult) {
+                        this.logResult('Error Handling', 'Invalid response validation: PASSED', 'success', 'error-test-results');
+                    } else {
+                        this.logResult('Error Handling', 'Invalid response validation: FAILED', 'error', 'error-test-results');
+                    }
+
+                    // Test 2: Rate limit handling
+                    if (typeof client.handleRateLimit === 'function') {
+                        this.logResult('Error Handling', 'Rate limit handler exists: PASSED', 'success', 'error-test-results');
+                    } else {
+                        this.logResult('Error Handling', 'Rate limit handler exists: FAILED', 'error', 'error-test-results');
+                    }
+
+                    // Test 3: Retry mechanism
+                    if (typeof client.retryRequest === 'function') {
+                        this.logResult('Error Handling', 'Retry mechanism exists: PASSED', 'success', 'error-test-results');
+                    } else {
+                        this.logResult('Error Handling', 'Retry mechanism exists: FAILED', 'error', 'error-test-results');
+                    }
+
+                    // Test 4: Conversation storage error handling
+                    const storage = new ConversationStorage();
+                    
+                    try {
+                        storage.addMessage('non-existent-id', { role: 'user', content: 'test' });
+                        this.logResult('Error Handling', 'Storage error handling: FAILED (should throw error)', 'error', 'error-test-results');
+                    } catch (expectedError) {
+                        this.logResult('Error Handling', 'Storage error handling: PASSED', 'success', 'error-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('Error Handling', `Error handling test failed: ${error.message}`, 'error', 'error-test-results');
+                }
+            }
+
+            testMCQAnalysisMode() {
+                this.clearResults('mcq-analysis-test-results');
+                this.logResult('MCQ Analysis Mode', 'Starting MCQ Analysis Mode tests...', 'info', 'mcq-analysis-test-results');
+
+                try {
+                    // Test 1: AssistantModeManager Constructor
+                    const modeManager = new AssistantModeManager();
+                    this.logResult('MCQ Analysis Mode', 'AssistantModeManager Constructor: PASSED', 'success', 'mcq-analysis-test-results');
+
+                    // Test 2: MCQ mode configuration
+                    const mcqConfig = modeManager.modeConfigs.mcq;
+                    if (mcqConfig && mcqConfig.name === 'MCQ Analysis') {
+                        this.logResult('MCQ Analysis Mode', 'MCQ mode configuration: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'MCQ mode configuration: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 3: MCQAnalysisMode Constructor
+                    const mcqAnalysis = new MCQAnalysisMode(modeManager);
+                    this.logResult('MCQ Analysis Mode', 'MCQAnalysisMode Constructor: PASSED', 'success', 'mcq-analysis-test-results');
+
+                    // Test 4: MCQ templates initialization
+                    if (mcqAnalysis.mcqTemplates && mcqAnalysis.mcqTemplates.questionAnalysis) {
+                        this.logResult('MCQ Analysis Mode', 'MCQ templates initialization: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'MCQ templates initialization: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 5: Analysis structure initialization
+                    if (mcqAnalysis.analysisStructure && mcqAnalysis.analysisStructure.correctAnswerFormat) {
+                        this.logResult('MCQ Analysis Mode', 'Analysis structure initialization: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'Analysis structure initialization: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 6: MCQ data validation
+                    const validMCQData = {
+                        question: "What is the capital of India?",
+                        options: {
+                            A: "Mumbai",
+                            B: "Delhi", 
+                            C: "Kolkata",
+                            D: "Chennai"
+                        },
+                        correctAnswer: "B",
+                        userAnswer: "A",
+                        subject: "Geography"
+                    };
+
+                    const validation = mcqAnalysis.validateMCQData(validMCQData);
+                    if (validation.isValid) {
+                        this.logResult('MCQ Analysis Mode', 'MCQ data validation (valid data): PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'MCQ data validation (valid data): FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 7: Invalid MCQ data validation
+                    const invalidMCQData = {
+                        question: "",
+                        options: {},
+                        correctAnswer: ""
+                    };
+
+                    const invalidValidation = mcqAnalysis.validateMCQData(invalidMCQData);
+                    if (!invalidValidation.isValid && invalidValidation.errors.length > 0) {
+                        this.logResult('MCQ Analysis Mode', 'MCQ data validation (invalid data): PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'MCQ data validation (invalid data): FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 8: Prompt generation
+                    const prompt = mcqAnalysis.generateMCQPrompt(validMCQData);
+                    if (prompt && prompt.includes(validMCQData.question) && prompt.includes(validMCQData.options.A)) {
+                        this.logResult('MCQ Analysis Mode', 'MCQ prompt generation: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'MCQ prompt generation: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 9: Mode switching to MCQ
+                    const modeResult = modeManager.setMode('mcq', {
+                        analysisType: 'mcq_test',
+                        questionId: 'test-123'
+                    });
+                    if (modeResult.success && modeManager.currentMode === 'mcq') {
+                        this.logResult('MCQ Analysis Mode', 'Mode switching to MCQ: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'Mode switching to MCQ: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 10: MCQ prompt template generation
+                    const mcqPrompt = modeManager.generateMCQAnalysisPrompt(validMCQData);
+                    if (mcqPrompt && mcqPrompt.includes('✅ CORRECT ANSWER EXPLANATION')) {
+                        this.logResult('MCQ Analysis Mode', 'MCQ prompt template generation: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'MCQ prompt template generation: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 11: Response section parsing
+                    const mockResponse = `
+✅ CORRECT ANSWER EXPLANATION
+The correct answer is B) Delhi because it is the national capital.
+
+❌ INCORRECT OPTIONS ANALYSIS
+A) Mumbai - This is the financial capital, not the national capital.
+C) Kolkata - This was the former capital during British rule.
+D) Chennai - This is a major city in South India but not the capital.
+
+📚 CONCEPT CLARIFICATION
+The capital of India is New Delhi, which is part of the National Capital Territory of Delhi.
+
+🎯 EXAM STRATEGY
+Remember that Delhi became the capital in 1911, replacing Kolkata.
+
+🔗 RELATED TOPICS
+Study about the history of Indian capitals and administrative divisions.
+                    `;
+
+                    const sections = modeManager.extractMCQSections(mockResponse);
+                    if (sections.correctAnswer && sections.incorrectOptions && sections.concepts) {
+                        this.logResult('MCQ Analysis Mode', 'Response section parsing: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'Response section parsing: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 12: Key points extraction
+                    const keyPoints = mcqAnalysis.extractKeyPoints(sections.correctAnswer || '');
+                    if (Array.isArray(keyPoints)) {
+                        this.logResult('MCQ Analysis Mode', 'Key points extraction: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'Key points extraction: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 13: Fallback analysis generation
+                    const fallbackAnalysis = mcqAnalysis.generateFallbackAnalysis(validMCQData);
+                    if (fallbackAnalysis && fallbackAnalysis.questionSummary && fallbackAnalysis.message) {
+                        this.logResult('MCQ Analysis Mode', 'Fallback analysis generation: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'Fallback analysis generation: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 14: Response formatting
+                    const formattedResponse = modeManager.formatMCQResponse(mockResponse);
+                    if (formattedResponse && formattedResponse.includes('mcq-analysis-response')) {
+                        this.logResult('MCQ Analysis Mode', 'Response formatting: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'Response formatting: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                    // Test 15: Available modes listing
+                    const availableModes = modeManager.getAvailableModes();
+                    const mcqMode = availableModes.find(mode => mode.id === 'mcq');
+                    if (mcqMode && mcqMode.name === 'MCQ Analysis') {
+                        this.logResult('MCQ Analysis Mode', 'Available modes listing: PASSED', 'success', 'mcq-analysis-test-results');
+                    } else {
+                        this.logResult('MCQ Analysis Mode', 'Available modes listing: FAILED', 'error', 'mcq-analysis-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('MCQ Analysis Mode', `Test failed: ${error.message}`, 'error', 'mcq-analysis-test-results');
+                }
+            }
+
+            testPerformanceAnalyticsAI() {
+                this.clearResults('performance-analytics-test-results');
+                this.logResult('Performance Analytics AI', 'Starting Performance Analytics AI tests...', 'info', 'performance-analytics-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const performanceAnalytics = new PerformanceAnalyticsAI();
+                    this.logResult('Performance Analytics AI', 'Constructor: PASSED', 'success', 'performance-analytics-test-results');
+
+                    // Test 2: Configuration
+                    if (performanceAnalytics.config && performanceAnalytics.config.analysisMode === 'performance_analytics') {
+                        this.logResult('Performance Analytics AI', 'Configuration: PASSED', 'success', 'performance-analytics-test-results');
+                    } else {
+                        this.logResult('Performance Analytics AI', 'Configuration: FAILED', 'error', 'performance-analytics-test-results');
+                    }
+
+                    // Test 3: Learning patterns initialization
+                    if (performanceAnalytics.learningPatterns && performanceAnalytics.learningPatterns.studyHabits) {
+                        this.logResult('Performance Analytics AI', 'Learning patterns initialization: PASSED', 'success', 'performance-analytics-test-results');
+                    } else {
+                        this.logResult('Performance Analytics AI', 'Learning patterns initialization: FAILED', 'error', 'performance-analytics-test-results');
+                    }
+
+                    // Test 4: Performance data gathering
+                    const mockUserData = {
+                        accuracy: 75,
+                        consistency: 80,
+                        studyTime: 5
+                    };
+
+                    const performanceData = performanceAnalytics.gatherPerformanceData(mockUserData);
+                    if (performanceData && performanceData.timestamp) {
+                        this.logResult('Performance Analytics AI', 'Performance data gathering: PASSED', 'success', 'performance-analytics-test-results');
+                    } else {
+                        this.logResult('Performance Analytics AI', 'Performance data gathering: FAILED', 'error', 'performance-analytics-test-results');
+                    }
+
+                    // Test 5: Data sufficiency check
+                    const hasSufficientData = performanceAnalytics.hassufficientData(performanceData);
+                    if (typeof hasSufficientData === 'boolean') {
+                        this.logResult('Performance Analytics AI', 'Data sufficiency check: PASSED', 'success', 'performance-analytics-test-results');
+                    } else {
+                        this.logResult('Performance Analytics AI', 'Data sufficiency check: FAILED', 'error', 'performance-analytics-test-results');
+                    }
+
+                    // Test 6: Weakness pattern analysis
+                    const weaknessPatterns = performanceAnalytics.analyzeAccuracyPatterns(mockUserData);
+                    if (Array.isArray(weaknessPatterns)) {
+                        this.logResult('Performance Analytics AI', 'Weakness pattern analysis: PASSED', 'success', 'performance-analytics-test-results');
+                    } else {
+                        this.logResult('Performance Analytics AI', 'Weakness pattern analysis: FAILED', 'error', 'performance-analytics-test-results');
+                    }
+
+                    // Test 7: Traditional analysis
+                    const traditionalAnalysis = performanceAnalytics.performTraditionalAnalysis(performanceData);
+                    if (traditionalAnalysis && traditionalAnalysis.performanceLevel) {
+                        this.logResult('Performance Analytics AI', 'Traditional analysis: PASSED', 'success', 'performance-analytics-test-results');
+                    } else {
+                        this.logResult('Performance Analytics AI', 'Traditional analysis: FAILED', 'error', 'performance-analytics-test-results');
+                    }
+
+                    // Test 8: Fallback analysis generation
+                    const fallbackAnalysis = performanceAnalytics.generateFallbackAnalysis(performanceData);
+                    if (fallbackAnalysis && fallbackAnalysis.analysisMethod === 'insufficient_data') {
+                        this.logResult('Performance Analytics AI', 'Fallback analysis generation: PASSED', 'success', 'performance-analytics-test-results');
+                    } else {
+                        this.logResult('Performance Analytics AI', 'Fallback analysis generation: FAILED', 'error', 'performance-analytics-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('Performance Analytics AI', `Test failed: ${error.message}`, 'error', 'performance-analytics-test-results');
+                }
+            }
+
+            testAIRecommendationEngine() {
+                this.clearResults('recommendation-engine-test-results');
+                this.logResult('AI Recommendation Engine', 'Starting AI Recommendation Engine tests...', 'info', 'recommendation-engine-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const recommendationEngine = new AIRecommendationEngine();
+                    this.logResult('AI Recommendation Engine', 'Constructor: PASSED', 'success', 'recommendation-engine-test-results');
+
+                    // Test 2: Configuration
+                    if (recommendationEngine.config && recommendationEngine.config.maxDailyTasks === 8) {
+                        this.logResult('AI Recommendation Engine', 'Configuration: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Configuration: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 3: Learning path templates
+                    if (recommendationEngine.learningPathTemplates && recommendationEngine.learningPathTemplates.beginner) {
+                        this.logResult('AI Recommendation Engine', 'Learning path templates: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Learning path templates: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 4: Rule-based recommendations generation
+                    const mockPerformanceData = {
+                        accuracy: 65,
+                        consistency: 45,
+                        studyTime: 3
+                    };
+
+                    const ruleBasedRecs = recommendationEngine.generateRuleBasedRecommendations(mockPerformanceData);
+                    if (Array.isArray(ruleBasedRecs) && ruleBasedRecs.length > 0) {
+                        this.logResult('AI Recommendation Engine', 'Rule-based recommendations generation: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Rule-based recommendations generation: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 5: Recent performance data processing
+                    const mockUserProfile = {
+                        sessionHistory: [
+                            { date: new Date().toISOString(), duration: 60, accuracy: 70 },
+                            { date: new Date(Date.now() - 24*60*60*1000).toISOString(), duration: 45, accuracy: 65 }
+                        ]
+                    };
+
+                    const recentData = recommendationEngine.getRecentPerformanceData(mockUserProfile, 7);
+                    if (recentData && recentData.sessions && recentData.totalSessions === 2) {
+                        this.logResult('AI Recommendation Engine', 'Recent performance data processing: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Recent performance data processing: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 6: Priority areas identification
+                    const priorityAreas = recommendationEngine.identifyPriorityAreas(recentData, { targetSubjects: ['History'] });
+                    if (Array.isArray(priorityAreas)) {
+                        this.logResult('AI Recommendation Engine', 'Priority areas identification: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Priority areas identification: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 7: Task generation for specific area
+                    const mockArea = {
+                        area: 'accuracy_improvement',
+                        priority: 'high',
+                        subjects: ['General Studies']
+                    };
+
+                    const areaTasks = recommendationEngine.generateTasksForArea(mockArea, mockUserProfile, {});
+                    if (Array.isArray(areaTasks) && areaTasks.length > 0) {
+                        this.logResult('AI Recommendation Engine', 'Task generation for specific area: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Task generation for specific area: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 8: Maintenance tasks generation
+                    const maintenanceTasks = recommendationEngine.generateMaintenanceTasks(recentData, {});
+                    if (Array.isArray(maintenanceTasks) && maintenanceTasks.length > 0) {
+                        this.logResult('AI Recommendation Engine', 'Maintenance tasks generation: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Maintenance tasks generation: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 9: Task difficulty adjustment
+                    const mockTasks = [
+                        { id: 'task1', difficulty: 'medium', estimatedTime: 60, priority: 'high' }
+                    ];
+
+                    const adjustedTasks = recommendationEngine.adjustTaskDifficulty(mockTasks, recentData);
+                    if (Array.isArray(adjustedTasks) && adjustedTasks.length > 0) {
+                        this.logResult('AI Recommendation Engine', 'Task difficulty adjustment: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Task difficulty adjustment: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 10: Task schedule optimization
+                    const optimizedTasks = recommendationEngine.optimizeTaskSchedule(adjustedTasks, mockUserProfile, {});
+                    if (Array.isArray(optimizedTasks)) {
+                        this.logResult('AI Recommendation Engine', 'Task schedule optimization: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Task schedule optimization: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 11: Recommendation personalization
+                    const mockRecommendations = [
+                        { id: 'rec1', priority: 'medium', subjects: ['History'] }
+                    ];
+
+                    const personalizedRecs = recommendationEngine.personalizeRecommendations(mockRecommendations, mockPerformanceData, null);
+                    if (Array.isArray(personalizedRecs) && personalizedRecs[0].personalized === true) {
+                        this.logResult('AI Recommendation Engine', 'Recommendation personalization: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Recommendation personalization: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 12: Recommendation prioritization and filtering
+                    const prioritizedRecs = recommendationEngine.prioritizeAndFilterRecommendations(personalizedRecs, 5);
+                    if (Array.isArray(prioritizedRecs)) {
+                        this.logResult('AI Recommendation Engine', 'Recommendation prioritization and filtering: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Recommendation prioritization and filtering: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 13: Fallback recommendations
+                    const fallbackRecs = recommendationEngine.generateFallbackRecommendations(mockPerformanceData);
+                    if (Array.isArray(fallbackRecs) && fallbackRecs.length > 0) {
+                        this.logResult('AI Recommendation Engine', 'Fallback recommendations: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Fallback recommendations: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 14: User level determination
+                    const userLevel = recommendationEngine.determineUserLevel({ overview: { performanceScore: 75 } });
+                    if (userLevel === 'intermediate') {
+                        this.logResult('AI Recommendation Engine', 'User level determination: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'User level determination: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                    // Test 15: Learning path customization
+                    const baseTemplate = recommendationEngine.learningPathTemplates.intermediate;
+                    const customizedPath = recommendationEngine.customizeLearningPath(baseTemplate, { overview: { performanceScore: 85 } }, mockUserProfile);
+                    if (customizedPath && customizedPath.duration) {
+                        this.logResult('AI Recommendation Engine', 'Learning path customization: PASSED', 'success', 'recommendation-engine-test-results');
+                    } else {
+                        this.logResult('AI Recommendation Engine', 'Learning path customization: FAILED', 'error', 'recommendation-engine-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('AI Recommendation Engine', `Test failed: ${error.message}`, 'error', 'recommendation-engine-test-results');
+                }
+            }
+
+            // Utility methods
+            logResult(category, message, status, targetElement = null) {
+                const result = {
+                    category,
+                    message,
+                    status,
+                    timestamp: new Date().toISOString()
+                };
+
+                this.testResults.push(result);
+
+                if (status === 'success') {
+                    this.passedTests++;
+                } else if (status === 'error') {
+                    this.failedTests++;
+                }
+
+                if (targetElement) {
+                    this.displayResult(result, targetElement);
+                }
+
+                this.updateResultsDisplay();
+            }
+
+            displayResult(result, targetElementId) {
+                const element = document.getElementById(targetElementId);
+                if (element) {
+                    const statusColor = result.status === 'success' ? 'text-green-400' : 
+                                       result.status === 'error' ? 'text-red-400' : 'text-blue-400';
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `p-2 rounded ${statusColor}`;
+                    resultDiv.innerHTML = `<strong>${result.category}:</strong> ${result.message}`;
+                    element.appendChild(resultDiv);
+                }
+            }
+
+            clearResults(targetElementId) {
+                const element = document.getElementById(targetElementId);
+                if (element) {
+                    element.innerHTML = '';
+                }
+            }
+
+            updateResultsDisplay() {
+                const resultsContent = document.getElementById('results-content');
+                const totalTests = this.passedTests + this.failedTests;
+                const passRate = totalTests > 0 ? ((this.passedTests / totalTests) * 100).toFixed(1) : 0;
+
+                resultsContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-400">${this.passedTests}</div>
+                            <div class="text-sm">Passed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-400">${this.failedTests}</div>
+                            <div class="text-sm">Failed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-400">${totalTests}</div>
+                            <div class="text-sm">Total</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-400">${passRate}%</div>
+                            <div class="text-sm">Pass Rate</div>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        Last updated: ${new Date().toLocaleTimeString()}
+                    </div>
+                `;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AIComponentsTestSuite();
+        });
+    </script>
+</body>
+</html>

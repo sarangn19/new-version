@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValidationSystem Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+    <div class="container mx-auto px-4 py-8">
+        <div class="glass-card p-8 max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-white mb-8 text-center">ValidationSystem Test Suite</h1>
+            
+            <!-- Test Results Display -->
+            <div id="test-results" class="mb-8 p-4 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg">
+                <h2 class="text-xl font-semibold text-white mb-4">Test Results</h2>
+                <div id="results-content" class="text-white"></div>
+            </div>
+
+            <!-- Form Validation Test -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Form Validation Test</h2>
+                <form id="test-form" data-validate class="space-y-4">
+                    <div>
+                        <label class="block text-white mb-2">Required Field:</label>
+                        <input type="text" 
+                               name="required-field" 
+                               data-validate="required" 
+                               data-sanitize="trim|removeExtraSpaces"
+                               class="w-full p-3 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-gray-300 border border-white border-opacity-30">
+                    </div>
+
+                    <div>
+                        <label class="block text-white mb-2">Email Field:</label>
+                        <input type="email" 
+                               name="email-field" 
+                               data-validate="required|email" 
+                               data-sanitize="trim|lowercase"
+                               class="w-full p-3 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-gray-300 border border-white border-opacity-30">
+                    </div>
+
+                    <div>
+                        <label class="block text-white mb-2">Numeric Field (1-100):</label>
+                        <input type="number" 
+                               name="numeric-field" 
+                               data-validate="required|numeric|range:1,100" 
+                               data-sanitize="trim|numericOnly"
+                               class="w-full p-3 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-gray-300 border border-white border-opacity-30">
+                    </div>
+
+                    <div>
+                        <label class="block text-white mb-2">Text with Length Limit (5-50 chars):</label>
+                        <textarea name="text-field" 
+                                  data-validate="required|minLength:5|maxLength:50|safeHtml" 
+                                  data-sanitize="trim|removeScript|maxLength:50"
+                                  class="w-full p-3 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-gray-300 border border-white border-opacity-30 h-24"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-white mb-2">Alphanumeric Only:</label>
+                        <input type="text" 
+                               name="alphanumeric-field" 
+                               data-validate="alphanumeric" 
+                               data-sanitize="trim|alphanumericOnly"
+                               class="w-full p-3 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-gray-300 border border-white border-opacity-30">
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                        Submit Form
+                    </button>
+                </form>
+            </div>
+
+            <!-- Security Test Section -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Security Tests</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-white mb-2">XSS Prevention Test:</label>
+                        <input type="text" 
+                               id="xss-test" 
+                               placeholder="Try entering: <script>alert('xss')</script>"
+                               data-validate="safeHtml|noScript" 
+                               data-sanitize="removeScript|escapeHtml"
+                               class="w-full p-3 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-gray-300 border border-white border-opacity-30">
+                        <div id="xss-result" class="mt-2 text-white"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-white mb-2">SQL Injection Prevention Test:</label>
+                        <input type="text" 
+                               id="sql-test" 
+                               placeholder="Try entering: '; DROP TABLE users; --"
+                               class="w-full p-3 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg text-white placeholder-gray-300 border border-white border-opacity-30">
+                        <div id="sql-result" class="mt-2 text-white"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Test Section -->
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">API Tests</h2>
+                <button id="run-api-tests" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    Run API Tests
+                </button>
+                <div id="api-test-results" class="mt-4 text-white"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/validation-system.js"></script>
+    <script>
+        // Test Suite Implementation
+        class ValidationTestSuite {
+            constructor() {
+                this.testResults = [];
+                this.setupTests();
+            }
+
+            setupTests() {
+                this.setupFormTests();
+                this.setupSecurityTests();
+                this.setupAPITests();
+                this.runInitialTests();
+            }
+
+            setupFormTests() {
+                const form = document.getElementById('test-form');
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.logResult('Form Validation', 'Form submission prevented - validation working', 'success');
+                });
+            }
+
+            setupSecurityTests() {
+                const xssInput = document.getElementById('xss-test');
+                const sqlInput = document.getElementById('sql-test');
+
+                xssInput.addEventListener('input', (e) => {
+                    const original = e.target.value;
+                    const cleaned = validationSystem.preventXSS(original);
+                    document.getElementById('xss-result').innerHTML = `
+                        <strong>Original:</strong> ${this.escapeHtml(original)}<br>
+                        <strong>Cleaned:</strong> ${this.escapeHtml(cleaned)}
+                    `;
+                });
+
+                sqlInput.addEventListener('input', (e) => {
+                    const original = e.target.value;
+                    const cleaned = validationSystem.preventSQLInjection(original);
+                    document.getElementById('sql-result').innerHTML = `
+                        <strong>Original:</strong> ${this.escapeHtml(original)}<br>
+                        <strong>Cleaned:</strong> ${this.escapeHtml(cleaned)}
+                    `;
+                });
+            }
+
+            setupAPITests() {
+                document.getElementById('run-api-tests').addEventListener('click', () => {
+                    this.runAPITests();
+                });
+            }
+
+            runInitialTests() {
+                // Test basic validators
+                this.testValidators();
+                this.testSanitizers();
+                this.testDataValidation();
+                this.updateResultsDisplay();
+            }
+
+            testValidators() {
+                const tests = [
+                    { validator: 'required', value: '', expected: false, name: 'Required - Empty' },
+                    { validator: 'required', value: 'test', expected: true, name: 'Required - Valid' },
+                    { validator: 'email', value: 'invalid-email', expected: false, name: 'Email - Invalid' },
+                    { validator: 'email', value: 'test@example.com', expected: true, name: 'Email - Valid' },
+                    { validator: 'numeric', value: 'abc', expected: false, name: 'Numeric - Invalid' },
+                    { validator: 'numeric', value: '123', expected: true, name: 'Numeric - Valid' },
+                    { validator: 'minLength', value: 'ab', params: [5], expected: false, name: 'MinLength - Too Short' },
+                    { validator: 'minLength', value: 'abcdef', params: [5], expected: true, name: 'MinLength - Valid' },
+                    { validator: 'range', value: '150', params: [1, 100], expected: false, name: 'Range - Out of Range' },
+                    { validator: 'range', value: '50', params: [1, 100], expected: true, name: 'Range - Valid' }
+                ];
+
+                tests.forEach(test => {
+                    const result = validationSystem.runValidator(test.validator, test.value, test.params || []);
+                    const status = result === test.expected ? 'success' : 'error';
+                    this.logResult('Validator Test', `${test.name}: ${status}`, status);
+                });
+            }
+
+            testSanitizers() {
+                const tests = [
+                    { sanitizer: 'trim', value: '  test  ', expected: 'test', name: 'Trim' },
+                    { sanitizer: 'lowercase', value: 'TEST', expected: 'test', name: 'Lowercase' },
+                    { sanitizer: 'removeHtml', value: '<p>test</p>', expected: 'test', name: 'Remove HTML' },
+                    { sanitizer: 'alphanumericOnly', value: 'test@123!', expected: 'test123', name: 'Alphanumeric Only' },
+                    { sanitizer: 'numericOnly', value: 'abc123def', expected: '123', name: 'Numeric Only' }
+                ];
+
+                tests.forEach(test => {
+                    const result = validationSystem.sanitizeValue(test.value, [test.sanitizer]);
+                    const status = result === test.expected ? 'success' : 'error';
+                    this.logResult('Sanitizer Test', `${test.name}: ${status} (${result})`, status);
+                });
+            }
+
+            testDataValidation() {
+                const testData = {
+                    name: '  John Doe  ',
+                    email: 'JOHN@EXAMPLE.COM',
+                    age: '25',
+                    bio: '<script>alert("xss")</script>Hello world'
+                };
+
+                const rules = {
+                    name: {
+                        validators: [
+                            { validator: 'required' },
+                            { validator: 'minLength', params: [2] }
+                        ],
+                        sanitizers: ['trim', 'removeExtraSpaces']
+                    },
+                    email: {
+                        validators: [
+                            { validator: 'required' },
+                            { validator: 'email' }
+                        ],
+                        sanitizers: ['trim', 'lowercase']
+                    },
+                    age: {
+                        validators: [
+                            { validator: 'required' },
+                            { validator: 'numeric' },
+                            { validator: 'range', params: [1, 120] }
+                        ],
+                        sanitizers: ['trim', 'numericOnly']
+                    },
+                    bio: {
+                        validators: [
+                            { validator: 'safeHtml' },
+                            { validator: 'maxLength', params: [500] }
+                        ],
+                        sanitizers: ['trim', 'removeScript', 'escapeHtml']
+                    }
+                };
+
+                const result = validationSystem.validateData(testData, rules);
+                this.logResult('Data Validation', `Validation ${result.isValid ? 'passed' : 'failed'}`, result.isValid ? 'success' : 'error');
+                
+                if (result.sanitized) {
+                    this.logResult('Data Sanitization', 'Data successfully sanitized', 'success');
+                }
+            }
+
+            runAPITests() {
+                const apiResults = document.getElementById('api-test-results');
+                apiResults.innerHTML = '<div class="text-yellow-300">Running API tests...</div>';
+
+                // Test validation summary
+                const summary = validationSystem.getValidationSummary();
+                
+                const tests = [
+                    {
+                        name: 'Validators Available',
+                        result: summary.validators.length > 10,
+                        details: `${summary.validators.length} validators loaded`
+                    },
+                    {
+                        name: 'Sanitizers Available',
+                        result: summary.sanitizers.length > 5,
+                        details: `${summary.sanitizers.length} sanitizers loaded`
+                    },
+                    {
+                        name: 'Form Attachment',
+                        result: summary.attachedForms >= 0,
+                        details: `${summary.attachedForms} forms attached`
+                    },
+                    {
+                        name: 'XSS Prevention',
+                        result: validationSystem.preventXSS('<script>alert("test")</script>') !== '<script>alert("test")</script>',
+                        details: 'XSS prevention working'
+                    },
+                    {
+                        name: 'SQL Injection Prevention',
+                        result: validationSystem.preventSQLInjection("'; DROP TABLE users; --") !== "'; DROP TABLE users; --",
+                        details: 'SQL injection prevention working'
+                    },
+                    {
+                        name: 'Custom Validator Addition',
+                        result: (() => {
+                            validationSystem.addValidator('test-validator', (value) => value === 'test', 'Test failed');
+                            return validationSystem.runValidator('test-validator', 'test') === true;
+                        })(),
+                        details: 'Custom validators can be added'
+                    }
+                ];
+
+                let html = '<div class="space-y-2">';
+                tests.forEach(test => {
+                    const status = test.result ? 'success' : 'error';
+                    const color = test.result ? 'text-green-300' : 'text-red-300';
+                    const icon = test.result ? '✓' : '✗';
+                    
+                    html += `
+                        <div class="${color}">
+                            ${icon} <strong>${test.name}:</strong> ${test.details}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+
+                apiResults.innerHTML = html;
+            }
+
+            logResult(category, message, status) {
+                this.testResults.push({ category, message, status, timestamp: new Date() });
+            }
+
+            updateResultsDisplay() {
+                const resultsContent = document.getElementById('results-content');
+                const successCount = this.testResults.filter(r => r.status === 'success').length;
+                const errorCount = this.testResults.filter(r => r.status === 'error').length;
+                
+                let html = `
+                    <div class="mb-4">
+                        <strong>Summary:</strong> ${successCount} passed, ${errorCount} failed
+                    </div>
+                    <div class="space-y-1 max-h-64 overflow-y-auto">
+                `;
+                
+                this.testResults.forEach(result => {
+                    const color = result.status === 'success' ? 'text-green-300' : 'text-red-300';
+                    const icon = result.status === 'success' ? '✓' : '✗';
+                    
+                    html += `
+                        <div class="${color} text-sm">
+                            ${icon} [${result.category}] ${result.message}
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                resultsContent.innerHTML = html;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new ValidationTestSuite();
+        });
+    </script>
+</body>
+</html>

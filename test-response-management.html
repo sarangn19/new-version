@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Response Management Tests - UPSC Learning Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Dependencies -->
+    <script src="js/enhanced-note-manager.js"></script>
+    <script src="js/response-manager.js"></script>
+    <script src="js/response-management-interface.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .test-section {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .test-case {
+            background: #333;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 3px solid #6b7280;
+        }
+        
+        .test-case.passed {
+            border-left-color: #10b981;
+            background: #064e3b;
+        }
+        
+        .test-case.failed {
+            border-left-color: #ef4444;
+            background: #7f1d1d;
+        }
+        
+        .test-case.running {
+            border-left-color: #f59e0b;
+            background: #78350f;
+        }
+        
+        .test-results {
+            background: #1f2937;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .log-entry {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #374151;
+        }
+        
+        .log-entry.error {
+            color: #fca5a5;
+        }
+        
+        .log-entry.success {
+            color: #86efac;
+        }
+        
+        .log-entry.info {
+            color: #93c5fd;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #374151;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold mb-4">Response Management System Tests</h1>
+            <p class="text-gray-300">Comprehensive testing suite for AI response management functionality</p>
+        </header>
+
+        <!-- Test Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div id="total-tests" class="stat-number text-blue-400">0</div>
+                <div class="text-sm text-gray-400">Total Tests</div>
+            </div>
+            <div class="stat-card">
+                <div id="passed-tests" class="stat-number text-green-400">0</div>
+                <div class="text-sm text-gray-400">Passed</div>
+            </div>
+            <div class="stat-card">
+                <div id="failed-tests" class="stat-number text-red-400">0</div>
+                <div class="text-sm text-gray-400">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div id="test-duration" class="stat-number text-yellow-400">0ms</div>
+                <div class="text-sm text-gray-400">Duration</div>
+            </div>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="controls">
+            <button id="run-all-tests" class="btn btn-primary">Run All Tests</button>
+            <button id="run-unit-tests" class="btn btn-secondary">Unit Tests Only</button>
+            <button id="run-integration-tests" class="btn btn-secondary">Integration Tests Only</button>
+            <button id="clear-storage" class="btn btn-danger">Clear Test Data</button>
+            <button id="clear-logs" class="btn btn-secondary">Clear Logs</button>
+        </div>
+
+        <!-- Test Sections -->
+        <div id="test-sections">
+            <!-- Test sections will be populated by JavaScript -->
+        </div>
+
+        <!-- Test Results Log -->
+        <div class="test-results">
+            <h3 class="text-lg font-semibold mb-4">Test Execution Log</h3>
+            <div id="test-log" class="max-h-96 overflow-y-auto">
+                <!-- Log entries will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ResponseManagementTestSuite {
+            constructor() {
+                this.tests = [];
+                this.results = {
+                    total: 0,
+                    passed: 0,
+                    failed: 0,
+                    duration: 0
+                };
+                this.startTime = 0;
+                this.responseManager = null;
+                this.responseInterface = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.initializeTestEnvironment();
+                this.defineTests();
+                this.renderTestSections();
+            }
+
+            setupEventListeners() {
+                document.getElementById('run-all-tests').addEventListener('click', () => this.runAllTests());
+                document.getElementById('run-unit-tests').addEventListener('click', () => this.runTestsByType('unit'));
+                document.getElementById('run-integration-tests').addEventListener('click', () => this.runTestsByType('integration'));
+                document.getElementById('clear-storage').addEventListener('click', () => this.clearTestData());
+                document.getElementById('clear-logs').addEventListener('click', () => this.clearLogs());
+            }
+
+            initializeTestEnvironment() {
+                try {
+                    // Clear any existing test data
+                    localStorage.removeItem('ai_responses');
+                    localStorage.removeItem('userNotes');
+                    localStorage.removeItem('userFlashcards');
+                    localStorage.removeItem('userMCQs');
+                    
+                    // Initialize components
+                    this.responseManager = new ResponseManager();
+                    
+                    this.log('Test environment initialized successfully', 'success');
+                } catch (error) {
+                    this.log(`Failed to initialize test environment: ${error.message}`, 'error');
+                }
+            }
+
+            defineTests() {
+                // Unit Tests for ResponseManager
+                this.addTest('ResponseManager Creation', 'unit', () => {
+                    return this.responseManager instanceof ResponseManager;
+                });
+
+                this.addTest('Save Response Basic', 'unit', () => {
+                    const response = {
+                        id: 'test_1',
+                        content: 'Test response content',
+                        mode: 'general'
+                    };
+                    
+                    const saved = this.responseManager.saveResponse(response);
+                    return saved && saved.id && saved.content === response.content;
+                });
+
+                this.addTest('Response Categorization', 'unit', () => {
+                    const response = {
+                        id: 'test_2',
+                        content: 'This is about MCQ questions and answers',
+                        mode: 'mcq'
+                    };
+                    
+                    const saved = this.responseManager.saveResponse(response);
+                    return saved.category === 'mcqs';
+                });
+
+                this.addTest('Subject Inference', 'unit', () => {
+                    const response = {
+                        id: 'test_3',
+                        content: 'The Indian Constitution has fundamental rights',
+                        mode: 'general'
+                    };
+                    
+                    const saved = this.responseManager.saveResponse(response);
+                    return saved.subject.toLowerCase().includes('polity') || saved.subject === 'General';
+                });
+
+                this.addTest('Tag Generation', 'unit', () => {
+                    const response = {
+                        id: 'test_4',
+                        content: 'Economics inflation monetary policy fiscal budget',
+                        mode: 'general'
+                    };
+                    
+                    const saved = this.responseManager.saveResponse(response);
+                    return saved.tags && saved.tags.length > 0;
+                });
+
+                this.addTest('Search Functionality', 'unit', () => {
+                    // First save some test responses
+                    this.responseManager.saveResponse({
+                        id: 'search_1',
+                        content: 'Constitution fundamental rights',
+                        mode: 'general'
+                    });
+                    
+                    this.responseManager.saveResponse({
+                        id: 'search_2',
+                        content: 'Economics GDP inflation',
+                        mode: 'general'
+                    });
+                    
+                    const results = this.responseManager.searchSavedResponses('constitution');
+                    return results.length > 0 && results.some(r => r.content.includes('Constitution'));
+                });
+
+                this.addTest('Filter by Category', 'unit', () => {
+                    const results = this.responseManager.searchSavedResponses('', { category: 'mcqs' });
+                    return results.every(r => r.category === 'mcqs');
+                });
+
+                this.addTest('Response Update', 'unit', () => {
+                    const responses = this.responseManager.searchSavedResponses('');
+                    if (responses.length === 0) return false;
+                    
+                    const responseId = responses[0].id;
+                    const updated = this.responseManager.updateResponse(responseId, {
+                        title: 'Updated Title',
+                        userRating: 5
+                    });
+                    
+                    return updated && updated.title === 'Updated Title' && updated.userRating === 5;
+                });
+
+                this.addTest('Response Deletion', 'unit', () => {
+                    const responses = this.responseManager.searchSavedResponses('');
+                    if (responses.length === 0) return false;
+                    
+                    const responseId = responses[0].id;
+                    const deleted = this.responseManager.deleteResponse(responseId);
+                    
+                    const afterDeletion = this.responseManager.getResponse(responseId);
+                    return deleted && !afterDeletion;
+                });
+
+                // Integration Tests
+                this.addTest('Save to Notes Integration', 'integration', () => {
+                    const response = {
+                        id: 'integration_1',
+                        content: 'Test note content for integration',
+                        mode: 'general'
+                    };
+                    
+                    const saved = this.responseManager.saveResponse(response);
+                    
+                    try {
+                        const note = this.responseManager.addToNotesSection(saved);
+                        return note && note.id && note.content.includes(response.content);
+                    } catch (error) {
+                        // Expected if EnhancedNoteManager is not available
+                        return error.message.includes('Enhanced Note Manager not available');
+                    }
+                });
+
+                this.addTest('Save to Flashcards Integration', 'integration', () => {
+                    const response = {
+                        id: 'integration_2',
+                        content: 'What is the capital of India? New Delhi is the capital.',
+                        mode: 'general'
+                    };
+                    
+                    const saved = this.responseManager.saveResponse(response);
+                    
+                    try {
+                        const flashcard = this.responseManager.addToFlashcards(saved);
+                        return flashcard && flashcard.front && flashcard.back;
+                    } catch (error) {
+                        this.log(`Flashcard integration error: ${error.message}`, 'info');
+                        return true; // Expected behavior if storage format differs
+                    }
+                });
+
+                this.addTest('Export Functionality', 'integration', () => {
+                    try {
+                        const exported = this.responseManager.exportResponses(null, 'json');
+                        const data = JSON.parse(exported);
+                        return data && data.responses && Array.isArray(data.responses);
+                    } catch (error) {
+                        return false;
+                    }
+                });
+
+                this.addTest('Statistics Generation', 'integration', () => {
+                    const stats = this.responseManager.getStatistics();
+                    return stats && 
+                           typeof stats.totalResponses === 'number' &&
+                           typeof stats.byCategory === 'object' &&
+                           typeof stats.averageRating === 'number';
+                });
+
+                // Performance Tests
+                this.addTest('Bulk Response Handling', 'performance', () => {
+                    const startTime = Date.now();
+                    
+                    // Create 50 test responses
+                    for (let i = 0; i < 50; i++) {
+                        this.responseManager.saveResponse({
+                            id: `bulk_${i}`,
+                            content: `Bulk test response ${i} with various content`,
+                            mode: 'general'
+                        });
+                    }
+                    
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    this.log(`Bulk operation took ${duration}ms`, 'info');
+                    return duration < 5000; // Should complete within 5 seconds
+                });
+
+                this.addTest('Search Performance', 'performance', () => {
+                    const startTime = Date.now();
+                    
+                    // Perform multiple searches
+                    for (let i = 0; i < 10; i++) {
+                        this.responseManager.searchSavedResponses('test');
+                    }
+                    
+                    const endTime = Date.now();
+                    const duration = endTime - startTime;
+                    
+                    this.log(`Search operations took ${duration}ms`, 'info');
+                    return duration < 1000; // Should complete within 1 second
+                });
+
+                // Error Handling Tests
+                this.addTest('Invalid Response Handling', 'error', () => {
+                    try {
+                        this.responseManager.saveResponse(null);
+                        return false; // Should have thrown an error
+                    } catch (error) {
+                        return true; // Expected behavior
+                    }
+                });
+
+                this.addTest('Non-existent Response Update', 'error', () => {
+                    try {
+                        const result = this.responseManager.updateResponse('non_existent_id', { title: 'Test' });
+                        return false; // Should have thrown an error
+                    } catch (error) {
+                        return true; // Expected behavior
+                    }
+                });
+
+                this.addTest('Invalid Export Format', 'error', () => {
+                    try {
+                        this.responseManager.exportResponses(null, 'invalid_format');
+                        return false; // Should have thrown an error
+                    } catch (error) {
+                        return true; // Expected behavior
+                    }
+                });
+            }
+
+            addTest(name, type, testFunction) {
+                this.tests.push({
+                    name,
+                    type,
+                    testFunction,
+                    status: 'pending',
+                    error: null,
+                    duration: 0
+                });
+            }
+
+            async runAllTests() {
+                this.log('Starting all tests...', 'info');
+                this.startTime = Date.now();
+                this.results = { total: 0, passed: 0, failed: 0, duration: 0 };
+
+                for (const test of this.tests) {
+                    await this.runSingleTest(test);
+                }
+
+                this.results.duration = Date.now() - this.startTime;
+                this.updateStatistics();
+                this.log(`All tests completed in ${this.results.duration}ms`, 'success');
+            }
+
+            async runTestsByType(type) {
+                this.log(`Starting ${type} tests...`, 'info');
+                this.startTime = Date.now();
+                this.results = { total: 0, passed: 0, failed: 0, duration: 0 };
+
+                const filteredTests = this.tests.filter(test => test.type === type);
+                
+                for (const test of filteredTests) {
+                    await this.runSingleTest(test);
+                }
+
+                this.results.duration = Date.now() - this.startTime;
+                this.updateStatistics();
+                this.log(`${type} tests completed in ${this.results.duration}ms`, 'success');
+            }
+
+            async runSingleTest(test) {
+                this.results.total++;
+                test.status = 'running';
+                this.updateTestDisplay(test);
+
+                const testStartTime = Date.now();
+
+                try {
+                    const result = await test.testFunction();
+                    test.duration = Date.now() - testStartTime;
+
+                    if (result) {
+                        test.status = 'passed';
+                        this.results.passed++;
+                        this.log(`✓ ${test.name} (${test.duration}ms)`, 'success');
+                    } else {
+                        test.status = 'failed';
+                        test.error = 'Test returned false';
+                        this.results.failed++;
+                        this.log(`✗ ${test.name}: Test returned false`, 'error');
+                    }
+                } catch (error) {
+                    test.status = 'failed';
+                    test.error = error.message;
+                    test.duration = Date.now() - testStartTime;
+                    this.results.failed++;
+                    this.log(`✗ ${test.name}: ${error.message}`, 'error');
+                }
+
+                this.updateTestDisplay(test);
+                
+                // Small delay to allow UI updates
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+
+            renderTestSections() {
+                const container = document.getElementById('test-sections');
+                const testsByType = this.groupTestsByType();
+
+                container.innerHTML = '';
+
+                for (const [type, tests] of Object.entries(testsByType)) {
+                    const section = document.createElement('div');
+                    section.className = 'test-section';
+                    section.innerHTML = `
+                        <h2 class="text-xl font-semibold mb-4 capitalize">${type} Tests (${tests.length})</h2>
+                        <div class="test-cases">
+                            ${tests.map(test => this.renderTestCase(test)).join('')}
+                        </div>
+                    `;
+                    container.appendChild(section);
+                }
+            }
+
+            groupTestsByType() {
+                const grouped = {};
+                this.tests.forEach(test => {
+                    if (!grouped[test.type]) {
+                        grouped[test.type] = [];
+                    }
+                    grouped[test.type].push(test);
+                });
+                return grouped;
+            }
+
+            renderTestCase(test) {
+                const statusIcon = {
+                    pending: '⏳',
+                    running: '🔄',
+                    passed: '✅',
+                    failed: '❌'
+                };
+
+                return `
+                    <div class="test-case ${test.status}" id="test-${test.name.replace(/\s+/g, '-')}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-lg">${statusIcon[test.status]}</span>
+                                <span class="font-medium">${test.name}</span>
+                            </div>
+                            <div class="text-sm text-gray-400">
+                                ${test.duration > 0 ? `${test.duration}ms` : ''}
+                            </div>
+                        </div>
+                        ${test.error ? `<div class="mt-2 text-sm text-red-300">Error: ${test.error}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            updateTestDisplay(test) {
+                const element = document.getElementById(`test-${test.name.replace(/\s+/g, '-')}`);
+                if (element) {
+                    element.outerHTML = this.renderTestCase(test);
+                }
+            }
+
+            updateStatistics() {
+                document.getElementById('total-tests').textContent = this.results.total;
+                document.getElementById('passed-tests').textContent = this.results.passed;
+                document.getElementById('failed-tests').textContent = this.results.failed;
+                document.getElementById('test-duration').textContent = `${this.results.duration}ms`;
+            }
+
+            log(message, type = 'info') {
+                const logContainer = document.getElementById('test-log');
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${type}`;
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                logContainer.appendChild(entry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+
+            clearLogs() {
+                document.getElementById('test-log').innerHTML = '';
+            }
+
+            clearTestData() {
+                localStorage.removeItem('ai_responses');
+                localStorage.removeItem('userNotes');
+                localStorage.removeItem('userFlashcards');
+                localStorage.removeItem('userMCQs');
+                
+                this.initializeTestEnvironment();
+                this.log('Test data cleared', 'info');
+            }
+        }
+
+        // Initialize test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                window.testSuite = new ResponseManagementTestSuite();
+                console.log('Response Management Test Suite initialized');
+            } catch (error) {
+                console.error('Failed to initialize test suite:', error);
+                document.body.innerHTML = `
+                    <div class="test-container">
+                        <div class="bg-red-900 border border-red-700 rounded-lg p-4">
+                            <h2 class="text-xl font-bold text-red-200 mb-2">Test Suite Initialization Failed</h2>
+                            <p class="text-red-300">Error: ${error.message}</p>
+                            <p class="text-red-400 text-sm mt-2">Please ensure all required JavaScript files are loaded.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

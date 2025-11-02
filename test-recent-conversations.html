@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Recent Conversations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/ai-response-cache.js"></script>
+    <script src="js/background-processor.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/conversation-storage.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/mock-ai-responses.js"></script>
+    <script src="js/ai-config.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">💬 Test Recent Conversations</h1>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Generate Test Conversations -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🎯 Generate Test Conversations</h2>
+                <div class="space-y-3">
+                    <button onclick="generateTestConversation('Explain federalism in Indian Constitution')" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-left">
+                        "Explain federalism in Indian Constitution"
+                    </button>
+                    <button onclick="generateTestConversation('Generate MCQs on Fundamental Rights')" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-left">
+                        "Generate MCQs on Fundamental Rights"
+                    </button>
+                    <button onclick="generateTestConversation('Create flashcards for UPSC Polity')" 
+                            class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-left">
+                        "Create flashcards for UPSC Polity"
+                    </button>
+                    <button onclick="generateTestConversation('Analyze current affairs for UPSC')" 
+                            class="w-full bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded text-left">
+                        "Analyze current affairs for UPSC"
+                    </button>
+                    <button onclick="generateTestConversation('Evaluate my essay on Digital India')" 
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded text-left">
+                        "Evaluate my essay on Digital India"
+                    </button>
+                </div>
+                <div class="mt-4 p-3 bg-gray-900 rounded">
+                    <div id="generation-status" class="text-sm text-gray-400">Click buttons to generate test conversations</div>
+                </div>
+            </div>
+            
+            <!-- Recent Conversations Display -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold">📋 Recent Conversations</h2>
+                    <button onclick="loadRecentConversations()" class="text-blue-400 hover:text-blue-300 text-sm">
+                        Refresh
+                    </button>
+                </div>
+                <div class="space-y-2">
+                    <h3 class="text-xs uppercase tracking-wider text-white/50 mb-3">Recent</h3>
+                    <ul id="recent-chats-display" class="space-y-2 text-sm">
+                        <li class="text-white/50 text-center py-4">No recent chats</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Response Preview -->
+            <div class="bg-gray-800 rounded-lg p-6 lg:col-span-2">
+                <h2 class="text-xl font-semibold mb-4">📄 Latest Response Preview</h2>
+                <div id="response-preview" class="text-sm bg-gray-900 p-4 rounded h-64 overflow-y-auto">
+                    <div class="text-gray-400">Generate a conversation to see the response preview</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let conversationCount = 0;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for AI service manager to initialize
+            setTimeout(() => {
+                loadRecentConversations();
+            }, 2000);
+        });
+        
+        async function generateTestConversation(message) {
+            const statusEl = document.getElementById('generation-status');
+            const previewEl = document.getElementById('response-preview');
+            
+            try {
+                statusEl.innerHTML = `Generating response for: "${message}"...`;
+                
+                if (window.aiServiceManager) {
+                    // Set appropriate mode based on message
+                    if (message.includes('MCQ')) {
+                        window.aiServiceManager.setMode('mcq_generator');
+                    } else if (message.includes('flashcard')) {
+                        window.aiServiceManager.setMode('flashcard_generator');
+                    } else if (message.includes('essay') || message.includes('Evaluate')) {
+                        window.aiServiceManager.setMode('answer_evaluation');
+                    } else if (message.includes('current affairs') || message.includes('news')) {
+                        window.aiServiceManager.setMode('news');
+                    } else {
+                        window.aiServiceManager.setMode('general');
+                    }
+                    
+                    const response = await window.aiServiceManager.sendMessage(message);
+                    
+                    conversationCount++;
+                    statusEl.innerHTML = `✅ Generated conversation ${conversationCount}: "${message}"`;
+                    
+                    // Show response preview
+                    const cleanContent = response.content
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\n/g, '<br>')
+                        .replace(/•/g, '•');
+                    
+                    previewEl.innerHTML = `
+                        <div class="mb-3">
+                            <div class="text-blue-400 font-semibold mb-2">Latest Response (${response.mode}):</div>
+                            <div class="prose prose-invert max-w-none text-sm leading-relaxed">${cleanContent}</div>
+                        </div>
+                    `;
+                    
+                    // Update recent conversations
+                    setTimeout(() => {
+                        loadRecentConversations();
+                    }, 500);
+                    
+                } else {
+                    statusEl.innerHTML = '❌ AI Service Manager not available';
+                }
+            } catch (error) {
+                statusEl.innerHTML = `❌ Error: ${error.message}`;
+                console.error('Generation error:', error);
+            }
+        }
+        
+        function loadRecentConversations() {
+            if (window.aiServiceManager) {
+                const recentChats = window.aiServiceManager.getRecentConversations(10);
+                const recentChatsDisplay = document.getElementById('recent-chats-display');
+                
+                if (recentChats.length === 0) {
+                    recentChatsDisplay.innerHTML = '<li class="text-white/50 text-center py-4">No recent chats</li>';
+                } else {
+                    recentChatsDisplay.innerHTML = recentChats.map(chat => `
+                        <li class="cursor-pointer hover:bg-white/5 rounded-lg px-3 py-2 transition-colors" onclick="showChatDetails('${chat.id}')">
+                            <div class="text-white/80 text-sm leading-relaxed">${chat.title || chat.preview}</div>
+                        </li>
+                    `).join('');
+                }
+            }
+        }
+        
+        function showChatDetails(chatId) {
+            const recentChats = window.aiServiceManager.getRecentConversations(20);
+            const chat = recentChats.find(c => c.id === chatId);
+            
+            if (chat) {
+                const previewEl = document.getElementById('response-preview');
+                const cleanContent = chat.lastMessage
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/•/g, '•');
+                
+                previewEl.innerHTML = `
+                    <div class="mb-3">
+                        <div class="text-green-400 font-semibold mb-2">Conversation: ${chat.title}</div>
+                        <div class="text-xs text-gray-400 mb-2">Mode: ${chat.mode} | ${formatTime(chat.timestamp)}</div>
+                        <div class="prose prose-invert max-w-none text-sm leading-relaxed">${cleanContent}</div>
+                    </div>
+                `;
+            }
+        }
+        
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString();
+        }
+    </script>
+</body>
+</html>

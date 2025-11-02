@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Integration System Tests</title>
+    <link rel="stylesheet" href="styles/unified-theme.css">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--bg-dark-1);
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .test-section {
+            background: var(--bg-dark-2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        
+        .test-pass {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+        
+        .test-fail {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .test-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+        
+        .test-button {
+            background: var(--teal-primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        
+        .test-button:hover {
+            background: var(--teal-secondary);
+            transform: translateY(-1px);
+        }
+        
+        .test-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .test-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            background: var(--bg-dark-3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--teal-primary);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>News Integration System Tests</h1>
+        <p>Comprehensive testing suite for the news integration system components</p>
+        
+        <div class="test-stats">
+            <div class="stat-item">
+                <div class="stat-number" id="total-tests">0</div>
+                <div class="stat-label">Total Tests</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="passed-tests">0</div>
+                <div class="stat-label">Passed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="failed-tests">0</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="success-rate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+            <button class="test-button" onclick="runNewsServiceTests()">News Service Tests</button>
+            <button class="test-button" onclick="runDisplayInterfaceTests()">Display Interface Tests</button>
+            <button class="test-button" onclick="runAnalysisModeTests()">Analysis Mode Tests</button>
+            <button class="test-button" onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>News Integration Service Tests</h2>
+            <div id="news-service-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>News Display Interface Tests</h2>
+            <div id="display-interface-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>News Analysis Mode Tests</h2>
+            <div id="analysis-mode-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Integration Tests</h2>
+            <div id="integration-results"></div>
+        </div>
+    </div>
+
+    <!-- Include required dependencies -->
+    <script src="js/error-handler.js"></script>
+    <script src="js/validation-system.js"></script>
+    <script src="js/loading-state-manager.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/assistant-mode-manager.js"></script>
+    <script src="js/news-analysis-mode.js"></script>
+    <script src="js/news-integration-service.js"></script>
+    <script src="js/news-display-interface.js"></script>
+
+    <script>
+        // Test framework
+        class NewsTestFramework {
+            constructor() {
+                this.tests = [];
+                this.results = [];
+                this.totalTests = 0;
+                this.passedTests = 0;
+                this.failedTests = 0;
+            }
+
+            addTest(name, testFunction, category = 'general') {
+                this.tests.push({
+                    name,
+                    testFunction,
+                    category,
+                    status: 'pending'
+                });
+            }
+
+            async runTest(test) {
+                try {
+                    const startTime = Date.now();
+                    await test.testFunction();
+                    const endTime = Date.now();
+                    
+                    test.status = 'passed';
+                    test.duration = endTime - startTime;
+                    this.passedTests++;
+                    
+                    this.logResult(test.name, 'PASS', `Completed in ${test.duration}ms`, test.category);
+                } catch (error) {
+                    test.status = 'failed';
+                    test.error = error.message;
+                    this.failedTests++;
+                    
+                    this.logResult(test.name, 'FAIL', error.message, test.category);
+                }
+                
+                this.totalTests++;
+                this.updateStats();
+            }
+
+            async runTestsByCategory(category) {
+                const categoryTests = this.tests.filter(test => test.category === category);
+                
+                for (const test of categoryTests) {
+                    await this.runTest(test);
+                }
+            }
+
+            async runAllTests() {
+                this.clearResults();
+                
+                for (const test of this.tests) {
+                    await this.runTest(test);
+                }
+                
+                this.logResult('All Tests', 'INFO', `Completed ${this.totalTests} tests. ${this.passedTests} passed, ${this.failedTests} failed.`, 'summary');
+            }
+
+            logResult(testName, status, message, category) {
+                const resultDiv = document.getElementById(`${category}-results`) || document.getElementById('integration-results');
+                const resultElement = document.createElement('div');
+                
+                const statusClass = status === 'PASS' ? 'test-pass' : status === 'FAIL' ? 'test-fail' : 'test-info';
+                resultElement.className = `test-result ${statusClass}`;
+                resultElement.innerHTML = `<strong>[${status}]</strong> ${testName}: ${message}`;
+                
+                resultDiv.appendChild(resultElement);
+            }
+
+            updateStats() {
+                document.getElementById('total-tests').textContent = this.totalTests;
+                document.getElementById('passed-tests').textContent = this.passedTests;
+                document.getElementById('failed-tests').textContent = this.failedTests;
+                
+                const successRate = this.totalTests > 0 ? Math.round((this.passedTests / this.totalTests) * 100) : 0;
+                document.getElementById('success-rate').textContent = `${successRate}%`;
+            }
+
+            clearResults() {
+                this.results = [];
+                this.totalTests = 0;
+                this.passedTests = 0;
+                this.failedTests = 0;
+                
+                ['news-service-results', 'display-interface-results', 'analysis-mode-results', 'integration-results'].forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.innerHTML = '';
+                });
+                
+                this.updateStats();
+            }
+
+            assert(condition, message) {
+                if (!condition) {
+                    throw new Error(message);
+                }
+            }
+
+            assertEqual(actual, expected, message) {
+                if (actual !== expected) {
+                    throw new Error(`${message}: Expected ${expected}, got ${actual}`);
+                }
+            }
+
+            assertNotNull(value, message) {
+                if (value === null || value === undefined) {
+                    throw new Error(`${message}: Value is null or undefined`);
+                }
+            }
+
+            assertInstanceOf(object, constructor, message) {
+                if (!(object instanceof constructor)) {
+                    throw new Error(`${message}: Object is not an instance of ${constructor.name}`);
+                }
+            }
+        }
+
+        // Initialize test framework
+        const testFramework = new NewsTestFramework();
+
+        // News Integration Service Tests
+        testFramework.addTest('NewsIntegrationService Constructor', async () => {
+            const service = new NewsIntegrationService();
+            testFramework.assertInstanceOf(service, NewsIntegrationService, 'Service should be instance of NewsIntegrationService');
+            testFramework.assertNotNull(service.config, 'Service should have config');
+            testFramework.assert(service.config.upscKeywords.length > 0, 'Should have UPSC keywords configured');
+        }, 'news-service');
+
+        testFramework.addTest('News Service Configuration', async () => {
+            const config = {
+                newsAPIKey: 'test-key',
+                sources: ['newsapi', 'rss'],
+                updateInterval: 1800000,
+                upscKeywords: ['government', 'policy', 'economy']
+            };
+            
+            const service = new NewsIntegrationService(config);
+            testFramework.assertEqual(service.config.newsAPIKey, 'test-key', 'API key should be set');
+            testFramework.assert(service.config.sources.includes('newsapi'), 'Should include newsapi source');
+            testFramework.assertEqual(service.config.updateInterval, 1800000, 'Update interval should be set');
+        }, 'news-service');
+
+        testFramework.addTest('UPSC Relevance Calculation', async () => {
+            const service = new NewsIntegrationService();
+            const article = {
+                title: 'Government announces new economic policy for digital India',
+                description: 'The government has unveiled a comprehensive economic policy focusing on digital infrastructure and governance reforms.'
+            };
+            
+            const relevance = service.calculateUPSCRelevance(article);
+            testFramework.assertNotNull(relevance, 'Relevance should be calculated');
+            testFramework.assert(relevance.score > 0, 'Relevance score should be positive');
+            testFramework.assert(relevance.subjects.length > 0, 'Should identify relevant subjects');
+        }, 'news-service');
+
+        testFramework.addTest('Article Categorization', async () => {
+            const service = new NewsIntegrationService();
+            const articles = [
+                { title: 'Supreme Court judgment on constitutional matters', description: 'Court ruling on governance' },
+                { title: 'GDP growth and economic indicators', description: 'Economic development statistics' },
+                { title: 'Climate change and environmental policies', description: 'Environmental conservation measures' }
+            ];
+            
+            articles.forEach(article => {
+                const category = service.categorizeArticle(article);
+                testFramework.assertNotNull(category, 'Article should be categorized');
+                testFramework.assert(typeof category === 'string', 'Category should be a string');
+            });
+        }, 'news-service');
+
+        testFramework.addTest('News Caching System', async () => {
+            const service = new NewsIntegrationService();
+            const testArticles = [
+                { id: 'test1', title: 'Test Article 1', publishedAt: new Date().toISOString() }
+            ];
+            
+            // Test caching
+            service.cacheNews('test-key', testArticles);
+            const cached = service.getCachedNews('test-key');
+            
+            testFramework.assertNotNull(cached, 'Cached data should exist');
+            testFramework.assertEqual(cached.articles.length, 1, 'Should cache correct number of articles');
+            testFramework.assert(service.isCacheValid(cached.timestamp), 'Cache should be valid');
+        }, 'news-service');
+
+        // News Display Interface Tests
+        testFramework.addTest('NewsDisplayInterface Constructor', async () => {
+            // Create a test container
+            const testContainer = document.createElement('div');
+            testContainer.id = 'test-news-container';
+            document.body.appendChild(testContainer);
+            
+            const interface = new NewsDisplayInterface({ containerId: 'test-news-container' });
+            testFramework.assertInstanceOf(interface, NewsDisplayInterface, 'Interface should be instance of NewsDisplayInterface');
+            testFramework.assertNotNull(interface.config, 'Interface should have config');
+            testFramework.assertEqual(interface.config.containerId, 'test-news-container', 'Container ID should be set');
+            
+            // Cleanup
+            document.body.removeChild(testContainer);
+        }, 'display-interface');
+
+        testFramework.addTest('Filter System', async () => {
+            const testContainer = document.createElement('div');
+            testContainer.id = 'test-filter-container';
+            document.body.appendChild(testContainer);
+            
+            const interface = new NewsDisplayInterface({ containerId: 'test-filter-container' });
+            
+            // Test filter initialization
+            testFramework.assertNotNull(interface.currentFilters, 'Filters should be initialized');
+            testFramework.assertEqual(interface.currentFilters.query, '', 'Query filter should be empty initially');
+            testFramework.assert(Array.isArray(interface.currentFilters.categories), 'Categories should be an array');
+            
+            // Test filter application
+            interface.currentFilters.query = 'government';
+            interface.currentFilters.categories = ['polity'];
+            
+            testFramework.assertEqual(interface.currentFilters.query, 'government', 'Query filter should be set');
+            testFramework.assert(interface.currentFilters.categories.includes('polity'), 'Category filter should be set');
+            
+            // Cleanup
+            document.body.removeChild(testContainer);
+        }, 'display-interface');
+
+        testFramework.addTest('Article Rendering', async () => {
+            const testContainer = document.createElement('div');
+            testContainer.id = 'test-render-container';
+            document.body.appendChild(testContainer);
+            
+            const interface = new NewsDisplayInterface({ containerId: 'test-render-container' });
+            
+            // Test article element creation
+            const testArticle = {
+                id: 'test-article',
+                title: 'Test News Article',
+                description: 'Test description for news article',
+                category: 'polity',
+                publishedAt: new Date().toISOString(),
+                source: { name: 'Test Source' },
+                upscRelevance: { score: 8 },
+                credibilityScore: 9
+            };
+            
+            const articleElement = interface.createArticleElement(testArticle, 0);
+            testFramework.assertNotNull(articleElement, 'Article element should be created');
+            testFramework.assert(articleElement.classList.contains('news-card'), 'Should have news-card class');
+            
+            // Cleanup
+            document.body.removeChild(testContainer);
+        }, 'display-interface');
+
+        testFramework.addTest('Search and Filtering', async () => {
+            const testContainer = document.createElement('div');
+            testContainer.id = 'test-search-container';
+            document.body.appendChild(testContainer);
+            
+            const interface = new NewsDisplayInterface({ containerId: 'test-search-container' });
+            
+            // Mock articles for testing
+            interface.currentArticles = [
+                { title: 'Government Policy Update', category: 'polity', upscRelevance: { score: 8 } },
+                { title: 'Economic Growth Report', category: 'economics', upscRelevance: { score: 7 } },
+                { title: 'Environmental Conservation', category: 'environment', upscRelevance: { score: 6 } }
+            ];
+            
+            // Test category filtering
+            interface.currentFilters.categories = ['polity'];
+            await interface.applyFilters();
+            
+            testFramework.assert(interface.filteredArticles.length <= interface.currentArticles.length, 'Filtered articles should not exceed total');
+            
+            // Test relevance filtering
+            interface.currentFilters.categories = [];
+            interface.currentFilters.relevanceThreshold = 7;
+            await interface.applyFilters();
+            
+            const highRelevanceArticles = interface.filteredArticles.filter(article => 
+                (article.upscRelevance?.score || 0) >= 7
+            );
+            testFramework.assertEqual(interface.filteredArticles.length, highRelevanceArticles.length, 'Should filter by relevance correctly');
+            
+            // Cleanup
+            document.body.removeChild(testContainer);
+        }, 'display-interface');
+
+        // News Analysis Mode Tests
+        testFramework.addTest('NewsAnalysisMode Constructor', async () => {
+            const mockModeManager = {
+                currentMode: 'general',
+                setMode: () => {},
+                getAIResponse: () => Promise.resolve({ content: 'Test response' })
+            };
+            
+            const analysisMode = new NewsAnalysisMode(mockModeManager);
+            testFramework.assertInstanceOf(analysisMode, NewsAnalysisMode, 'Should be instance of NewsAnalysisMode');
+            testFramework.assertNotNull(analysisMode.newsTemplates, 'Should have news templates');
+            testFramework.assertNotNull(analysisMode.upscSubjects, 'Should have UPSC subjects');
+        }, 'analysis-mode');
+
+        testFramework.addTest('News Data Validation', async () => {
+            const mockModeManager = { currentMode: 'general' };
+            const analysisMode = new NewsAnalysisMode(mockModeManager);
+            
+            // Test valid news data
+            const validNews = {
+                headline: 'Test News Headline',
+                content: 'This is a test news article with sufficient content for analysis.'
+            };
+            
+            const validation = analysisMode.validateNewsData(validNews);
+            testFramework.assert(validation.isValid, 'Valid news data should pass validation');
+            testFramework.assertEqual(validation.errors.length, 0, 'Should have no validation errors');
+            
+            // Test invalid news data
+            const invalidNews = {
+                headline: '',
+                content: 'Short'
+            };
+            
+            const invalidValidation = analysisMode.validateNewsData(invalidNews);
+            testFramework.assert(!invalidValidation.isValid, 'Invalid news data should fail validation');
+            testFramework.assert(invalidValidation.errors.length > 0, 'Should have validation errors');
+        }, 'analysis-mode');
+
+        testFramework.addTest('Prompt Generation', async () => {
+            const mockModeManager = { currentMode: 'general' };
+            const analysisMode = new NewsAnalysisMode(mockModeManager);
+            
+            const newsData = {
+                headline: 'Government Announces New Digital Policy',
+                source: 'Test Source',
+                publishDate: '2024-01-01',
+                category: 'polity',
+                content: 'The government has announced a comprehensive digital policy framework.'
+            };
+            
+            const prompt = analysisMode.generateNewsPrompt(newsData);
+            testFramework.assertNotNull(prompt, 'Prompt should be generated');
+            testFramework.assert(prompt.includes(newsData.headline), 'Prompt should include headline');
+            testFramework.assert(prompt.includes('UPSC'), 'Prompt should mention UPSC');
+        }, 'analysis-mode');
+
+        testFramework.addTest('Subject Identification', async () => {
+            const mockModeManager = { currentMode: 'general' };
+            const analysisMode = new NewsAnalysisMode(mockModeManager);
+            
+            const content = 'The Supreme Court delivered a judgment on constitutional matters and governance policies.';
+            const subjectAnalysis = 'This relates to polity and governance structures.';
+            
+            const primarySubject = analysisMode.identifyPrimarySubject(content, subjectAnalysis);
+            testFramework.assertNotNull(primarySubject, 'Primary subject should be identified');
+            testFramework.assert(typeof primarySubject === 'string', 'Subject should be a string');
+        }, 'analysis-mode');
+
+        // Integration Tests
+        testFramework.addTest('Service Integration', async () => {
+            // Test integration between NewsIntegrationService and NewsDisplayInterface
+            const service = new NewsIntegrationService();
+            
+            const testContainer = document.createElement('div');
+            testContainer.id = 'integration-test-container';
+            document.body.appendChild(testContainer);
+            
+            const interface = new NewsDisplayInterface({ containerId: 'integration-test-container' });
+            
+            // Test service connection
+            if (interface.newsService) {
+                testFramework.assertInstanceOf(interface.newsService, NewsIntegrationService, 'Interface should connect to news service');
+            }
+            
+            // Test mock data handling
+            const mockData = interface.getMockNewsData();
+            testFramework.assert(Array.isArray(mockData), 'Mock data should be an array');
+            testFramework.assert(mockData.length > 0, 'Should have mock articles');
+            
+            // Cleanup
+            document.body.removeChild(testContainer);
+        }, 'integration');
+
+        testFramework.addTest('Error Handling', async () => {
+            const service = new NewsIntegrationService();
+            
+            // Test error handling for invalid API responses
+            const error = new Error('API key invalid');
+            const handledError = service.handleNewsError(error);
+            
+            testFramework.assertNotNull(handledError, 'Error should be handled');
+            testFramework.assert(handledError.message.includes('authentication'), 'Should provide meaningful error message');
+        }, 'integration');
+
+        testFramework.addTest('Performance Metrics', async () => {
+            const service = new NewsIntegrationService();
+            
+            // Test service status
+            const status = service.getStatus();
+            testFramework.assertNotNull(status, 'Status should be available');
+            testFramework.assert(typeof status.isInitialized === 'boolean', 'Should have initialization status');
+            testFramework.assert(typeof status.cacheSize === 'number', 'Should have cache size');
+        }, 'integration');
+
+        // Global test functions
+        async function runAllTests() {
+            await testFramework.runAllTests();
+        }
+
+        async function runNewsServiceTests() {
+            await testFramework.runTestsByCategory('news-service');
+        }
+
+        async function runDisplayInterfaceTests() {
+            await testFramework.runTestsByCategory('display-interface');
+        }
+
+        async function runAnalysisModeTests() {
+            await testFramework.runTestsByCategory('analysis-mode');
+        }
+
+        function clearResults() {
+            testFramework.clearResults();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('News Integration System Tests initialized');
+            testFramework.logResult('Test Framework', 'INFO', 'Test framework initialized successfully', 'integration');
+        });
+    </script>
+</body>
+</html>

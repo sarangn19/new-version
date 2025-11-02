@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Profile Test</title>
+    <script src="js/profile-manager.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1F1F1F;
+            color: white;
+            padding: 20px;
+        }
+        .test-section {
+            background: #2A2A2A;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .profile-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #84D0F7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+        }
+        button {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #357ABD;
+        }
+    </style>
+</head>
+<body>
+    <h1>Community Profile Synchronization Test</h1>
+    
+    <div class="test-section">
+        <h2>Current Profile State</h2>
+        <div class="profile-display">
+            <div class="avatar">
+                <div id="user-initials">JD</div>
+            </div>
+            <div>
+                <div id="user-name">Jane Doe</div>
+                <div id="user-email">jane.doe@aspirant.com</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="updateName()">Update Name to "John Smith"</button>
+        <button onclick="updateEmail()">Update Email to "john.smith@test.com"</button>
+        <button onclick="setDP1()">Set Profile Picture DP1</button>
+        <button onclick="setDP2()">Set Profile Picture DP2</button>
+        <button onclick="clearDP()">Clear Profile Picture</button>
+        <button onclick="resetProfile()">Reset to Default</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Storage Debug</h2>
+        <div id="storage-debug"></div>
+        <button onclick="showStorage()">Show Storage Contents</button>
+    </div>
+
+    <script>
+        function updateName() {
+            if (window.profileManager) {
+                profileManager.updateProfile({ name: 'John Smith' });
+                console.log('Updated name to John Smith');
+            }
+        }
+
+        function updateEmail() {
+            if (window.profileManager) {
+                profileManager.updateProfile({ email: 'john.smith@test.com' });
+                console.log('Updated email to john.smith@test.com');
+            }
+        }
+
+        function setDP1() {
+            if (window.profileManager) {
+                profileManager.updateProfile({ selectedDP: 'DP1' });
+                console.log('Set DP1');
+            }
+        }
+
+        function setDP2() {
+            if (window.profileManager) {
+                profileManager.updateProfile({ selectedDP: 'DP2' });
+                console.log('Set DP2');
+            }
+        }
+
+        function clearDP() {
+            if (window.profileManager) {
+                profileManager.updateProfile({ selectedDP: null });
+                localStorage.removeItem('selectedDP');
+                console.log('Cleared DP');
+            }
+        }
+
+        function resetProfile() {
+            localStorage.removeItem('userProfile');
+            localStorage.removeItem('profile.name');
+            localStorage.removeItem('profile.email');
+            localStorage.removeItem('selectedDP');
+            location.reload();
+        }
+
+        function showStorage() {
+            const debug = document.getElementById('storage-debug');
+            const storage = {
+                'userProfile': localStorage.getItem('userProfile'),
+                'profile.name': localStorage.getItem('profile.name'),
+                'profile.email': localStorage.getItem('profile.email'),
+                'selectedDP': localStorage.getItem('selectedDP')
+            };
+            debug.innerHTML = '<pre>' + JSON.stringify(storage, null, 2) + '</pre>';
+        }
+
+        // Initialize
+        console.log('Profile Manager:', window.profileManager);
+        showStorage();
+    </script>
+</body>
+</html>

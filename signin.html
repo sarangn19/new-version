@@ -336,24 +336,30 @@
                 <div class="divider-text">or</div>
 
                 <!-- Form Fields -->
-                <div class="form-fields">
+                <form data-validate class="form-fields">
                     <div class="input-group">
                         <i data-lucide="mail" class="input-icon"></i>
-                        <input type="email" class="input-field" placeholder="Email address" required>
+                        <input type="email" class="input-field" placeholder="Email address" 
+                               data-validate="required|email" 
+                               data-sanitize="trim|lowercase"
+                               required>
                     </div>
 
                     <div class="input-group">
                         <i data-lucide="lock" class="input-icon"></i>
-                        <input type="password" class="input-field" placeholder="Password" required>
+                        <input type="password" class="input-field" placeholder="Password" 
+                               data-validate="required|minLength:6" 
+                               data-sanitize="trim"
+                               required>
                     </div>
 
                     <a href="reset-password.html" class="forgot-password">Forgot Password?</a>
-                </div>
-
-                <!-- Sign In Button -->
-                <button class="signin-btn">
-                    <span class="signin-btn-text">Sign In</span>
-                </button>
+                
+                    <!-- Sign In Button -->
+                    <button type="submit" class="signin-btn">
+                        <span class="signin-btn-text">Sign In</span>
+                    </button>
+                </form>
 
                 <!-- Sign Up Link -->
                 <div class="signup-link">
@@ -390,6 +396,7 @@
             window.location.href = 'db.html';
         });
     </script>
+    <script src="js/validation-system.js"></script>
 </body>
 
 </html>

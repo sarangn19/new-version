@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaced Repetition Engine Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <style>
+        .test-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .test-result {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .status-new { background: #3b82f6; }
+        .status-learning { background: #f59e0b; }
+        .status-review { background: #10b981; }
+        .status-graduated { background: #8b5cf6; }
+        .status-suspended { background: #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+    <!-- Navigation -->
+    <nav class="test-card p-4 m-4 rounded-xl">
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-white">Spaced Repetition Engine Test</h1>
+            <div class="flex gap-4">
+                <button onclick="runAllTests()" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                    Run All Tests
+                </button>
+                <button onclick="clearAllData()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    Clear All Data
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-8">
+        <!-- Test Results -->
+        <div class="test-card p-6 mb-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-white mb-4">Test Results</h2>
+            <div id="testResults" class="space-y-2">
+                <p class="text-white/70">Click "Run All Tests" to start testing the SpacedRepetitionEngine</p>
+            </div>
+        </div>
+
+        <!-- Engine Statistics -->
+        <div class="test-card p-6 mb-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-white mb-4">Engine Statistics</h2>
+            <div id="engineStats" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Stats will be populated here -->
+            </div>
+        </div>
+
+        <!-- Sample Item Management -->
+        <div class="test-card p-6 mb-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-white mb-4">Sample Item Management</h2>
+            <div class="flex flex-wrap gap-4 mb-4">
+                <button onclick="addSampleItems()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Add Sample Items
+                </button>
+                <button onclick="simulateReviews()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Simulate Reviews
+                </button>
+                <button onclick="showReviewQueue()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                    Show Review Queue
+                </button>
+            </div>
+            <div id="itemsList" class="space-y-2">
+                <!-- Items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Review Queue -->
+        <div class="test-card p-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-white mb-4">Review Queue</h2>
+            <div id="reviewQueue" class="space-y-2">
+                <!-- Queue items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/study-tools.js"></script>
+    <script>
+        let spacedRepetitionEngine;
+        let testResults = [];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize profile manager
+            window.profileManager = new ProfileManager();
+            
+            // Initialize spaced repetition engine
+            spacedRepetitionEngine = new SpacedRepetitionEngine();
+            
+            // Update initial display
+            updateEngineStats();
+            showReviewQueue();
+        });
+
+        function runAllTests() {
+            testResults = [];
+            addTestResult('Starting SpacedRepetitionEngine tests...', 'info');
+
+            // Test 1: Engine initialization
+            testEngineInitialization();
+
+            // Test 2: Adding items
+            testAddingItems();
+
+            // Test 3: Processing reviews
+            testProcessingReviews();
+
+            // Test 4: Review queue management
+            testReviewQueue();
+
+            // Test 5: Statistics and analytics
+            testStatistics();
+
+            // Test 6: Data persistence
+            testDataPersistence();
+
+            // Test 7: Algorithm correctness
+            testAlgorithmCorrectness();
+
+            addTestResult('All tests completed!', 'success');
+            updateEngineStats();
+        }
+
+        function testEngineInitialization() {
+            try {
+                addTestResult('✓ Engine initialization test passed', 'success');
+                
+                // Check if engine has required properties
+                if (spacedRepetitionEngine.reviewData && 
+                    spacedRepetitionEngine.algorithm === 'sm2' &&
+                    spacedRepetitionEngine.defaultEaseFactor === 2.5) {
+                    addTestResult('✓ Engine properties correctly initialized', 'success');
+                } else {
+                    addTestResult('✗ Engine properties not correctly initialized', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ Engine initialization failed: ' + error.message, 'error');
+            }
+        }
+
+        function testAddingItems() {
+            try {
+                const testItem = {
+                    content: 'What is the capital of France?',
+                    subject: 'Geography',
+                    chapter: 'European Capitals',
+                    difficulty: 'easy',
+                    type: 'mcq'
+                };
+
+                const item = spacedRepetitionEngine.addItem(testItem);
+                
+                if (item && item.id && item.status === 'new') {
+                    addTestResult('✓ Item addition test passed', 'success');
+                } else {
+                    addTestResult('✗ Item addition test failed', 'error');
+                }
+
+                // Test item retrieval
+                const retrievedItem = spacedRepetitionEngine.getItem(item.id);
+                if (retrievedItem && retrievedItem.content === testItem.content) {
+                    addTestResult('✓ Item retrieval test passed', 'success');
+                } else {
+                    addTestResult('✗ Item retrieval test failed', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ Item addition test failed: ' + error.message, 'error');
+            }
+        }
+
+        function testProcessingReviews() {
+            try {
+                // Add a test item
+                const testItem = spacedRepetitionEngine.addItem({
+                    content: 'Test question for review processing',
+                    subject: 'Test',
+                    difficulty: 'medium'
+                });
+
+                // Process a correct review (quality 4)
+                const result = spacedRepetitionEngine.processReview(testItem.id, 4, 30);
+                
+                if (result && result.item && result.session) {
+                    addTestResult('✓ Review processing test passed', 'success');
+                    
+                    // Check if item was updated correctly
+                    if (result.item.totalReviews === 1 && result.item.correctReviews === 1) {
+                        addTestResult('✓ Review statistics updated correctly', 'success');
+                    } else {
+                        addTestResult('✗ Review statistics not updated correctly', 'error');
+                    }
+                } else {
+                    addTestResult('✗ Review processing test failed', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ Review processing test failed: ' + error.message, 'error');
+            }
+        }
+
+        function testReviewQueue() {
+            try {
+                // Update queue
+                spacedRepetitionEngine.updateReviewQueue();
+                const queue = spacedRepetitionEngine.getReviewQueue();
+                
+                addTestResult(`✓ Review queue contains ${queue.length} items`, 'info');
+                
+                // Test queue filtering
+                const filteredQueue = spacedRepetitionEngine.getReviewQueue({ limit: 5 });
+                if (filteredQueue.length <= 5) {
+                    addTestResult('✓ Queue filtering test passed', 'success');
+                } else {
+                    addTestResult('✗ Queue filtering test failed', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ Review queue test failed: ' + error.message, 'error');
+            }
+        }
+
+        function testStatistics() {
+            try {
+                const stats = spacedRepetitionEngine.getStatistics();
+                
+                if (stats && stats.queueStats && stats.performanceStats) {
+                    addTestResult('✓ Statistics generation test passed', 'success');
+                    
+                    // Check specific statistics
+                    if (typeof stats.queueStats.total === 'number' && 
+                        typeof stats.performanceStats.totalSessions === 'number') {
+                        addTestResult('✓ Statistics structure test passed', 'success');
+                    } else {
+                        addTestResult('✗ Statistics structure test failed', 'error');
+                    }
+                } else {
+                    addTestResult('✗ Statistics generation test failed', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ Statistics test failed: ' + error.message, 'error');
+            }
+        }
+
+        function testDataPersistence() {
+            try {
+                // Save current data
+                spacedRepetitionEngine.saveReviewData();
+                
+                // Create new engine instance to test loading
+                const newEngine = new SpacedRepetitionEngine();
+                const originalStats = spacedRepetitionEngine.getStatistics();
+                const loadedStats = newEngine.getStatistics();
+                
+                if (originalStats.queueStats.total === loadedStats.queueStats.total) {
+                    addTestResult('✓ Data persistence test passed', 'success');
+                } else {
+                    addTestResult('✗ Data persistence test failed', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ Data persistence test failed: ' + error.message, 'error');
+            }
+        }
+
+        function testAlgorithmCorrectness() {
+            try {
+                // Test SuperMemo 2 algorithm implementation
+                const testItem = spacedRepetitionEngine.addItem({
+                    content: 'Algorithm test question',
+                    subject: 'Test'
+                });
+
+                // Simulate correct answer (quality 4)
+                let result = spacedRepetitionEngine.processReview(testItem.id, 4);
+                
+                if (result.item.repetitions === 1 && result.item.interval > 0) {
+                    addTestResult('✓ Algorithm first review test passed', 'success');
+                } else {
+                    addTestResult('✗ Algorithm first review test failed', 'error');
+                }
+
+                // Simulate another correct answer
+                result = spacedRepetitionEngine.processReview(testItem.id, 4);
+                
+                if (result.item.repetitions === 2 && result.item.interval > result.session.previousInterval) {
+                    addTestResult('✓ Algorithm interval increase test passed', 'success');
+                } else {
+                    addTestResult('✗ Algorithm interval increase test failed', 'error');
+                }
+
+                // Test incorrect answer (quality 1)
+                result = spacedRepetitionEngine.processReview(testItem.id, 1);
+                
+                if (result.item.repetitions === 0 && result.item.status === 'learning') {
+                    addTestResult('✓ Algorithm failure handling test passed', 'success');
+                } else {
+                    addTestResult('✗ Algorithm failure handling test failed', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ Algorithm correctness test failed: ' + error.message, 'error');
+            }
+        }
+
+        function addSampleItems() {
+            const sampleItems = [
+                {
+                    content: 'What is the capital of Japan?',
+                    subject: 'Geography',
+                    chapter: 'Asian Capitals',
+                    difficulty: 'easy',
+                    type: 'mcq'
+                },
+                {
+                    content: 'Explain the concept of photosynthesis',
+                    subject: 'Biology',
+                    chapter: 'Plant Biology',
+                    difficulty: 'medium',
+                    type: 'concept'
+                },
+                {
+                    content: 'Solve: 2x + 5 = 15',
+                    subject: 'Mathematics',
+                    chapter: 'Algebra',
+                    difficulty: 'easy',
+                    type: 'problem'
+                },
+                {
+                    content: 'What year did World War II end?',
+                    subject: 'History',
+                    chapter: 'Modern History',
+                    difficulty: 'easy',
+                    type: 'mcq'
+                },
+                {
+                    content: 'Explain quantum mechanics principles',
+                    subject: 'Physics',
+                    chapter: 'Quantum Physics',
+                    difficulty: 'hard',
+                    type: 'concept'
+                }
+            ];
+
+            sampleItems.forEach(item => {
+                spacedRepetitionEngine.addItem(item);
+            });
+
+            updateEngineStats();
+            showItems();
+            addTestResult(`Added ${sampleItems.length} sample items`, 'info');
+        }
+
+        function simulateReviews() {
+            const queue = spacedRepetitionEngine.getReviewQueue({ limit: 10 });
+            let reviewsProcessed = 0;
+
+            queue.forEach(item => {
+                // Simulate random quality (weighted towards correct answers)
+                const quality = Math.random() > 0.3 ? 
+                    Math.floor(Math.random() * 2) + 3 : // 3-4 (correct)
+                    Math.floor(Math.random() * 3) + 1;   // 1-3 (incorrect/hard)
+                
+                const responseTime = Math.floor(Math.random() * 60) + 15; // 15-75 seconds
+                
+                spacedRepetitionEngine.processReview(item.id, quality, responseTime);
+                reviewsProcessed++;
+            });
+
+            updateEngineStats();
+            showReviewQueue();
+            addTestResult(`Simulated ${reviewsProcessed} reviews`, 'info');
+        }
+
+        function showItems() {
+            const items = Object.values(spacedRepetitionEngine.reviewData.items);
+            const container = document.getElementById('itemsList');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<p class="text-white/70">No items added yet</p>';
+                return;
+            }
+
+            container.innerHTML = items.slice(0, 10).map(item => `
+                <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                    <div class="flex-1">
+                        <div class="text-white font-medium">${item.content.substring(0, 50)}${item.content.length > 50 ? '...' : ''}</div>
+                        <div class="text-white/70 text-sm">${item.subject} - ${item.chapter}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="status-${item.status} text-white px-2 py-1 rounded text-xs">${item.status.toUpperCase()}</span>
+                        <span class="text-white/70 text-sm">${Math.round(item.accuracy)}%</span>
+                        <span class="text-white/70 text-sm">EF: ${item.easeFactor.toFixed(1)}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            if (items.length > 10) {
+                container.innerHTML += `<p class="text-white/70 text-sm">... and ${items.length - 10} more items</p>`;
+            }
+        }
+
+        function showReviewQueue() {
+            const queue = spacedRepetitionEngine.getReviewQueue();
+            const container = document.getElementById('reviewQueue');
+            
+            if (queue.length === 0) {
+                container.innerHTML = '<p class="text-white/70">No items due for review</p>';
+                return;
+            }
+
+            container.innerHTML = queue.slice(0, 10).map(item => {
+                const overdue = new Date(item.nextReviewDate) < new Date();
+                return `
+                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg ${overdue ? 'border-l-4 border-red-400' : ''}">
+                        <div class="flex-1">
+                            <div class="text-white font-medium">${item.content.substring(0, 50)}${item.content.length > 50 ? '...' : ''}</div>
+                            <div class="text-white/70 text-sm">${item.subject} - ${item.difficulty}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="status-${item.status} text-white px-2 py-1 rounded text-xs">${item.status.toUpperCase()}</span>
+                            <span class="text-white/70 text-sm">Reviews: ${item.totalReviews}</span>
+                            <span class="text-white/70 text-sm">${overdue ? 'OVERDUE' : 'DUE'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (queue.length > 10) {
+                container.innerHTML += `<p class="text-white/70 text-sm">... and ${queue.length - 10} more items due</p>`;
+            }
+        }
+
+        function updateEngineStats() {
+            const stats = spacedRepetitionEngine.getStatistics();
+            const container = document.getElementById('engineStats');
+            
+            container.innerHTML = `
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-white">${stats.queueStats.total}</div>
+                    <div class="text-sm text-white/70">Total Items</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-400">${stats.queueStats.due}</div>
+                    <div class="text-sm text-white/70">Due for Review</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-400">${stats.performanceStats.retentionRate}%</div>
+                    <div class="text-sm text-white/70">Retention Rate</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-400">${stats.performanceStats.totalSessions}</div>
+                    <div class="text-sm text-white/70">Total Reviews</div>
+                </div>
+            `;
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all spaced repetition data? This cannot be undone.')) {
+                spacedRepetitionEngine.resetAllData();
+                updateEngineStats();
+                showItems();
+                showReviewQueue();
+                addTestResult('All data cleared', 'info');
+            }
+        }
+
+        function addTestResult(message, type = 'info') {
+            const container = document.getElementById('testResults');
+            const result = document.createElement('div');
+            
+            const colors = {
+                'success': 'text-green-400',
+                'error': 'text-red-400',
+                'warning': 'text-yellow-400',
+                'info': 'text-blue-400'
+            };
+            
+            result.className = `test-result ${colors[type]}`;
+            result.textContent = message;
+            
+            container.appendChild(result);
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>

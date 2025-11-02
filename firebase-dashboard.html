@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Dashboard - UPSC Learning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <script src="js/firebase-init.js"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="min-h-screen p-8">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold mb-8">🔥 Firebase Dashboard</h1>
+            
+            <!-- Connection Status -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center gap-3">
+                        <div id="connection-status" class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <h3 class="font-semibold">Connection</h3>
+                    </div>
+                    <p id="connection-text" class="text-sm text-gray-400 mt-2">Connecting...</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="user" class="w-5 h-5 text-blue-400"></i>
+                        <h3 class="font-semibold">User ID</h3>
+                    </div>
+                    <p id="user-id" class="text-sm text-gray-400 mt-2">Not authenticated</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="database" class="w-5 h-5 text-green-400"></i>
+                        <h3 class="font-semibold">Total Records</h3>
+                    </div>
+                    <p id="total-records" class="text-2xl font-bold mt-2">0</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="sync" class="w-5 h-5 text-purple-400"></i>
+                        <h3 class="font-semibold">Last Sync</h3>
+                    </div>
+                    <p id="last-sync" class="text-sm text-gray-400 mt-2">Never</p>
+                </div>
+            </div>
+            
+            <!-- Data Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Notes -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">📄 Notes</h3>
+                        <button onclick="loadNotes()" class="text-blue-400 hover:text-blue-300">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="notes-list" class="space-y-2 max-h-64 overflow-y-auto">
+                        <p class="text-gray-400">Loading...</p>
+                    </div>
+                </div>
+                
+                <!-- Flashcards -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">🗂️ Flashcards</h3>
+                        <button onclick="loadFlashcards()" class="text-blue-400 hover:text-blue-300">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="flashcards-list" class="space-y-2 max-h-64 overflow-y-auto">
+                        <p class="text-gray-400">Loading...</p>
+                    </div>
+                </div>
+                
+                <!-- MCQs -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">❓ MCQs</h3>
+                        <button onclick="loadMCQs()" class="text-blue-400 hover:text-blue-300">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="mcqs-list" class="space-y-2 max-h-64 overflow-y-auto">
+                        <p class="text-gray-400">Loading...</p>
+                    </div>
+                </div>
+                
+                <!-- Conversations -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">💬 Conversations</h3>
+                        <button onclick="loadConversations()" class="text-blue-400 hover:text-blue-300">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="conversations-list" class="space-y-2 max-h-64 overflow-y-auto">
+                        <p class="text-gray-400">Loading...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-xl font-semibold mb-4">🔧 Actions</h3>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="syncLocalData()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded flex items-center gap-2">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        Sync Local Data
+                    </button>
+                    <button onclick="downloadData()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Download All Data
+                    </button>
+                    <button onclick="clearLocalData()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded flex items-center gap-2">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        Clear Local Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let auth, db;
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // Wait for Firebase to initialize
+            setTimeout(async () => {
+                if (window.firebaseUtils) {
+                    auth = window.firebaseUtils.auth;
+                    db = window.firebaseUtils.db;
+                    
+                    // Update connection status
+                    document.getElementById('connection-status').className = 'w-3 h-3 bg-green-500 rounded-full';
+                    document.getElementById('connection-text').textContent = 'Connected';
+                    
+                    // Update user ID
+                    auth.onAuthStateChanged((user) => {
+                        if (user) {
+                            document.getElementById('user-id').textContent = user.uid.substring(0, 8) + '...';
+                            loadAllData();
+                        }
+                    });
+                } else {
+                    document.getElementById('connection-text').textContent = 'Failed to connect';
+                }
+            }, 2000);
+        });
+        
+        async function loadAllData() {
+            await Promise.all([
+                loadNotes(),
+                loadFlashcards(),
+                loadMCQs(),
+                loadConversations()
+            ]);
+            updateTotalRecords();
+        }
+        
+        async function loadNotes() {
+            try {
+                const notes = await window.firebaseUtils.getData('notes');
+                const notesList = document.getElementById('notes-list');
+                
+                if (notes.length === 0) {
+                    notesList.innerHTML = '<p class="text-gray-400">No notes found</p>';
+                } else {
+                    notesList.innerHTML = notes.map(note => `
+                        <div class="bg-gray-700 rounded p-3">
+                            <h4 class="font-medium text-sm">${note.title || 'Untitled'}</h4>
+                            <p class="text-xs text-gray-400 mt-1">${formatDate(note.createdAt)}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                document.getElementById('notes-list').innerHTML = '<p class="text-red-400">Error loading notes</p>';
+            }
+        }
+        
+        async function loadFlashcards() {
+            try {
+                const flashcards = await window.firebaseUtils.getData('flashcards');
+                const flashcardsList = document.getElementById('flashcards-list');
+                
+                if (flashcards.length === 0) {
+                    flashcardsList.innerHTML = '<p class="text-gray-400">No flashcards found</p>';
+                } else {
+                    flashcardsList.innerHTML = flashcards.map(card => `
+                        <div class="bg-gray-700 rounded p-3">
+                            <h4 class="font-medium text-sm">${card.front || 'No front text'}</h4>
+                            <p class="text-xs text-gray-400 mt-1">${formatDate(card.createdAt)}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading flashcards:', error);
+                document.getElementById('flashcards-list').innerHTML = '<p class="text-red-400">Error loading flashcards</p>';
+            }
+        }
+        
+        async function loadMCQs() {
+            try {
+                const mcqs = await window.firebaseUtils.getData('mcqs');
+                const mcqsList = document.getElementById('mcqs-list');
+                
+                if (mcqs.length === 0) {
+                    mcqsList.innerHTML = '<p class="text-gray-400">No MCQs found</p>';
+                } else {
+                    mcqsList.innerHTML = mcqs.map(mcq => `
+                        <div class="bg-gray-700 rounded p-3">
+                            <h4 class="font-medium text-sm">${mcq.question || 'No question'}</h4>
+                            <p class="text-xs text-gray-400 mt-1">${formatDate(mcq.createdAt)}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading MCQs:', error);
+                document.getElementById('mcqs-list').innerHTML = '<p class="text-red-400">Error loading MCQs</p>';
+            }
+        }
+        
+        async function loadConversations() {
+            try {
+                const conversations = await window.firebaseUtils.getData('conversations');
+                const conversationsList = document.getElementById('conversations-list');
+                
+                if (conversations.length === 0) {
+                    conversationsList.innerHTML = '<p class="text-gray-400">No conversations found</p>';
+                } else {
+                    conversationsList.innerHTML = conversations.map(conv => `
+                        <div class="bg-gray-700 rounded p-3">
+                            <h4 class="font-medium text-sm">Conversation ${conv.id.substring(0, 8)}...</h4>
+                            <p class="text-xs text-gray-400 mt-1">${formatDate(conv.createdAt)}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+                document.getElementById('conversations-list').innerHTML = '<p class="text-red-400">Error loading conversations</p>';
+            }
+        }
+        
+        async function updateTotalRecords() {
+            try {
+                const [notes, flashcards, mcqs, conversations] = await Promise.all([
+                    window.firebaseUtils.getData('notes'),
+                    window.firebaseUtils.getData('flashcards'),
+                    window.firebaseUtils.getData('mcqs'),
+                    window.firebaseUtils.getData('conversations')
+                ]);
+                
+                const total = notes.length + flashcards.length + mcqs.length + conversations.length;
+                document.getElementById('total-records').textContent = total;
+            } catch (error) {
+                console.error('Error updating total records:', error);
+            }
+        }
+        
+        async function syncLocalData() {
+            try {
+                // Sync notes
+                const localNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+                for (const note of localNotes) {
+                    if (!note.synced) {
+                        await window.firebaseUtils.saveData('notes', note);
+                    }
+                }
+                
+                // Sync flashcards
+                const localFlashcards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+                for (const flashcard of localFlashcards) {
+                    if (!flashcard.synced) {
+                        await window.firebaseUtils.saveData('flashcards', flashcard);
+                    }
+                }
+                
+                // Sync MCQs
+                const localMCQs = JSON.parse(localStorage.getItem('mcq-explanations') || '[]');
+                for (const mcq of localMCQs) {
+                    if (!mcq.synced) {
+                        await window.firebaseUtils.saveData('mcqs', mcq);
+                    }
+                }
+                
+                alert('Local data synced successfully!');
+                loadAllData();
+            } catch (error) {
+                console.error('Sync error:', error);
+                alert('Sync failed: ' + error.message);
+            }
+        }
+        
+        async function downloadData() {
+            try {
+                const [notes, flashcards, mcqs, conversations] = await Promise.all([
+                    window.firebaseUtils.getData('notes'),
+                    window.firebaseUtils.getData('flashcards'),
+                    window.firebaseUtils.getData('mcqs'),
+                    window.firebaseUtils.getData('conversations')
+                ]);
+                
+                const allData = {
+                    notes,
+                    flashcards,
+                    mcqs,
+                    conversations,
+                    exportDate: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `upsc-data-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Download failed: ' + error.message);
+            }
+        }
+        
+        function clearLocalData() {
+            if (confirm('Are you sure you want to clear all local data? This cannot be undone.')) {
+                localStorage.removeItem('notes');
+                localStorage.removeItem('flashcards');
+                localStorage.removeItem('mcq-explanations');
+                localStorage.removeItem('conversations');
+                alert('Local data cleared successfully!');
+            }
+        }
+        
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Unknown';
+            
+            let date;
+            if (timestamp.toDate) {
+                date = timestamp.toDate();
+            } else {
+                date = new Date(timestamp);
+            }
+            
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+    </script>
+</body>
+</html>

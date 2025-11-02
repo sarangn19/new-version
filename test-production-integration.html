@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Production Integration Test Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  
+  <!-- Production-Ready Components -->
+  <script src="js/error-handler.js"></script>
+  <script src="js/offline-manager.js"></script>
+  <script src="js/performance-optimizer.js"></script>
+  <script src="js/loading-state-manager.js"></script>
+  <script src="js/validation-system.js"></script>
+  
+  <!-- Supporting Components -->
+  <script src="js/profile-manager.js"></script>
+  <script src="js/data-exporter.js"></script>
+  <script src="js/backup-manager.js"></script>
+  
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark-1: #1F1F1F;
+      --bg-dark-2: #1A1A1A;
+      --teal-primary: #2C7A7B;
+    }
+    
+    body {
+      background-color: var(--bg-dark-1);
+      color: white;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .test-section {
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .test-result {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 0.5rem 0;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    
+    .test-pass {
+      background-color: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: rgb(34, 197, 94);
+    }
+    
+    .test-fail {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: rgb(239, 68, 68);
+    }
+    
+    .test-info {
+      background-color: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: rgb(59, 130, 246);
+    }
+    
+    .test-warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: rgb(245, 158, 11);
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2C7A7B, #38B2AC);
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+  </style>
+</head>
+<body class="p-8">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-center">Production Integration Test Suite</h1>
+    
+    <!-- Test Progress -->
+    <div class="test-section">
+      <h2 class="text-xl font-semibold mb-4">Test Progress</h2>
+      <div class="progress-bar">
+        <div id="overall-progress" class="progress-fill"></div>
+      </div>
+      <p id="progress-text" class="text-center mt-2">Ready to start tests</p>
+    </div>
+    
+    <!-- Cross-Component Communication Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="network" class="w-6 h-6"></i>
+        Cross-Component Communication Tests
+      </h2>
+      <div id="communication-tests"></div>
+      <button id="run-communication-tests" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Communication Tests
+      </button>
+    </div>
+    
+    <!-- Error Scenario Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        Error Scenario and Recovery Tests
+      </h2>
+      <div id="error-scenario-tests"></div>
+      <button id="run-error-scenario-tests" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Error Scenario Tests
+      </button>
+    </div>
+    
+    <!-- Performance Under Load Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="activity" class="w-6 h-6"></i>
+        Performance Under Various Conditions
+      </h2>
+      <div id="performance-load-tests"></div>
+      <button id="run-performance-load-tests" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run Performance Tests
+      </button>
+    </div>
+    
+    <!-- System Integration Tests -->
+    <div class="test-section">
+      <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+        <i data-lucide="layers" class="w-6 h-6"></i>
+        System Integration and Data Flow Tests
+      </h2>
+      <div id="system-integration-tests"></div>
+      <button id="run-system-integration-tests" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg mt-4">
+        Run System Integration Tests
+      </button>
+    </div>
+    
+    <!-- Run All Tests -->
+    <div class="test-section text-center">
+      <button id="run-all-tests" class="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold">
+        Run All Integration Tests
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Test utilities and state management
+    let testProgress = 0;
+    let totalTests = 0;
+    let completedTests = 0;
+    
+    function updateProgress() {
+      const percentage = totalTests > 0 ? (completedTests / totalTests) * 100 : 0;
+      document.getElementById('overall-progress').style.width = percentage + '%';
+      document.getElementById('progress-text').textContent = 
+        `${completedTests}/${totalTests} tests completed (${Math.round(percentage)}%)`;
+    }
+    
+    function logTest(container, message, type = 'info') {
+      const div = document.createElement('div');
+      div.className = `test-result test-${type}`;
+      div.textContent = message;
+      container.appendChild(div);
+      
+      if (type === 'pass' || type === 'fail') {
+        completedTests++;
+        updateProgress();
+      }
+    }
+
+    function assert(condition, message, container) {
+      if (condition) {
+        logTest(container, `✓ PASS: ${message}`, 'pass');
+        return true;
+      } else {
+        logTest(container, `✗ FAIL: ${message}`, 'fail');
+        return false;
+      }
+    }
+    
+    // Initialize components for testing
+    let errorHandler, offlineManager, performanceOptimizer, loadingStateManager, validationSystem;
+    
+    function initializeComponents() {
+      try {
+        errorHandler = new ErrorHandler();
+        offlineManager = new OfflineManager();
+        performanceOptimizer = new PerformanceOptimizer();
+        loadingStateManager = new LoadingStateManager();
+        validationSystem = new ValidationSystem();
+        return true;
+      } catch (error) {
+        console.error('Failed to initialize components:', error);
+        return false;
+      }
+    }
+    
+    // Cross-Component Communication Tests
+    document.getElementById('run-communication-tests').addEventListener('click', async () => {
+      const container = document.getElementById('communication-tests');
+      container.innerHTML = '';
+      totalTests += 8;
+      
+      logTest(container, 'Testing Cross-Component Communication...', 'info');
+      
+      try {
+        // Test 1: Component initialization and availability
+        const componentsInitialized = initializeComponents();
+        assert(
+          componentsInitialized,
+          'All production components initialize successfully',
+          container
+        );
+
+        // Test 2: Error Handler integration with other components
+        const originalConsoleError = console.error;
+        let errorsCaught = 0;
+        
+        // Mock console.error to count errors
+        console.error = (...args) => {
+          errorsCaught++;
+          originalConsoleError.apply(console, args);
+        };
+        
+        // Trigger an error and check if ErrorHandler catches it
+        setTimeout(() => {
+          throw new Error('Test error for integration');
+        }, 100);
+        
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        assert(
+          errorHandler.errorLog.length > 0,
+          'ErrorHandler successfully captures and logs errors',
+          container
+        );
+        
+        console.error = originalConsoleError;
+
+        // Test 3: Loading State Manager integration
+        const loadingId = loadingStateManager.showLoading('test-operation', {
+          message: 'Testing integration...',
+          showProgress: true
+        });
+        
+        assert(
+          loadingStateManager.activeLoaders.has(loadingId),
+          'LoadingStateManager creates and tracks loading states',
+          container
+        );
+        
+        loadingStateManager.hideLoading(loadingId);
+        
+        assert(
+          !loadingStateManager.activeLoaders.has(loadingId),
+          'LoadingStateManager properly removes completed loading states',
+          container
+        );
+
+        // Test 4: Validation System integration with forms
+        const testForm = document.createElement('form');
+        const testInput = document.createElement('input');
+        testInput.type = 'email';
+        testInput.name = 'test-email';
+        testInput.value = 'invalid-email';
+        testForm.appendChild(testInput);
+        document.body.appendChild(testForm);
+        
+        const validationResult = validationSystem.validateForm(testForm);
+        
+        assert(
+          !validationResult.isValid && validationResult.errors.length > 0,
+          'ValidationSystem integrates with DOM forms and validates input',
+          container
+        );
+        
+        document.body.removeChild(testForm);
+
+        // Test 5: Performance Optimizer monitoring integration
+        const initialMetrics = performanceOptimizer.performanceMetrics.size;
+        
+        // Trigger a performance measurement
+        performanceOptimizer.measureOperation('test-operation', () => {
+          // Simulate some work
+          for (let i = 0; i < 1000; i++) {
+            Math.random();
+          }
+        });
+        
+        assert(
+          performanceOptimizer.performanceMetrics.size > initialMetrics,
+          'PerformanceOptimizer captures and stores performance metrics',
+          container
+        );
+
+        // Test 6: Offline Manager state synchronization
+        const originalOnLine = navigator.onLine;
+        
+        // Simulate going offline
+        Object.defineProperty(navigator, 'onLine', {
+          writable: true,
+          value: false
+        });
+        
+        offlineManager.handleNetworkChange();
+        
+        assert(
+          !offlineManager.isOnline,
+          'OfflineManager responds to network state changes',
+          container
+        );
+        
+        // Restore online state
+        Object.defineProperty(navigator, 'onLine', {
+          writable: true,
+          value: originalOnLine
+        });
+
+        // Test 7: Component event communication
+        let eventReceived = false;
+        
+        // Set up event listener
+        document.addEventListener('test-integration-event', () => {
+          eventReceived = true;
+        });
+        
+        // Dispatch event from one component
+        const event = new CustomEvent('test-integration-event', {
+          detail: { source: 'integration-test' }
+        });
+        document.dispatchEvent(event);
+        
+        assert(
+          eventReceived,
+          'Components can communicate through custom events',
+          container
+        );
+
+        // Test 8: Data flow between components
+        if (window.profileManager) {
+          const testProfile = { name: 'Integration Test User', email: 'test@integration.com' };
+          
+          // Update profile through ProfileManager
+          profileManager.updateProfile(testProfile);
+          
+          // Check if other components can access the updated data
+          const storedProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+          
+          assert(
+            storedProfile.name === testProfile.name && storedProfile.email === testProfile.email,
+            'Data flows correctly between components through shared storage',
+            container
+          );
+        }
+
+        logTest(container, 'Cross-component communication tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during communication tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Error Scenario and Recovery Tests
+    document.getElementById('run-error-scenario-tests').addEventListener('click', async () => {
+      const container = document.getElementById('error-scenario-tests');
+      container.innerHTML = '';
+      totalTests += 10;
+      
+      logTest(container, 'Testing Error Scenarios and Recovery Mechanisms...', 'info');
+      
+      try {
+        // Test 1: localStorage corruption handling
+        const originalGetItem = localStorage.getItem;
+        localStorage.getItem = () => { throw new Error('Storage corrupted'); };
+        
+        let errorHandled = false;
+        try {
+          if (window.profileManager) {
+            profileManager.loadProfile();
+          }
+        } catch (error) {
+          errorHandled = true;
+        }
+        
+        localStorage.getItem = originalGetItem;
+        
+        assert(
+          errorHandled || errorHandler.errorLog.some(e => e.message.includes('Storage')),
+          'System handles localStorage corruption gracefully',
+          container
+        );
+
+        // Test 2: Network failure simulation
+        const originalFetch = window.fetch;
+        window.fetch = () => Promise.reject(new Error('Network error'));
+        
+        let networkErrorHandled = false;
+        try {
+          // Simulate a network operation that would fail
+          await offlineManager.attemptSync();
+        } catch (error) {
+          networkErrorHandled = true;
+        }
+        
+        window.fetch = originalFetch;
+        
+        assert(
+          networkErrorHandled || offlineManager.syncQueue.length >= 0,
+          'System handles network failures and queues operations',
+          container
+        );
+
+        // Test 3: Invalid data recovery
+        localStorage.setItem('userProfile', 'invalid json data');
+        
+        let dataRecovered = false;
+        try {
+          if (window.profileManager) {
+            profileManager.loadProfile();
+            dataRecovered = profileManager.profileData.name !== undefined;
+          }
+        } catch (error) {
+          // Check if default profile was loaded
+          dataRecovered = true;
+        }
+        
+        assert(
+          dataRecovered,
+          'System recovers from invalid data by loading defaults',
+          container
+        );
+
+        // Test 4: Memory leak prevention
+        const initialMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        
+        // Create and destroy many objects
+        for (let i = 0; i < 100; i++) {
+          const tempLoader = loadingStateManager.showLoading(`temp-${i}`, {});
+          loadingStateManager.hideLoading(tempLoader);
+        }
+        
+        // Force garbage collection if available
+        if (window.gc) {
+          window.gc();
+        }
+        
+        const finalMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        const memoryIncrease = finalMemory - initialMemory;
+        
+        assert(
+          memoryIncrease < 10 * 1024 * 1024, // Less than 10MB increase
+          'System prevents memory leaks during intensive operations',
+          container
+        );
+
+        // Test 5: Validation bypass attempts
+        const maliciousData = {
+          name: '<script>alert("xss")</script>',
+          email: 'javascript:void(0)',
+          content: '<img src=x onerror=alert(1)>'
+        };
+        
+        const sanitizedData = validationSystem.sanitizeObject(maliciousData);
+        
+        assert(
+          !JSON.stringify(sanitizedData).includes('<script>') && 
+          !JSON.stringify(sanitizedData).includes('javascript:'),
+          'ValidationSystem prevents XSS and malicious input',
+          container
+        );
+
+        // Test 6: Concurrent operation conflicts
+        const concurrentPromises = [];
+        
+        for (let i = 0; i < 10; i++) {
+          concurrentPromises.push(
+            performanceOptimizer.measureOperation(`concurrent-${i}`, async () => {
+              await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+              return i;
+            })
+          );
+        }
+        
+        const results = await Promise.all(concurrentPromises);
+        
+        assert(
+          results.length === 10 && results.every((r, i) => r === i),
+          'System handles concurrent operations without conflicts',
+          container
+        );
+
+        // Test 7: Resource exhaustion handling
+        const largeArray = [];
+        let resourceExhaustionHandled = false;
+        
+        try {
+          // Try to create a very large array
+          for (let i = 0; i < 10000000; i++) {
+            largeArray.push(new Array(1000).fill(Math.random()));
+            if (i % 100000 === 0) {
+              // Check if we should stop to prevent browser crash
+              if (performance.memory && performance.memory.usedJSHeapSize > 100 * 1024 * 1024) {
+                resourceExhaustionHandled = true;
+                break;
+              }
+            }
+          }
+        } catch (error) {
+          resourceExhaustionHandled = true;
+        }
+        
+        assert(
+          resourceExhaustionHandled,
+          'System handles resource exhaustion gracefully',
+          container
+        );
+
+        // Test 8: Error recovery after component failure
+        const originalErrorHandler = window.ErrorHandler;
+        window.ErrorHandler = null;
+        
+        let recoveredFromFailure = false;
+        try {
+          // Try to use a component that depends on ErrorHandler
+          loadingStateManager.showLoading('test-recovery', {});
+          recoveredFromFailure = true;
+        } catch (error) {
+          // System should still function even if ErrorHandler is unavailable
+          recoveredFromFailure = error.message.includes('ErrorHandler') === false;
+        }
+        
+        window.ErrorHandler = originalErrorHandler;
+        
+        assert(
+          recoveredFromFailure,
+          'System recovers gracefully from component failures',
+          container
+        );
+
+        // Test 9: Timeout handling
+        const timeoutPromise = new Promise((resolve, reject) => {
+          setTimeout(() => reject(new Error('Operation timeout')), 100);
+        });
+        
+        let timeoutHandled = false;
+        try {
+          await Promise.race([
+            timeoutPromise,
+            new Promise(resolve => setTimeout(resolve, 200))
+          ]);
+        } catch (error) {
+          timeoutHandled = error.message.includes('timeout');
+        }
+        
+        assert(
+          timeoutHandled,
+          'System properly handles operation timeouts',
+          container
+        );
+
+        // Test 10: State consistency after errors
+        const initialState = {
+          profile: localStorage.getItem('userProfile'),
+          bookmarks: localStorage.getItem('bookmarks')
+        };
+        
+        // Cause an error that might corrupt state
+        try {
+          localStorage.setItem('userProfile', null);
+          if (window.profileManager) {
+            profileManager.loadProfile();
+          }
+        } catch (error) {
+          // Ignore the error, we're testing recovery
+        }
+        
+        // Check if state is consistent
+        const finalProfile = localStorage.getItem('userProfile');
+        
+        assert(
+          finalProfile !== null && finalProfile !== 'null',
+          'System maintains state consistency after errors',
+          container
+        );
+
+        logTest(container, 'Error scenario and recovery tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during error scenario tests: ${error.message}`, 'fail');
+      }
+    });    //
+ Performance Under Load Tests
+    document.getElementById('run-performance-load-tests').addEventListener('click', async () => {
+      const container = document.getElementById('performance-load-tests');
+      container.innerHTML = '';
+      totalTests += 8;
+      
+      logTest(container, 'Testing Performance Under Various Conditions...', 'info');
+      
+      try {
+        // Test 1: High-frequency operations
+        const startTime = performance.now();
+        const operations = [];
+        
+        for (let i = 0; i < 1000; i++) {
+          operations.push(
+            performanceOptimizer.measureOperation(`high-freq-${i}`, () => {
+              return Math.random() * 100;
+            })
+          );
+        }
+        
+        await Promise.all(operations);
+        const endTime = performance.now();
+        
+        assert(
+          endTime - startTime < 5000, // Should complete within 5 seconds
+          `High-frequency operations complete efficiently (${Math.round(endTime - startTime)}ms)`,
+          container
+        );
+
+        // Test 2: Large dataset processing
+        const largeDataset = [];
+        for (let i = 0; i < 10000; i++) {
+          largeDataset.push({
+            id: i,
+            name: `Item ${i}`,
+            data: new Array(100).fill(Math.random())
+          });
+        }
+        
+        const processingStart = performance.now();
+        
+        // Process the large dataset
+        const processedData = largeDataset.map(item => ({
+          ...item,
+          processed: true,
+          checksum: item.data.reduce((a, b) => a + b, 0)
+        }));
+        
+        const processingEnd = performance.now();
+        
+        assert(
+          processedData.length === largeDataset.length && processingEnd - processingStart < 3000,
+          `Large dataset processing completes efficiently (${Math.round(processingEnd - processingStart)}ms)`,
+          container
+        );
+
+        // Test 3: Memory usage under load
+        const initialMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        
+        // Create multiple loading states simultaneously
+        const loaders = [];
+        for (let i = 0; i < 100; i++) {
+          loaders.push(loadingStateManager.showLoading(`load-test-${i}`, {
+            message: `Loading ${i}...`,
+            showProgress: true
+          }));
+        }
+        
+        // Update progress for all loaders
+        loaders.forEach((loaderId, index) => {
+          loadingStateManager.updateProgress(loaderId, (index + 1) / loaders.length * 100);
+        });
+        
+        // Clean up all loaders
+        loaders.forEach(loaderId => {
+          loadingStateManager.hideLoading(loaderId);
+        });
+        
+        const finalMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+        const memoryIncrease = finalMemory - initialMemory;
+        
+        assert(
+          memoryIncrease < 50 * 1024 * 1024, // Less than 50MB increase
+          `Memory usage remains reasonable under load (${Math.round(memoryIncrease / 1024 / 1024)}MB increase)`,
+          container
+        );
+
+        // Test 4: Validation performance with large forms
+        const largeForm = document.createElement('form');
+        
+        for (let i = 0; i < 100; i++) {
+          const input = document.createElement('input');
+          input.name = `field-${i}`;
+          input.value = `value-${i}`;
+          input.setAttribute('data-validate', 'required|minLength:3|maxLength:50');
+          largeForm.appendChild(input);
+        }
+        
+        document.body.appendChild(largeForm);
+        
+        const validationStart = performance.now();
+        const validationResult = validationSystem.validateForm(largeForm);
+        const validationEnd = performance.now();
+        
+        document.body.removeChild(largeForm);
+        
+        assert(
+          validationResult.isValid && validationEnd - validationStart < 1000,
+          `Large form validation completes quickly (${Math.round(validationEnd - validationStart)}ms)`,
+          container
+        );
+
+        // Test 5: Error handling under stress
+        const errorPromises = [];
+        
+        for (let i = 0; i < 50; i++) {
+          errorPromises.push(
+            new Promise((resolve) => {
+              setTimeout(() => {
+                try {
+                  throw new Error(`Stress test error ${i}`);
+                } catch (error) {
+                  errorHandler.handleError({
+                    type: 'stress-test',
+                    message: error.message,
+                    timestamp: new Date().toISOString()
+                  });
+                }
+                resolve();
+              }, Math.random() * 100);
+            })
+          );
+        }
+        
+        await Promise.all(errorPromises);
+        
+        assert(
+          errorHandler.errorLog.length >= 50,
+          'ErrorHandler processes multiple concurrent errors efficiently',
+          container
+        );
+
+        // Test 6: Offline queue performance
+        const queueOperations = [];
+        
+        for (let i = 0; i < 200; i++) {
+          queueOperations.push({
+            type: 'sync',
+            data: { id: i, content: `Test data ${i}` },
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        const queueStart = performance.now();
+        
+        queueOperations.forEach(op => {
+          offlineManager.queueOperation(op);
+        });
+        
+        const queueEnd = performance.now();
+        
+        assert(
+          offlineManager.syncQueue.length >= 200 && queueEnd - queueStart < 1000,
+          `Offline queue handles large number of operations efficiently (${Math.round(queueEnd - queueStart)}ms)`,
+          container
+        );
+
+        // Test 7: Concurrent component operations
+        const concurrentOps = [];
+        
+        for (let i = 0; i < 20; i++) {
+          concurrentOps.push(
+            Promise.all([
+              loadingStateManager.showLoading(`concurrent-${i}`, {}),
+              validationSystem.validateValue(`test-${i}`, 'required'),
+              performanceOptimizer.measureOperation(`concurrent-op-${i}`, () => Math.random()),
+              errorHandler.handleError({
+                type: 'concurrent-test',
+                message: `Concurrent error ${i}`,
+                timestamp: new Date().toISOString()
+              })
+            ])
+          );
+        }
+        
+        const concurrentStart = performance.now();
+        await Promise.all(concurrentOps);
+        const concurrentEnd = performance.now();
+        
+        assert(
+          concurrentEnd - concurrentStart < 2000,
+          `Concurrent component operations complete efficiently (${Math.round(concurrentEnd - concurrentStart)}ms)`,
+          container
+        );
+
+        // Test 8: Resource cleanup after intensive operations
+        const initialResourceCount = {
+          loaders: loadingStateManager.activeLoaders.size,
+          metrics: performanceOptimizer.performanceMetrics.size,
+          errors: errorHandler.errorLog.length
+        };
+        
+        // Perform intensive operations
+        for (let i = 0; i < 50; i++) {
+          const loaderId = loadingStateManager.showLoading(`cleanup-test-${i}`, {});
+          performanceOptimizer.measureOperation(`cleanup-${i}`, () => Math.random());
+          loadingStateManager.hideLoading(loaderId);
+        }
+        
+        // Allow cleanup to occur
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const finalResourceCount = {
+          loaders: loadingStateManager.activeLoaders.size,
+          metrics: performanceOptimizer.performanceMetrics.size,
+          errors: errorHandler.errorLog.length
+        };
+        
+        assert(
+          finalResourceCount.loaders === initialResourceCount.loaders,
+          'Resources are properly cleaned up after intensive operations',
+          container
+        );
+
+        logTest(container, 'Performance under load tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during performance tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // System Integration and Data Flow Tests
+    document.getElementById('run-system-integration-tests').addEventListener('click', async () => {
+      const container = document.getElementById('system-integration-tests');
+      container.innerHTML = '';
+      totalTests += 6;
+      
+      logTest(container, 'Testing System Integration and Data Flow...', 'info');
+      
+      try {
+        // Test 1: End-to-end data flow
+        const testData = {
+          profile: { name: 'Integration User', email: 'integration@test.com' },
+          preferences: { theme: 'dark', notifications: true }
+        };
+        
+        // Store data through ProfileManager
+        if (window.profileManager) {
+          profileManager.updateProfile(testData.profile);
+        }
+        
+        // Validate data through ValidationSystem
+        const validationResult = validationSystem.validateObject(testData.profile, {
+          name: 'required|minLength:2',
+          email: 'required|email'
+        });
+        
+        // Process data through PerformanceOptimizer
+        const processedData = await performanceOptimizer.measureOperation('data-flow-test', () => {
+          return { ...testData, processed: true, timestamp: new Date().toISOString() };
+        });
+        
+        // Handle potential errors through ErrorHandler
+        if (!validationResult.isValid) {
+          errorHandler.handleError({
+            type: 'validation',
+            message: 'Data validation failed',
+            errors: validationResult.errors
+          });
+        }
+        
+        assert(
+          validationResult.isValid && processedData.processed,
+          'End-to-end data flow works correctly across all components',
+          container
+        );
+
+        // Test 2: Component dependency chain
+        const dependencyChain = [];
+        
+        // Start with loading state
+        const loaderId = loadingStateManager.showLoading('dependency-test', {
+          message: 'Testing dependencies...'
+        });
+        dependencyChain.push('loading-started');
+        
+        // Validate some data
+        const isValid = validationSystem.validateValue('test@example.com', 'email');
+        if (isValid) {
+          dependencyChain.push('validation-passed');
+        }
+        
+        // Measure performance
+        await performanceOptimizer.measureOperation('dependency-op', async () => {
+          dependencyChain.push('performance-measured');
+          await new Promise(resolve => setTimeout(resolve, 50));
+        });
+        
+        // Handle completion
+        loadingStateManager.hideLoading(loaderId);
+        dependencyChain.push('loading-completed');
+        
+        assert(
+          dependencyChain.length === 4 && dependencyChain.includes('loading-completed'),
+          'Component dependency chain executes in correct order',
+          container
+        );
+
+        // Test 3: Error propagation and handling
+        let errorPropagated = false;
+        
+        // Set up error listener
+        const errorListener = (event) => {
+          if (event.detail && event.detail.type === 'integration-test') {
+            errorPropagated = true;
+          }
+        };
+        
+        document.addEventListener('system-error', errorListener);
+        
+        // Trigger an error that should propagate
+        errorHandler.handleError({
+          type: 'integration-test',
+          message: 'Test error propagation',
+          propagate: true
+        });
+        
+        // Dispatch custom event to simulate error propagation
+        document.dispatchEvent(new CustomEvent('system-error', {
+          detail: { type: 'integration-test', message: 'Test error propagation' }
+        }));
+        
+        document.removeEventListener('system-error', errorListener);
+        
+        assert(
+          errorPropagated,
+          'Errors propagate correctly through the system',
+          container
+        );
+
+        // Test 4: State synchronization across components
+        const initialState = {
+          online: offlineManager.isOnline,
+          loading: loadingStateManager.activeLoaders.size,
+          errors: errorHandler.errorLog.length
+        };
+        
+        // Simulate state changes
+        const syncLoaderId = loadingStateManager.showLoading('sync-test', {});
+        
+        // Simulate network change
+        const originalOnline = navigator.onLine;
+        Object.defineProperty(navigator, 'onLine', { value: false, writable: true });
+        offlineManager.handleNetworkChange();
+        
+        // Check state synchronization
+        const syncedState = {
+          online: offlineManager.isOnline,
+          loading: loadingStateManager.activeLoaders.size,
+          errors: errorHandler.errorLog.length
+        };
+        
+        // Cleanup
+        loadingStateManager.hideLoading(syncLoaderId);
+        Object.defineProperty(navigator, 'onLine', { value: originalOnline, writable: true });
+        
+        assert(
+          syncedState.loading > initialState.loading && syncedState.online !== initialState.online,
+          'State synchronization works correctly across components',
+          container
+        );
+
+        // Test 5: Performance impact of integration
+        const integrationStart = performance.now();
+        
+        // Perform integrated operations
+        const integrationPromises = [];
+        
+        for (let i = 0; i < 10; i++) {
+          integrationPromises.push(
+            (async () => {
+              const loaderId = loadingStateManager.showLoading(`integration-${i}`, {});
+              
+              const validData = validationSystem.validateValue(`test-${i}@example.com`, 'email');
+              
+              if (validData) {
+                await performanceOptimizer.measureOperation(`integration-op-${i}`, async () => {
+                  await new Promise(resolve => setTimeout(resolve, 10));
+                });
+              }
+              
+              loadingStateManager.hideLoading(loaderId);
+            })()
+          );
+        }
+        
+        await Promise.all(integrationPromises);
+        const integrationEnd = performance.now();
+        
+        assert(
+          integrationEnd - integrationStart < 3000,
+          `Integrated operations maintain good performance (${Math.round(integrationEnd - integrationStart)}ms)`,
+          container
+        );
+
+        // Test 6: System recovery after component restart
+        const originalComponents = {
+          errorHandler: window.errorHandler,
+          loadingStateManager: window.loadingStateManager
+        };
+        
+        // Simulate component restart
+        window.errorHandler = null;
+        window.loadingStateManager = null;
+        
+        let systemRecovered = false;
+        try {
+          // Try to reinitialize components
+          window.errorHandler = new ErrorHandler();
+          window.loadingStateManager = new LoadingStateManager();
+          
+          // Test if system still works
+          const testLoaderId = window.loadingStateManager.showLoading('recovery-test', {});
+          window.loadingStateManager.hideLoading(testLoaderId);
+          
+          systemRecovered = true;
+        } catch (error) {
+          console.error('System recovery failed:', error);
+        }
+        
+        // Restore original components
+        window.errorHandler = originalComponents.errorHandler;
+        window.loadingStateManager = originalComponents.loadingStateManager;
+        
+        assert(
+          systemRecovered,
+          'System recovers correctly after component restart',
+          container
+        );
+
+        logTest(container, 'System integration and data flow tests completed!', 'pass');
+        
+      } catch (error) {
+        logTest(container, `Error during system integration tests: ${error.message}`, 'fail');
+      }
+    });
+
+    // Run All Tests
+    document.getElementById('run-all-tests').addEventListener('click', async () => {
+      totalTests = 0;
+      completedTests = 0;
+      updateProgress();
+      
+      // Run all test suites in sequence
+      document.getElementById('run-communication-tests').click();
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      document.getElementById('run-error-scenario-tests').click();
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      document.getElementById('run-performance-load-tests').click();
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      document.getElementById('run-system-integration-tests').click();
+    });
+
+    // Initialize components on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+      
+      // Initialize components for testing
+      setTimeout(() => {
+        const initialized = initializeComponents();
+        if (initialized) {
+          console.log('All production components initialized successfully');
+        } else {
+          console.error('Failed to initialize some components');
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>

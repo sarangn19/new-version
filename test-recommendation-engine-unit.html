@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recommendation Engine Unit Tests</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="glass-card p-8 max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-white mb-8 text-center">AI Recommendation Engine Unit Tests</h1>
+            
+            <!-- Test Results Display -->
+            <div id="test-results" class="mb-8 p-4 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg">
+                <h2 class="text-xl font-semibold text-white mb-4">Test Results</h2>
+                <div id="results-summary" class="text-white mb-4"></div>
+                <div id="results-content" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Test Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <button id="run-all-tests" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Run All Tests
+                </button>
+                <button id="run-integration-test" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Run Integration Test
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Dependencies -->
+    <script src="js/validation-system.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/conversation-storage.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/performance-analytics-ai.js"></script>
+    <script src="js/ai-recommendation-engine.js"></script>
+
+    <script>
+        class RecommendationEngineTestSuite {
+            constructor() {
+                this.testResults = [];
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.setupTests();
+            }
+
+            setupTests() {
+                document.getElementById('run-all-tests').addEventListener('click', () => {
+                    this.runAllTests();
+                });
+
+                document.getElementById('run-integration-test').addEventListener('click', () => {
+                    this.runIntegrationTest();
+                });
+
+                this.logResult('System', 'AI Recommendation Engine Test Suite initialized', 'info');
+                this.updateResultsDisplay();
+            }
+
+            async runAllTests() {
+                this.clearResults();
+                this.logResult('System', 'Starting comprehensive test suite...', 'info');
+
+                // Test 1: Component availability
+                this.testComponentAvailability();
+
+                // Test 2: Constructor and configuration
+                this.testConstructorAndConfiguration();
+
+                // Test 3: Rule-based recommendations
+                this.testRuleBasedRecommendations();
+
+                // Test 4: Daily task generation
+                await this.testDailyTaskGeneration();
+
+                // Test 5: Performance data processing
+                this.testPerformanceDataProcessing();
+
+                // Test 6: Learning path generation
+                await this.testLearningPathGeneration();
+
+                // Test 7: Personalization features
+                this.testPersonalizationFeatures();
+
+                this.updateResultsDisplay();
+                this.logResult('System', 'All tests completed', 'info');
+            }
+
+            testComponentAvailability() {
+                this.logResult('Component Availability', 'Testing component availability...', 'info');
+
+                if (window.AIRecommendationEngine) {
+                    this.logResult('Component Availability', 'AIRecommendationEngine class available', 'success');
+                } else {
+                    this.logResult('Component Availability', 'AIRecommendationEngine class NOT available', 'error');
+                    return;
+                }
+
+                if (window.PerformanceAnalyticsAI) {
+                    this.logResult('Component Availability', 'PerformanceAnalyticsAI class available', 'success');
+                } else {
+                    this.logResult('Component Availability', 'PerformanceAnalyticsAI class NOT available', 'error');
+                }
+            }
+
+            testConstructorAndConfiguration() {
+                this.logResult('Constructor & Config', 'Testing constructor and configuration...', 'info');
+
+                try {
+                    const engine = new AIRecommendationEngine();
+                    this.logResult('Constructor & Config', 'Constructor executed successfully', 'success');
+
+                    if (engine.config && engine.config.maxDailyTasks === 8) {
+                        this.logResult('Constructor & Config', 'Configuration loaded correctly', 'success');
+                    } else {
+                        this.logResult('Constructor & Config', 'Configuration not loaded correctly', 'error');
+                    }
+
+                    if (engine.learningPathTemplates && Object.keys(engine.learningPathTemplates).length === 3) {
+                        this.logResult('Constructor & Config', 'Learning path templates initialized', 'success');
+                    } else {
+                        this.logResult('Constructor & Config', 'Learning path templates not initialized', 'error');
+                    }
+
+                } catch (error) {
+                    this.logResult('Constructor & Config', `Constructor failed: ${error.message}`, 'error');
+                }
+            }
+
+            testRuleBasedRecommendations() {
+                this.logResult('Rule-based Recommendations', 'Testing rule-based recommendation generation...', 'info');
+
+                try {
+                    const engine = new AIRecommendationEngine();
+                    
+                    // Test with low accuracy
+                    const lowAccuracyData = { accuracy: 60, consistency: 45, studyTime: 3 };
+                    const recommendations = engine.generateRuleBasedRecommendations(lowAccuracyData);
+
+                    if (Array.isArray(recommendations)) {
+                        this.logResult('Rule-based Recommendations', 'Returns array of recommendations', 'success');
+                    } else {
+                        this.logResult('Rule-based Recommendations', 'Does not return array', 'error');
+                        return;
+                    }
+
+                    if (recommendations.length > 0) {
+                        this.logResult('Rule-based Recommendations', `Generated ${recommendations.length} recommendations`, 'success');
+                    } else {
+                        this.logResult('Rule-based Recommendations', 'No recommendations generated', 'error');
+                        return;
+                    }
+
+                    // Check recommendation structure
+                    const firstRec = recommendations[0];
+                    const requiredFields = ['id', 'type', 'priority', 'title', 'description', 'actions'];
+                    const hasAllFields = requiredFields.every(field => firstRec.hasOwnProperty(field));
+
+                    if (hasAllFields) {
+                        this.logResult('Rule-based Recommendations', 'Recommendations have correct structure', 'success');
+                    } else {
+                        this.logResult('Rule-based Recommendations', 'Recommendations missing required fields', 'error');
+                    }
+
+                    // Test with high performance data
+                    const highPerformanceData = { accuracy: 85, consistency: 90, studyTime: 6 };
+                    const highPerfRecs = engine.generateRuleBasedRecommendations(highPerformanceData);
+
+                    if (highPerfRecs.length < recommendations.length) {
+                        this.logResult('Rule-based Recommendations', 'Fewer recommendations for high performance (correct)', 'success');
+                    } else {
+                        this.logResult('Rule-based Recommendations', 'Recommendation count not adjusted for performance', 'warning');
+                    }
+
+                } catch (error) {
+                    this.logResult('Rule-based Recommendations', `Test failed: ${error.message}`, 'error');
+                }
+            }
+
+            async testDailyTaskGeneration() {
+                this.logResult('Daily Task Generation', 'Testing daily task generation...', 'info');
+
+                try {
+                    const engine = new AIRecommendationEngine();
+                    
+                    const mockUserProfile = {
+                        sessionHistory: [
+                            { date: new Date().toISOString(), duration: 60, accuracy: 70 },
+                            { date: new Date(Date.now() - 24*60*60*1000).toISOString(), duration: 45, accuracy: 65 }
+                        ]
+                    };
+
+                    const mockGoals = {
+                        targetSubjects: ['History', 'Geography'],
+                        dailyStudyHours: 5
+                    };
+
+                    const tasks = await engine.generateDailyTasks(mockUserProfile, mockGoals);
+
+                    if (Array.isArray(tasks)) {
+                        this.logResult('Daily Task Generation', 'Returns array of tasks', 'success');
+                    } else {
+                        this.logResult('Daily Task Generation', 'Does not return array', 'error');
+                        return;
+                    }
+
+                    if (tasks.length > 0 && tasks.length <= engine.config.maxDailyTasks) {
+                        this.logResult('Daily Task Generation', `Generated ${tasks.length} tasks (within limit)`, 'success');
+                    } else {
+                        this.logResult('Daily Task Generation', 'Task count outside expected range', 'error');
+                    }
+
+                    // Check task structure
+                    if (tasks.length > 0) {
+                        const firstTask = tasks[0];
+                        const requiredTaskFields = ['id', 'title', 'description', 'type', 'priority', 'estimatedTime'];
+                        const hasAllTaskFields = requiredTaskFields.every(field => firstTask.hasOwnProperty(field));
+
+                        if (hasAllTaskFields) {
+                            this.logResult('Daily Task Generation', 'Tasks have correct structure', 'success');
+                        } else {
+                            this.logResult('Daily Task Generation', 'Tasks missing required fields', 'error');
+                        }
+                    }
+
+                } catch (error) {
+                    this.logResult('Daily Task Generation', `Test failed: ${error.message}`, 'error');
+                }
+            }
+
+            testPerformanceDataProcessing() {
+                this.logResult('Performance Data Processing', 'Testing performance data processing...', 'info');
+
+                try {
+                    const engine = new AIRecommendationEngine();
+                    
+                    const mockUserProfile = {
+                        sessionHistory: [
+                            { date: new Date().toISOString(), duration: 60, accuracy: 70 },
+                            { date: new Date(Date.now() - 24*60*60*1000).toISOString(), duration: 45, accuracy: 65 },
+                            { date: new Date(Date.now() - 2*24*60*60*1000).toISOString(), duration: 90, accuracy: 80 }
+                        ]
+                    };
+
+                    const recentData = engine.getRecentPerformanceData(mockUserProfile, 7);
+
+                    if (recentData && recentData.sessions) {
+                        this.logResult('Performance Data Processing', 'Recent data extracted successfully', 'success');
+                    } else {
+                        this.logResult('Performance Data Processing', 'Failed to extract recent data', 'error');
+                        return;
+                    }
+
+                    if (recentData.totalSessions === 3) {
+                        this.logResult('Performance Data Processing', 'Correct session count calculated', 'success');
+                    } else {
+                        this.logResult('Performance Data Processing', `Incorrect session count: ${recentData.totalSessions}`, 'error');
+                    }
+
+                    if (recentData.averageAccuracy > 0 && recentData.averageAccuracy <= 100) {
+                        this.logResult('Performance Data Processing', 'Average accuracy calculated correctly', 'success');
+                    } else {
+                        this.logResult('Performance Data Processing', 'Average accuracy calculation failed', 'error');
+                    }
+
+                    if (typeof recentData.consistency === 'number') {
+                        this.logResult('Performance Data Processing', 'Consistency metric calculated', 'success');
+                    } else {
+                        this.logResult('Performance Data Processing', 'Consistency metric not calculated', 'error');
+                    }
+
+                } catch (error) {
+                    this.logResult('Performance Data Processing', `Test failed: ${error.message}`, 'error');
+                }
+            }
+
+            async testLearningPathGeneration() {
+                this.logResult('Learning Path Generation', 'Testing adaptive learning path generation...', 'info');
+
+                try {
+                    const engine = new AIRecommendationEngine();
+                    
+                    const mockUserProfile = { studyLevel: 'intermediate' };
+                    const mockPerformanceData = { overview: { performanceScore: 75 } };
+
+                    const learningPath = await engine.generateAdaptiveLearningPath(mockUserProfile, mockPerformanceData);
+
+                    if (learningPath && learningPath.duration) {
+                        this.logResult('Learning Path Generation', 'Learning path generated successfully', 'success');
+                    } else {
+                        this.logResult('Learning Path Generation', 'Failed to generate learning path', 'error');
+                        return;
+                    }
+
+                    if (learningPath.phases && Array.isArray(learningPath.phases)) {
+                        this.logResult('Learning Path Generation', 'Learning phases defined', 'success');
+                    } else {
+                        this.logResult('Learning Path Generation', 'Learning phases not defined', 'error');
+                    }
+
+                    if (learningPath.milestones && Array.isArray(learningPath.milestones)) {
+                        this.logResult('Learning Path Generation', 'Learning milestones generated', 'success');
+                    } else {
+                        this.logResult('Learning Path Generation', 'Learning milestones not generated', 'error');
+                    }
+
+                    if (learningPath.adaptiveFeatures) {
+                        this.logResult('Learning Path Generation', 'Adaptive features included', 'success');
+                    } else {
+                        this.logResult('Learning Path Generation', 'Adaptive features not included', 'error');
+                    }
+
+                } catch (error) {
+                    this.logResult('Learning Path Generation', `Test failed: ${error.message}`, 'error');
+                }
+            }
+
+            testPersonalizationFeatures() {
+                this.logResult('Personalization Features', 'Testing personalization features...', 'info');
+
+                try {
+                    const engine = new AIRecommendationEngine();
+                    
+                    const mockRecommendations = [
+                        { id: 'rec1', priority: 'medium', subjects: ['History'], confidence: 0.7 },
+                        { id: 'rec2', priority: 'high', subjects: ['Geography'], confidence: 0.8 }
+                    ];
+
+                    const mockPerformanceData = { accuracy: 65, consistency: 70, studyTime: 4 };
+
+                    const personalizedRecs = engine.personalizeRecommendations(mockRecommendations, mockPerformanceData, null);
+
+                    if (Array.isArray(personalizedRecs) && personalizedRecs.length === mockRecommendations.length) {
+                        this.logResult('Personalization Features', 'Personalization maintains recommendation count', 'success');
+                    } else {
+                        this.logResult('Personalization Features', 'Personalization changes recommendation count', 'error');
+                    }
+
+                    if (personalizedRecs[0].personalized === true) {
+                        this.logResult('Personalization Features', 'Personalization flag added', 'success');
+                    } else {
+                        this.logResult('Personalization Features', 'Personalization flag not added', 'error');
+                    }
+
+                    if (personalizedRecs[0].adaptedFor) {
+                        this.logResult('Personalization Features', 'Adaptation metadata included', 'success');
+                    } else {
+                        this.logResult('Personalization Features', 'Adaptation metadata not included', 'error');
+                    }
+
+                    // Test prioritization
+                    const prioritizedRecs = engine.prioritizeAndFilterRecommendations(personalizedRecs, 5);
+
+                    if (Array.isArray(prioritizedRecs)) {
+                        this.logResult('Personalization Features', 'Prioritization returns array', 'success');
+                    } else {
+                        this.logResult('Personalization Features', 'Prioritization does not return array', 'error');
+                    }
+
+                } catch (error) {
+                    this.logResult('Personalization Features', `Test failed: ${error.message}`, 'error');
+                }
+            }
+
+            async runIntegrationTest() {
+                this.clearResults();
+                this.logResult('Integration Test', 'Running full integration test...', 'info');
+
+                try {
+                    // Initialize components
+                    const performanceAnalytics = new PerformanceAnalyticsAI();
+                    const recommendationEngine = new AIRecommendationEngine(null, performanceAnalytics);
+
+                    this.logResult('Integration Test', 'Components initialized successfully', 'success');
+
+                    // Mock comprehensive user data
+                    const mockUserData = {
+                        accuracy: 68,
+                        consistency: 55,
+                        studyTime: 4.5,
+                        sessionHistory: [
+                            { date: new Date().toISOString(), duration: 90, accuracy: 72, subject: 'History' },
+                            { date: new Date(Date.now() - 24*60*60*1000).toISOString(), duration: 60, accuracy: 65, subject: 'Geography' },
+                            { date: new Date(Date.now() - 2*24*60*60*1000).toISOString(), duration: 75, accuracy: 70, subject: 'Polity' }
+                        ]
+                    };
+
+                    // Test full recommendation pipeline
+                    const recommendations = await recommendationEngine.generatePersonalizedRecommendations(mockUserData, {
+                        maxRecommendations: 5
+                    });
+
+                    if (Array.isArray(recommendations) && recommendations.length > 0) {
+                        this.logResult('Integration Test', `Generated ${recommendations.length} personalized recommendations`, 'success');
+                    } else {
+                        this.logResult('Integration Test', 'Failed to generate personalized recommendations', 'error');
+                    }
+
+                    // Test daily task generation
+                    const dailyTasks = await recommendationEngine.generateDailyTasks(mockUserData, {
+                        targetSubjects: ['History', 'Geography'],
+                        dailyStudyHours: 5
+                    });
+
+                    if (Array.isArray(dailyTasks) && dailyTasks.length > 0) {
+                        this.logResult('Integration Test', `Generated ${dailyTasks.length} daily tasks`, 'success');
+                    } else {
+                        this.logResult('Integration Test', 'Failed to generate daily tasks', 'error');
+                    }
+
+                    // Test adaptive learning path
+                    const learningPath = await recommendationEngine.generateAdaptiveLearningPath(mockUserData, mockUserData);
+
+                    if (learningPath && learningPath.duration) {
+                        this.logResult('Integration Test', 'Generated adaptive learning path', 'success');
+                    } else {
+                        this.logResult('Integration Test', 'Failed to generate learning path', 'error');
+                    }
+
+                    this.logResult('Integration Test', 'Integration test completed successfully', 'success');
+
+                } catch (error) {
+                    this.logResult('Integration Test', `Integration test failed: ${error.message}`, 'error');
+                }
+
+                this.updateResultsDisplay();
+            }
+
+            // Utility methods
+            logResult(category, message, status) {
+                const result = {
+                    category,
+                    message,
+                    status,
+                    timestamp: new Date().toISOString()
+                };
+
+                this.testResults.push(result);
+
+                if (status === 'success') {
+                    this.passedTests++;
+                } else if (status === 'error') {
+                    this.failedTests++;
+                }
+
+                this.displayResult(result);
+            }
+
+            displayResult(result) {
+                const element = document.getElementById('results-content');
+                if (element) {
+                    const statusColor = result.status === 'success' ? 'text-green-400' : 
+                                       result.status === 'error' ? 'text-red-400' : 
+                                       result.status === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `p-2 rounded ${statusColor}`;
+                    resultDiv.innerHTML = `<strong>${result.category}:</strong> ${result.message}`;
+                    element.appendChild(resultDiv);
+                }
+            }
+
+            clearResults() {
+                const element = document.getElementById('results-content');
+                if (element) {
+                    element.innerHTML = '';
+                }
+                this.testResults = [];
+                this.passedTests = 0;
+                this.failedTests = 0;
+            }
+
+            updateResultsDisplay() {
+                const resultsContent = document.getElementById('results-summary');
+                const totalTests = this.passedTests + this.failedTests;
+                const passRate = totalTests > 0 ? ((this.passedTests / totalTests) * 100).toFixed(1) : 0;
+
+                resultsContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-400">${this.passedTests}</div>
+                            <div class="text-sm">Passed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-400">${this.failedTests}</div>
+                            <div class="text-sm">Failed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-400">${totalTests}</div>
+                            <div class="text-sm">Total</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-400">${passRate}%</div>
+                            <div class="text-sm">Pass Rate</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new RecommendationEngineTestSuite();
+        });
+    </script>
+</body>
+</html>

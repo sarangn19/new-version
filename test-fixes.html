@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fixes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/ai-response-cache.js"></script>
+    <script src="js/background-processor.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/conversation-storage.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/mock-ai-responses.js"></script>
+    <script src="js/ai-config.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">🔧 Test Fixes</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Mode Testing -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🎯 Mode Testing</h2>
+                <div class="space-y-3">
+                    <button onclick="testMode('mcq_generator')" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                        Test MCQ Generator Mode
+                    </button>
+                    <button onclick="testMode('flashcard_generator')" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                        Test Flashcard Generator Mode
+                    </button>
+                    <button onclick="testMode('answer_evaluation')" class="w-full bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded">
+                        Test Answer Evaluation Mode
+                    </button>
+                </div>
+                <div id="mode-result" class="mt-4 text-sm bg-gray-900 p-4 rounded h-32 overflow-y-auto"></div>
+            </div>
+            
+            <!-- Recent Conversations -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">💬 Recent Conversations</h2>
+                <button onclick="loadRecentChats()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-4">
+                    Load Recent Chats
+                </button>
+                <div id="recent-result" class="text-sm bg-gray-900 p-4 rounded h-32 overflow-y-auto"></div>
+            </div>
+            
+            <!-- Conversation Persistence -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">💾 Conversation Persistence</h2>
+                <button onclick="testConversationPersistence()" class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded mb-4">
+                    Test Conversation Saving
+                </button>
+                <div id="persistence-result" class="text-sm bg-gray-900 p-4 rounded h-32 overflow-y-auto"></div>
+            </div>
+            
+            <!-- Firebase Status -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">🔥 Firebase Status</h2>
+                <button onclick="checkFirebaseStatus()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded mb-4">
+                    Check Firebase Status
+                </button>
+                <div id="firebase-result" class="text-sm bg-gray-900 p-4 rounded h-32 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for AI service manager to initialize
+            setTimeout(() => {
+                if (window.aiServiceManager) {
+                    document.getElementById('mode-result').innerHTML = '✅ AI Service Manager ready';
+                } else {
+                    document.getElementById('mode-result').innerHTML = '❌ AI Service Manager not found';
+                }
+            }, 2000);
+        });
+        
+        function testMode(mode) {
+            const resultEl = document.getElementById('mode-result');
+            
+            try {
+                if (window.aiServiceManager) {
+                    window.aiServiceManager.setMode(mode);
+                    resultEl.innerHTML = `✅ Successfully set mode to: ${mode}`;
+                } else {
+                    resultEl.innerHTML = '❌ AI Service Manager not available';
+                }
+            } catch (error) {
+                resultEl.innerHTML = `❌ Error setting mode: ${error.message}`;
+            }
+        }
+        
+        function loadRecentChats() {
+            const resultEl = document.getElementById('recent-result');
+            
+            try {
+                if (window.aiServiceManager) {
+                    const recentChats = window.aiServiceManager.getRecentConversations(5);
+                    
+                    if (recentChats.length === 0) {
+                        resultEl.innerHTML = 'No recent conversations found';
+                    } else {
+                        resultEl.innerHTML = recentChats.map(chat => `
+                            <div class="mb-2 p-2 bg-gray-700 rounded">
+                                <div class="font-semibold text-xs">${chat.mode}</div>
+                                <div class="text-xs text-gray-300">${chat.preview}</div>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    resultEl.innerHTML = '❌ AI Service Manager not available';
+                }
+            } catch (error) {
+                resultEl.innerHTML = `❌ Error loading chats: ${error.message}`;
+            }
+        }
+        
+        async function testConversationPersistence() {
+            const resultEl = document.getElementById('persistence-result');
+            
+            try {
+                if (window.aiServiceManager) {
+                    // Send a test message
+                    const response = await window.aiServiceManager.sendMessage('Test message for persistence');
+                    
+                    resultEl.innerHTML = `✅ Message sent and saved<br>
+                        Conversation ID: ${response.conversationId}<br>
+                        Mode: ${response.mode}<br>
+                        Timestamp: ${response.timestamp}`;
+                    
+                    // Update recent chats
+                    setTimeout(() => {
+                        loadRecentChats();
+                    }, 500);
+                } else {
+                    resultEl.innerHTML = '❌ AI Service Manager not available';
+                }
+            } catch (error) {
+                resultEl.innerHTML = `❌ Error testing persistence: ${error.message}`;
+            }
+        }
+        
+        function checkFirebaseStatus() {
+            const resultEl = document.getElementById('firebase-result');
+            
+            try {
+                if (window.firebaseUtils) {
+                    resultEl.innerHTML = '✅ Firebase utilities available';
+                } else if (window.firebase) {
+                    resultEl.innerHTML = '⚠️ Firebase SDK loaded but utils not initialized';
+                } else {
+                    resultEl.innerHTML = '❌ Firebase not loaded (using localStorage only)';
+                }
+            } catch (error) {
+                resultEl.innerHTML = `❌ Error checking Firebase: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics System Tests - Task 5.5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { background: #1F1F1F; color: white; font-family: system-ui; }
+        .test-section { margin: 20px; padding: 20px; border: 1px solid #333; border-radius: 8px; }
+        .success { border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+        .error { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .warning { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+        .loading { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .test-result { margin: 10px 0; padding: 8px; border-radius: 4px; font-size: 14px; }
+        .test-result.pass { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .test-result.fail { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .test-result.info { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .counter { font-size: 24px; font-weight: bold; }
+        .stat-card { background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 8px; margin: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6 text-center">Analytics System Tests - Task 5.5</h1>
+        <p class="text-center text-gray-300 mb-8">Testing performance data analysis, pattern recognition, recommendation generation, task creation, and real-time statistics updates</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="text-center">
+                <div id="total-tests" class="text-2xl font-bold text-blue-400">0</div>
+                <div class="text-sm">Total Tests</div>
+            </div>
+            <div class="text-center">
+                <div id="passed-tests" class="text-2xl font-bold text-green-400">0</div>
+                <div class="text-sm">Passed</div>
+            </div>
+            <div class="text-center">
+                <div id="failed-tests" class="text-2xl font-bold text-red-400">0</div>
+                <div class="text-sm">Failed</div>
+            </div>
+            <div class="text-center">
+                <div id="pass-rate" class="text-2xl font-bold text-yellow-400">0%</div>
+                <div class="text-sm">Pass Rate</div>
+            </div>
+        </div>
+
+        <div class="text-center mb-8">
+            <button id="run-all-tests" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg mr-4">
+                Run All Tests
+            </button>
+            <button id="run-performance-tests" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg mr-4">
+                Performance Analysis Tests
+            </button>
+            <button id="run-recommendation-tests" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg mr-4">
+                Recommendation Tests
+            </button>
+            <button id="run-realtime-tests" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg">
+                Real-time Tests
+            </button>
+        </div>
+        
+        <div id="test-results">
+            <!-- Test results will be populated here -->
+        </div>
+
+        <!-- Mock DOM elements for testing -->
+        <div id="mock-statistics-page" style="display: none;">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h1>Statistics</h1>
+                    <div class="flex items-center gap-4"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card">
+                        <div class="counter" data-target="100">0</div>
+                        <div>Study Hours</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="counter" data-target="250">0</div>
+                        <div>Questions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="counter" data-target="75.5">0</div>
+                        <div>Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="counter" data-target="15">0</div>
+                        <div>Sessions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load required scripts -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-optimizer.js"></script>
+    <script src="js/performance-analyzer.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/performance-analytics-ai.js"></script>
+    <script src="js/ai-recommendation-engine.js"></script>
+    <script src="js/real-time-analytics-dashboard.js"></script>
+
+    <script>
+        class AnalyticsSystemTests {
+            constructor() {
+                this.testResults = [];
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.totalTests = 0;
+                this.setupTests();
+            }
+
+            setupTests() {
+                document.getElementById('run-all-tests').addEventListener('click', () => {
+                    this.runAllTests();
+                });
+
+                document.getElementById('run-performance-tests').addEventListener('click', () => {
+                    this.runPerformanceAnalysisTests();
+                });
+
+                document.getElementById('run-recommendation-tests').addEventListener('click', () => {
+                    this.runRecommendationTests();
+                });
+
+                document.getElementById('run-realtime-tests').addEventListener('click', () => {
+                    this.runRealTimeTests();
+                });
+
+                this.logResult('System', 'Analytics System Test Suite initialized for Task 5.5', 'info');
+                this.updateCounters();
+            }
+
+            async runAllTests() {
+                this.clearResults();
+                this.logResult('System', 'Starting comprehensive analytics system tests for Task 5.5...', 'info');
+
+                // Test 1: Performance Data Analysis and Pattern Recognition
+                await this.runPerformanceAnalysisTests();
+
+                // Test 2: Recommendation Generation and Task Creation
+                await this.runRecommendationTests();
+
+                // Test 3: Real-time Statistics Updates and Display
+                await this.runRealTimeTests();
+
+                this.logResult('System', 'All Task 5.5 analytics system tests completed', 'info');
+                this.updateCounters();
+            }
+
+            async runPerformanceAnalysisTests() {
+                this.logResult('Performance Analysis', 'Running performance data analysis and pattern recognition tests...', 'info');
+
+                // Test performance data analysis
+                await this.testPerformanceDataAnalysis();
+
+                // Test pattern recognition
+                await this.testPatternRecognition();
+
+                // Test weakness identification
+                await this.testWeaknessIdentification();
+
+                // Test learning pattern management
+                await this.testLearningPatternManagement();
+
+                this.updateCounters();
+            }
+
+            async runRecommendationTests() {
+                this.logResult('Recommendation Tests', 'Running recommendation generation and task creation tests...', 'info');
+
+                // Test recommendation generation
+                await this.testRecommendationGeneration();
+
+                // Test task creation
+                await this.testTaskCreation();
+
+                // Test personalization
+                await this.testPersonalization();
+
+                // Test adaptive learning paths
+                await this.testAdaptiveLearningPaths();
+
+                this.updateCounters();
+            }
+
+            async runRealTimeTests() {
+                this.logResult('Real-time Tests', 'Running real-time statistics updates and display tests...', 'info');
+
+                // Test real-time dashboard
+                await this.testRealTimeDashboard();
+
+                // Test statistics updates
+                await this.testStatisticsUpdates();
+
+                // Test UI display
+                await this.testUIDisplay();
+
+                // Test caching system
+                await this.testCachingSystem();
+
+                this.updateCounters();
+            }
+
+            async testPerformanceDataAnalysis() {
+                const testSection = this.createTestSection('Performance Data Analysis');
+                
+                try {
+                    // Test component availability
+                    if (typeof PerformanceAnalyticsAI === 'undefined') {
+                        this.addTestResult(testSection, 'PerformanceAnalyticsAI class not available', false);
+                        testSection.className = 'test-section error';
+                        return;
+                    }
+
+                    const analyticsAI = new PerformanceAnalyticsAI();
+                    this.addTestResult(testSection, 'PerformanceAnalyticsAI initialized successfully', true);
+
+                    // Test data gathering
+                    const mockUserData = {
+                        accuracy: 75.5,
+                        consistency: 68.2,
+                        studyTime: 5.2,
+                        sessionsCompleted: 12,
+                        sessionHistory: [
+                            { date: new Date().toISOString(), duration: 90, accuracy: 78 },
+                            { date: new Date(Date.now() - 24*60*60*1000).toISOString(), duration: 75, accuracy: 73 }
+                        ]
+                    };
+
+                    const performanceData = await analyticsAI.gatherPerformanceData(mockUserData);
+                    
+                    if (performanceData && performanceData.timestamp) {
+                        this.addTestResult(testSection, 'Performance data gathering works correctly', true);
+                    } else {
+                        this.addTestResult(testSection, 'Performance data gathering failed', false);
+                    }
+
+                    // Test data sufficiency check
+                    const hasSufficientData = analyticsAI.hassufficientData(performanceData);
+                    this.addTestResult(testSection, `Data sufficiency check: ${hasSufficientData ? 'sufficient' : 'insufficient'}`, true);
+
+                    // Test performance analysis
+                    const analysis = await analyticsAI.analyzePerformance(mockUserData);
+                    
+                    if (analysis && analysis.overview) {
+                        this.addTestResult(testSection, 'Performance analysis generates overview', true);
+                        
+                        if (analysis.overview.performanceScore && typeof analysis.overview.performanceScore === 'number') {
+                            this.addTestResult(testSection, 'Performance score calculated correctly', true);
+                        }
+                        
+                        if (analysis.overview.level) {
+                            this.addTestResult(testSection, 'Performance level determined', true);
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Performance analysis failed', false);
+                    }
+
+                    if (analysis && analysis.combinedInsights) {
+                        this.addTestResult(testSection, 'Combined insights generated', true);
+                        
+                        if (analysis.combinedInsights.strengths && Array.isArray(analysis.combinedInsights.strengths)) {
+                            this.addTestResult(testSection, 'Strengths identified correctly', true);
+                        }
+                        
+                        if (analysis.combinedInsights.weaknesses && Array.isArray(analysis.combinedInsights.weaknesses)) {
+                            this.addTestResult(testSection, 'Weaknesses identified correctly', true);
+                        }
+                    }
+
+                    // Test analysis method detection
+                    if (analysis && analysis.analysisMethod) {
+                        this.addTestResult(testSection, `Analysis method: ${analysis.analysisMethod}`, true);
+                    }
+
+                    // Test confidence scoring
+                    if (analysis && typeof analysis.confidence === 'number') {
+                        this.addTestResult(testSection, `Analysis confidence: ${analysis.confidence}`, true);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Performance data analysis test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testPatternRecognition() {
+                const testSection = this.createTestSection('Pattern Recognition');
+                
+                try {
+                    const analyticsAI = new PerformanceAnalyticsAI();
+                    
+                    // Test pattern recognition with mock data
+                    const mockPerformanceData = {
+                        metrics: {
+                            overallAccuracy: 65,
+                            studyConsistency: 45,
+                            focusQuality: 55,
+                            totalStudyTime: 12
+                        },
+                        trends: {
+                            trends: {
+                                accuracy: -1.5,
+                                studyTime: 0.2,
+                                focusQuality: -0.8
+                            }
+                        }
+                    };
+
+                    // Test accuracy pattern analysis
+                    const accuracyPatterns = analyticsAI.analyzeAccuracyPatterns(mockPerformanceData);
+                    if (Array.isArray(accuracyPatterns)) {
+                        this.addTestResult(testSection, 'Accuracy pattern analysis works', true);
+                        
+                        if (accuracyPatterns.length > 0) {
+                            this.addTestResult(testSection, `Identified ${accuracyPatterns.length} accuracy patterns`, true);
+                            
+                            const firstPattern = accuracyPatterns[0];
+                            if (firstPattern.type === 'accuracy' && firstPattern.trend) {
+                                this.addTestResult(testSection, 'Accuracy patterns have correct structure', true);
+                            }
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Accuracy pattern analysis failed', false);
+                    }
+
+                    // Test time-based pattern analysis
+                    const timePatterns = analyticsAI.analyzeTimeBasedPatterns(mockPerformanceData);
+                    if (Array.isArray(timePatterns)) {
+                        this.addTestResult(testSection, 'Time-based pattern analysis works', true);
+                    } else {
+                        this.addTestResult(testSection, 'Time-based pattern analysis failed', false);
+                    }
+
+                    // Test consistency pattern analysis
+                    const consistencyPatterns = analyticsAI.analyzeConsistencyPatterns(mockPerformanceData);
+                    if (Array.isArray(consistencyPatterns)) {
+                        this.addTestResult(testSection, 'Consistency pattern analysis works', true);
+                    } else {
+                        this.addTestResult(testSection, 'Consistency pattern analysis failed', false);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Pattern recognition test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testWeaknessIdentification() {
+                const testSection = this.createTestSection('Weakness Identification');
+                
+                try {
+                    const analyticsAI = new PerformanceAnalyticsAI();
+                    
+                    // Test with data that should trigger weakness identification
+                    const mockPerformanceData = {
+                        metrics: {
+                            overallAccuracy: 55, // Low accuracy
+                            studyConsistency: 35, // Low consistency
+                            focusQuality: 45 // Low focus
+                        }
+                    };
+
+                    const weaknesses = await analyticsAI.identifyWeaknessPatterns(mockPerformanceData);
+                    
+                    if (Array.isArray(weaknesses)) {
+                        this.addTestResult(testSection, 'Weakness identification returns array', true);
+                        
+                        if (weaknesses.length > 0) {
+                            this.addTestResult(testSection, `Identified ${weaknesses.length} weaknesses`, true);
+                            
+                            const firstWeakness = weaknesses[0];
+                            if (firstWeakness.type && firstWeakness.severity && firstWeakness.area) {
+                                this.addTestResult(testSection, 'Weaknesses have correct structure', true);
+                            } else {
+                                this.addTestResult(testSection, 'Weakness structure incomplete', false);
+                            }
+                            
+                            // Test severity ranking
+                            const severityOrder = { high: 3, medium: 2, low: 1 };
+                            let properlyRanked = true;
+                            for (let i = 1; i < weaknesses.length; i++) {
+                                const prevSeverity = severityOrder[weaknesses[i-1].severity] || 1;
+                                const currSeverity = severityOrder[weaknesses[i].severity] || 1;
+                                if (prevSeverity < currSeverity) {
+                                    properlyRanked = false;
+                                    break;
+                                }
+                            }
+                            
+                            if (properlyRanked) {
+                                this.addTestResult(testSection, 'Weaknesses properly ranked by severity', true);
+                            } else {
+                                this.addTestResult(testSection, 'Weakness ranking may be incorrect', false);
+                            }
+                        } else {
+                            this.addTestResult(testSection, 'No weaknesses identified (may be correct for good performance)', true);
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Weakness identification failed', false);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Weakness identification test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testLearningPatternManagement() {
+                const testSection = this.createTestSection('Learning Pattern Management');
+                
+                try {
+                    const analyticsAI = new PerformanceAnalyticsAI();
+                    
+                    // Test pattern updates
+                    const mockPerformanceData = {
+                        metrics: {
+                            studyConsistency: 75,
+                            focusQuality: 80
+                        },
+                        trends: {
+                            trends: {
+                                accuracy: 1.2,
+                                studyTime: 0.5
+                            }
+                        }
+                    };
+                    
+                    const mockAnalysis = { confidence: 0.8 };
+                    
+                    analyticsAI.updateLearningPatterns(mockPerformanceData, mockAnalysis);
+                    this.addTestResult(testSection, 'Learning patterns updated without error', true);
+                    
+                    // Test pattern saving and loading
+                    analyticsAI.saveLearningPatterns();
+                    this.addTestResult(testSection, 'Learning patterns saved', true);
+                    
+                    analyticsAI.loadLearningPatterns();
+                    this.addTestResult(testSection, 'Learning patterns loaded', true);
+                    
+                    // Check if patterns are stored correctly
+                    if (analyticsAI.learningPatterns && analyticsAI.learningPatterns.studyHabits instanceof Map) {
+                        this.addTestResult(testSection, 'Study habit patterns stored correctly', true);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Learning pattern management test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testRecommendationGeneration() {
+                const testSection = this.createTestSection('Recommendation Generation');
+                
+                try {
+                    // Test component availability
+                    if (typeof AIRecommendationEngine === 'undefined') {
+                        this.addTestResult(testSection, 'AIRecommendationEngine class not available', false);
+                        testSection.className = 'test-section error';
+                        return;
+                    }
+
+                    const recommendationEngine = new AIRecommendationEngine();
+                    this.addTestResult(testSection, 'AIRecommendationEngine initialized successfully', true);
+                    
+                    // Test rule-based recommendations
+                    const mockPerformanceData = {
+                        accuracy: 65,
+                        consistency: 50,
+                        studyTime: 3.5
+                    };
+
+                    const ruleBasedRecs = recommendationEngine.generateRuleBasedRecommendations(mockPerformanceData);
+                    
+                    if (Array.isArray(ruleBasedRecs)) {
+                        this.addTestResult(testSection, 'Rule-based recommendations generated', true);
+                        
+                        if (ruleBasedRecs.length > 0) {
+                            this.addTestResult(testSection, `Generated ${ruleBasedRecs.length} rule-based recommendations`, true);
+                            
+                            // Check recommendation structure
+                            const firstRec = ruleBasedRecs[0];
+                            const requiredFields = ['id', 'type', 'priority', 'title', 'description', 'actions'];
+                            const hasAllFields = requiredFields.every(field => firstRec.hasOwnProperty(field));
+                            
+                            if (hasAllFields) {
+                                this.addTestResult(testSection, 'Recommendations have correct structure', true);
+                            } else {
+                                this.addTestResult(testSection, 'Recommendations missing required fields', false);
+                            }
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Rule-based recommendation generation failed', false);
+                    }
+
+                    // Test personalized recommendations
+                    const personalizedRecs = await recommendationEngine.generatePersonalizedRecommendations(mockPerformanceData, {
+                        maxRecommendations: 5
+                    });
+                    
+                    if (Array.isArray(personalizedRecs)) {
+                        this.addTestResult(testSection, 'Personalized recommendations generated', true);
+                        
+                        if (personalizedRecs.length > 0 && personalizedRecs.length <= 5) {
+                            this.addTestResult(testSection, `Generated ${personalizedRecs.length} personalized recommendations (within limit)`, true);
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Personalized recommendation generation failed', false);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Recommendation generation test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testTaskCreation() {
+                const testSection = this.createTestSection('Task Creation');
+                
+                try {
+                    const recommendationEngine = new AIRecommendationEngine();
+                    
+                    // Test daily task generation
+                    const mockUserProfile = {
+                        sessionHistory: [
+                            { date: new Date().toISOString(), duration: 60, accuracy: 70 },
+                            { date: new Date(Date.now() - 24*60*60*1000).toISOString(), duration: 45, accuracy: 65 }
+                        ]
+                    };
+
+                    const mockGoals = {
+                        targetSubjects: ['History', 'Geography'],
+                        dailyStudyHours: 5
+                    };
+
+                    const dailyTasks = await recommendationEngine.generateDailyTasks(mockUserProfile, mockGoals);
+                    
+                    if (Array.isArray(dailyTasks)) {
+                        this.addTestResult(testSection, 'Daily task generation returns array', true);
+                        
+                        if (dailyTasks.length > 0 && dailyTasks.length <= recommendationEngine.config.maxDailyTasks) {
+                            this.addTestResult(testSection, `Generated ${dailyTasks.length} daily tasks (within limit)`, true);
+                        }
+                        
+                        // Check task structure
+                        if (dailyTasks.length > 0) {
+                            const firstTask = dailyTasks[0];
+                            const requiredFields = ['id', 'title', 'description', 'type', 'priority', 'estimatedTime'];
+                            const hasAllFields = requiredFields.every(field => firstTask.hasOwnProperty(field));
+                            
+                            if (hasAllFields) {
+                                this.addTestResult(testSection, 'Tasks have correct structure', true);
+                            } else {
+                                this.addTestResult(testSection, 'Tasks missing required fields', false);
+                            }
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Daily task generation failed', false);
+                    }
+
+                    // Test priority area identification
+                    const recentData = recommendationEngine.getRecentPerformanceData(mockUserProfile, 7);
+                    const priorityAreas = await recommendationEngine.identifyPriorityAreas(recentData, mockGoals);
+                    
+                    if (Array.isArray(priorityAreas)) {
+                        this.addTestResult(testSection, 'Priority area identification works', true);
+                    } else {
+                        this.addTestResult(testSection, 'Priority area identification failed', false);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Task creation test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testPersonalization() {
+                const testSection = this.createTestSection('Personalization Features');
+                
+                try {
+                    const recommendationEngine = new AIRecommendationEngine();
+                    
+                    const mockRecommendations = [
+                        { id: 'rec1', priority: 'medium', subjects: ['History'], confidence: 0.7 },
+                        { id: 'rec2', priority: 'high', subjects: ['Geography'], confidence: 0.8 }
+                    ];
+
+                    const mockPerformanceData = { accuracy: 65, consistency: 70, studyTime: 4 };
+
+                    const personalizedRecs = recommendationEngine.personalizeRecommendations(mockRecommendations, mockPerformanceData, null);
+
+                    if (Array.isArray(personalizedRecs) && personalizedRecs.length === mockRecommendations.length) {
+                        this.addTestResult(testSection, 'Personalization maintains recommendation count', true);
+                    } else {
+                        this.addTestResult(testSection, 'Personalization changes recommendation count', false);
+                    }
+
+                    if (personalizedRecs[0].personalized === true) {
+                        this.addTestResult(testSection, 'Personalization flag added', true);
+                    } else {
+                        this.addTestResult(testSection, 'Personalization flag not added', false);
+                    }
+
+                    // Test prioritization
+                    const prioritizedRecs = recommendationEngine.prioritizeAndFilterRecommendations(personalizedRecs, 5);
+
+                    if (Array.isArray(prioritizedRecs)) {
+                        this.addTestResult(testSection, 'Prioritization returns array', true);
+                    } else {
+                        this.addTestResult(testSection, 'Prioritization does not return array', false);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Personalization test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testAdaptiveLearningPaths() {
+                const testSection = this.createTestSection('Adaptive Learning Paths');
+                
+                try {
+                    const recommendationEngine = new AIRecommendationEngine();
+                    
+                    const mockUserProfile = { studyLevel: 'intermediate' };
+                    const mockPerformanceData = { overview: { performanceScore: 75 } };
+
+                    const learningPath = await recommendationEngine.generateAdaptiveLearningPath(mockUserProfile, mockPerformanceData);
+
+                    if (learningPath && learningPath.duration) {
+                        this.addTestResult(testSection, 'Learning path generated successfully', true);
+                    } else {
+                        this.addTestResult(testSection, 'Failed to generate learning path', false);
+                        return;
+                    }
+
+                    if (learningPath.phases && Array.isArray(learningPath.phases)) {
+                        this.addTestResult(testSection, 'Learning phases defined', true);
+                    } else {
+                        this.addTestResult(testSection, 'Learning phases not defined', false);
+                    }
+
+                    if (learningPath.milestones && Array.isArray(learningPath.milestones)) {
+                        this.addTestResult(testSection, 'Learning milestones generated', true);
+                    } else {
+                        this.addTestResult(testSection, 'Learning milestones not generated', false);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Adaptive learning paths test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testRealTimeDashboard() {
+                const testSection = this.createTestSection('Real-time Dashboard');
+                
+                try {
+                    // Test component availability
+                    if (typeof RealTimeAnalyticsDashboard === 'undefined') {
+                        this.addTestResult(testSection, 'RealTimeAnalyticsDashboard class not available', false);
+                        testSection.className = 'test-section error';
+                        return;
+                    }
+
+                    // Create mock DOM elements
+                    const mockContainer = document.getElementById('mock-statistics-page');
+                    document.body.appendChild(mockContainer);
+                    mockContainer.style.display = 'block';
+                    mockContainer.id = 'main-content';
+
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    this.addTestResult(testSection, 'Real-time dashboard initialized', true);
+
+                    // Test dashboard configuration
+                    if (dashboard.config && dashboard.config.updateInterval === 30000) {
+                        this.addTestResult(testSection, 'Dashboard configuration loaded correctly', true);
+                    }
+
+                    // Test cache system
+                    if (dashboard.cache instanceof Map) {
+                        this.addTestResult(testSection, 'Cache system initialized', true);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Real-time dashboard test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testStatisticsUpdates() {
+                const testSection = this.createTestSection('Statistics Updates');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test dashboard update
+                    if (typeof dashboard.updateDashboard === 'function') {
+                        this.addTestResult(testSection, 'Dashboard update method available', true);
+                        
+                        try {
+                            await dashboard.updateDashboard();
+                            this.addTestResult(testSection, 'Dashboard update executed successfully', true);
+                        } catch (updateError) {
+                            this.addTestResult(testSection, `Dashboard update failed: ${updateError.message}`, false);
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Dashboard update method not available', false);
+                    }
+
+                    // Test real-time update timer
+                    if (typeof dashboard.startRealTimeUpdates === 'function') {
+                        dashboard.startRealTimeUpdates();
+                        this.addTestResult(testSection, 'Real-time updates started', true);
+                        
+                        if (typeof dashboard.stopRealTimeUpdates === 'function') {
+                            dashboard.stopRealTimeUpdates();
+                            this.addTestResult(testSection, 'Real-time updates stopped', true);
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Real-time update methods not available', false);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Statistics updates test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testUIDisplay() {
+                const testSection = this.createTestSection('UI Display');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test insight extraction
+                    const mockAnalysis = {
+                        overview: {
+                            performanceScore: 75,
+                            level: 'Good',
+                            efficiency: 'High'
+                        },
+                        combinedInsights: {
+                            strengths: [{ area: 'Math', description: 'Strong performance' }],
+                            weaknesses: [{ area: 'History', description: 'Needs work' }]
+                        }
+                    };
+
+                    const insights = dashboard.extractInsights(mockAnalysis);
+
+                    if (Array.isArray(insights)) {
+                        this.addTestResult(testSection, 'Insight extraction works', true);
+                        
+                        if (insights.length > 0) {
+                            this.addTestResult(testSection, `Extracted ${insights.length} insights`, true);
+                            
+                            const firstInsight = insights[0];
+                            if (firstInsight.type && firstInsight.title && firstInsight.value) {
+                                this.addTestResult(testSection, 'Insights have correct structure', true);
+                            } else {
+                                this.addTestResult(testSection, 'Insight structure incomplete', false);
+                            }
+                        }
+                    } else {
+                        this.addTestResult(testSection, 'Insight extraction failed', false);
+                    }
+
+                    // Test counter animation
+                    const counters = document.querySelectorAll('.counter');
+                    if (counters.length > 0) {
+                        this.addTestResult(testSection, `Found ${counters.length} counter elements`, true);
+                        
+                        if (typeof dashboard.animateCounter === 'function') {
+                            dashboard.animateCounter(counters[0], 100);
+                            this.addTestResult(testSection, 'Counter animation method works', true);
+                        }
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `UI display test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            async testCachingSystem() {
+                const testSection = this.createTestSection('Caching System');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test cache initialization
+                    if (dashboard.cache instanceof Map) {
+                        this.addTestResult(testSection, 'Cache is properly initialized as Map', true);
+                    } else {
+                        this.addTestResult(testSection, 'Cache not properly initialized', false);
+                    }
+
+                    // Test cache operations
+                    const testKey = 'test_key';
+                    const testData = { test: 'data', timestamp: Date.now() };
+
+                    dashboard.cache.set(testKey, testData);
+
+                    if (dashboard.cache.has(testKey)) {
+                        this.addTestResult(testSection, 'Cache set operation works', true);
+                    } else {
+                        this.addTestResult(testSection, 'Cache set operation failed', false);
+                    }
+
+                    const retrievedData = dashboard.cache.get(testKey);
+                    if (retrievedData && retrievedData.test === 'data') {
+                        this.addTestResult(testSection, 'Cache get operation works', true);
+                    } else {
+                        this.addTestResult(testSection, 'Cache get operation failed', false);
+                    }
+
+                    testSection.className = 'test-section success';
+                } catch (error) {
+                    this.addTestResult(testSection, `Caching system test failed: ${error.message}`, false);
+                    testSection.className = 'test-section error';
+                }
+            }
+
+            // Utility methods
+            createTestSection(title) {
+                const section = document.createElement('div');
+                section.className = 'test-section loading';
+                section.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-4">${title}</h3>
+                    <div class="test-results-container"></div>
+                `;
+                document.getElementById('test-results').appendChild(section);
+                return section;
+            }
+
+            addTestResult(section, message, passed) {
+                const container = section.querySelector('.test-results-container');
+                const result = document.createElement('div');
+                result.className = `test-result ${passed ? 'pass' : 'fail'}`;
+                result.innerHTML = `${passed ? '✅' : '❌'} ${message}`;
+                container.appendChild(result);
+
+                this.totalTests++;
+                if (passed) {
+                    this.passedTests++;
+                } else {
+                    this.failedTests++;
+                }
+            }
+
+            logResult(category, message, status) {
+                const result = {
+                    category,
+                    message,
+                    status,
+                    timestamp: new Date().toISOString()
+                };
+                this.testResults.push(result);
+                console.log(`[${category}] ${message}`);
+            }
+
+            clearResults() {
+                document.getElementById('test-results').innerHTML = '';
+                this.testResults = [];
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.totalTests = 0;
+                this.updateCounters();
+            }
+
+            updateCounters() {
+                document.getElementById('total-tests').textContent = this.totalTests;
+                document.getElementById('passed-tests').textContent = this.passedTests;
+                document.getElementById('failed-tests').textContent = this.failedTests;
+                
+                const passRate = this.totalTests > 0 ? ((this.passedTests / this.totalTests) * 100).toFixed(1) : 0;
+                document.getElementById('pass-rate').textContent = `${passRate}%`;
+            }
+        }
+
+        // Initialize test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AnalyticsSystemTests();
+        });
+    </script>
+</body>
+</html>

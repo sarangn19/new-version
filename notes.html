@@ -8,9 +8,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/enhanced-note-manager.js"></script>
+  <script src="js/data-exporter.js"></script>
+  <script src="js/backup-manager.js"></script>
+  <script src="js/loading-state-manager.js"></script>
+  <script src="js/error-handler.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="styles/glassmorphism.css" rel="stylesheet">
   <link href="styles/duolingo-animations.css" rel="stylesheet">
+  <link href="styles/theme-system.css" rel="stylesheet">
+  <link href="styles/accessibility.css" rel="stylesheet">
+  <link href="styles/unified-theme.css" rel="stylesheet">
   <script src="js/duolingo-animations.js"></script>
 
   <style>
@@ -241,7 +249,10 @@
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 12px;
-      placeholder-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .note-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
     }
 
     .note-textarea {
@@ -252,7 +263,10 @@
       font-size: 14px;
       resize: none;
       flex: 1;
-      placeholder-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .note-textarea::placeholder {
+      color: rgba(255, 255, 255, 0.6);
     }
 
     .note-actions {
@@ -373,7 +387,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen text-white antialiased scroll-hidden">
+<body class="min-h-screen text-white antialiased scroll-hidden" data-theme="dark" data-color-scheme="default">
 
   <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
     
@@ -384,7 +398,7 @@
         <div class="flex items-center space-x-4"> 
           <div class="relative">
             <a href="profile.html" class="block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
-              <div id="user-initials" class="text-lg font-medium text-black">JD</div>
+              <div id="user-initials" class="text-lg font-medium text-black">U</div>
             </a>
             <!-- Notification badge -->
             <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
@@ -394,8 +408,8 @@
             </button>
           </div>
           <div>
-            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
-            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+            <div id="user-name" class="font-normal text-sm">User</div>
+            <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
           </div>
         </div>
       </div>
@@ -417,6 +431,10 @@
         <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
           <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Community</span>
         </a>
         <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI</div>
@@ -471,7 +489,7 @@
         <!-- Note Content (hidden initially) -->
         <div class="note-content">
           <input type="text" class="note-input" placeholder="Note title..." maxlength="50">
-          <textarea class="note-textarea" placeholder="Start writing your note..."></textarea>
+          <div class="rich-text-editor" placeholder="Start writing your note..."></div>
           <div class="note-actions">
             <span class="text-xs opacity-70" id="note-date"></span>
             <button class="save-note-btn" id="save-note">Save</button>
@@ -597,61 +615,8 @@
   </div>
 
   <script>
-    // Notes data - consistent between grid and table views
-    const notesData = [
-      { 
-        id: 1, 
-        title: "Indian Constitution - Fundamental Rights", 
-        content: "Article 12-35 of the Indian Constitution deals with Fundamental Rights. These are basic human rights that are guaranteed to all citizens...", 
-        subject: "Constitutional Law", 
-        date: "2 days ago",
-        lastEdited: "2024-10-20",
-        color: "black"
-      },
-      { 
-        id: 2, 
-        title: "Economic Survey 2024 - Key Points", 
-        content: "GDP growth projections, inflation trends, and major economic reforms highlighted in the Economic Survey...", 
-        subject: "Economics", 
-        date: "1 week ago",
-        lastEdited: "2024-10-15",
-        color: "black"
-      },
-      { 
-        id: 3, 
-        title: "International Relations - BRICS Summit", 
-        content: "Key outcomes from the latest BRICS summit, including new member additions and economic cooperation initiatives...", 
-        subject: "International Relations", 
-        date: "3 days ago",
-        lastEdited: "2024-10-18",
-        color: "black"
-      },
-      { 
-        id: 4, 
-        title: "Environment & Ecology - Climate Change", 
-        content: "Impact of climate change on biodiversity, international climate agreements, and India's climate action plans...", 
-        subject: "Environment", 
-        date: "5 days ago",
-        lastEdited: "2024-10-16",
-        color: "black"
-      },
-      { 
-        id: 5, 
-        title: "Modern History - Freedom Struggle", 
-        content: "Timeline of major events in India's freedom struggle, key personalities, and their contributions...", 
-        subject: "History", 
-        date: "1 week ago",
-        lastEdited: "2024-10-14"
-      },
-      { 
-        id: 6, 
-        title: "Public Administration - Governance", 
-        content: "Principles of good governance, administrative reforms, and digital governance initiatives in India...", 
-        subject: "Public Administration", 
-        date: "4 days ago",
-        lastEdited: "2024-10-17"
-      }
-    ];
+    // Notes data - will be loaded from user's actual notes
+    const notesData = [];
 
     let currentView = 'grid';
     let filteredNotes = [...notesData];
@@ -824,7 +789,7 @@
       const modal = document.createElement('div');
       modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
       modal.innerHTML = `
-        <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-2xl w-full border border-white/10">
+        <div class="bg-[var(--bg-dark-2)] rounded-2xl p-8 max-w-4xl w-full border border-white/10">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-medium">Edit Note</h3>
             <button id="closeEditModal" class="text-white/50 hover:text-white">
@@ -849,7 +814,7 @@
             </div>
             <div>
               <label class="block text-sm text-white/80 mb-2">Content</label>
-              <textarea id="edit-content" rows="12" class="w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg p-3 text-white placeholder-white/50 resize-y min-h-[200px] max-h-[400px]" required>${note.content}</textarea>
+              <div id="edit-content" class="rich-text-editor w-full bg-[var(--bg-dark-1)] border border-white/20 rounded-lg text-white min-h-[200px] max-h-[400px] overflow-y-auto">${note.richContent || note.content}</div>
             </div>
             <div class="flex items-center justify-end gap-3 pt-4">
               <button type="button" id="cancelEdit" class="px-4 py-2 text-white/70 hover:text-white transition">Cancel</button>
@@ -876,28 +841,46 @@
         e.preventDefault();
         const title = modal.querySelector('#edit-title').value.trim();
         const subject = modal.querySelector('#edit-subject').value;
-        const content = modal.querySelector('#edit-content').value.trim();
+        const richEditor = modal.querySelector('#edit-content');
+        const richContent = richEditor.innerHTML;
+        const plainContent = richEditor.textContent.trim();
         
-        if (!title || !content) {
+        if (!title || !plainContent) {
           showToast('Please fill in all required fields');
           return;
         }
         
-        // Update the note
-        note.title = title;
-        note.subject = subject;
-        note.content = content;
-        note.lastEdited = new Date().toISOString().split('T')[0];
-        note.date = 'Today';
+        // Update using enhanced note manager
+        const updates = {
+          title: title,
+          subject: subject,
+          content: plainContent,
+          richContent: richContent
+        };
         
-        // Update filtered notes
-        const filteredIndex = filteredNotes.findIndex(n => n.id === note.id);
-        if (filteredIndex !== -1) {
-          filteredNotes[filteredIndex] = note;
+        const updatedNote = window.enhancedNoteManager.updateNote(note.id, updates);
+        
+        if (updatedNote) {
+          // Update local display data
+          note.title = title;
+          note.subject = subject;
+          note.content = plainContent;
+          note.richContent = richContent;
+          note.lastEdited = new Date().toISOString().split('T')[0];
+          note.date = 'Today';
+          
+          // Update filtered notes
+          const filteredIndex = filteredNotes.findIndex(n => n.id === note.id);
+          if (filteredIndex !== -1) {
+            filteredNotes[filteredIndex] = note;
+          }
+          
+          switchView(currentView);
+          showToast('Note updated successfully!');
+        } else {
+          showToast('Error updating note');
         }
         
-        switchView(currentView);
-        showToast('Note updated successfully!');
         document.body.removeChild(modal);
       });
       
@@ -1026,8 +1009,8 @@
         // Start morphing animation after a brief delay
         setTimeout(() => {
           // Calculate target position (center of screen)
-          const targetWidth = 320;
-          const targetHeight = 400;
+          const targetWidth = 480;
+          const targetHeight = 600;
           const targetLeft = (window.innerWidth - targetWidth) / 2;
           const targetTop = (window.innerHeight - targetHeight) / 2;
           
@@ -1043,8 +1026,12 @@
           // Set current date
           document.getElementById('note-date').textContent = new Date().toLocaleDateString();
           
-          // Focus on title input after animation
+          // Initialize rich text editor and focus on title input after animation
           setTimeout(() => {
+            const richEditor = document.querySelector('.rich-text-editor');
+            if (richEditor && window.enhancedNoteManager) {
+              window.enhancedNoteManager.setupRichTextEditor(richEditor);
+            }
             document.querySelector('.note-input').focus();
           }, 600);
           
@@ -1080,28 +1067,41 @@
       // Save note functionality
       document.getElementById('save-note').addEventListener('click', () => {
         const title = document.querySelector('.note-input').value.trim();
-        const content = document.querySelector('.note-textarea').value.trim();
+        const richEditor = document.querySelector('.rich-text-editor');
+        const richContent = richEditor ? richEditor.innerHTML : '';
+        const plainContent = richEditor ? richEditor.textContent : '';
         
-        if (!title && !content) {
+        if (!title && !plainContent) {
           // If empty, just close
           closeNoteCreation();
           return;
         }
         
-        // Create new note object
-        const newNote = {
-          id: Date.now(),
+        // Create new note using enhanced note manager
+        const noteData = {
           title: title || 'Untitled Note',
-          content: content || 'Empty note',
+          content: plainContent || 'Empty note',
+          richContent: richContent,
           subject: 'Personal',
-          date: new Date().toLocaleDateString(),
-          lastEdited: new Date().toISOString().split('T')[0], // Add lastEdited field
           color: document.querySelector('.color-option.selected').dataset.color || 'black'
         };
         
-        // Add to notes data
-        notesData.unshift(newNote);
-        console.log('New note added:', newNote);
+        const newNote = window.enhancedNoteManager.createNote(noteData);
+        
+        // Add to local notes data for display
+        const displayNote = {
+          id: newNote.id,
+          title: newNote.title,
+          content: newNote.content,
+          richContent: newNote.richContent,
+          subject: newNote.subject,
+          date: 'Today',
+          lastEdited: new Date().toISOString().split('T')[0],
+          color: newNote.color
+        };
+        
+        notesData.unshift(displayNote);
+        console.log('New note added:', displayNote);
         console.log('Total notes:', notesData.length);
         
         // Trigger success celebration
@@ -1110,7 +1110,7 @@
         }
         
         // Animate note flying to its position in grid
-        animateNoteToGrid(newNote);
+        animateNoteToGrid(displayNote);
       });
 
       function animateNoteToGrid(note) {
@@ -1162,7 +1162,10 @@
         
         // Reset form
         document.querySelector('.note-input').value = '';
-        document.querySelector('.note-textarea').value = '';
+        const richEditor = document.querySelector('.rich-text-editor');
+        if (richEditor) {
+          richEditor.innerHTML = '';
+        }
         
         // Reset morphing note
         morphingNote.classList.remove('morphed');
@@ -1202,17 +1205,16 @@
       
       // Notification functionality
       const notifications = [
-        { id: 1, title: "New Daily Challenge Available", message: "Complete today's MCQ challenge to maintain your streak!", time: "2 minutes ago", type: "challenge", read: false },
-        { id: 2, title: "Revision Reminder", message: "You have 3 topics due for revision today", time: "1 hour ago", type: "reminder", read: false }
+        // No notifications yet
       ];
 
       function showNotificationsModal() {
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
         modal.innerHTML = `
-          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-hidden border border-white/10">
+          <div class="bg-[var(--bg-dark-2)] rounded-2xl p-8 max-w-4xl w-full max-h-[85vh] overflow-hidden border border-white/10">
             <div class="flex items-center justify-between mb-6">
-              <h3 class="text-lg font-medium">Notifications</h3>
+              <h3 class="text-xl font-medium">Notifications</h3>
               <button id="closeNotificationsModal" class="text-white/50 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
               </button>
@@ -1245,10 +1247,7 @@
       }
 
       // Bookmark functionality
-      const bookmarkedContent = [
-        { id: 1, title: "Indian Constitution - Fundamental Rights", type: "Note", date: "2 days ago" },
-        { id: 2, title: "Economic Survey 2024 - Key Points", type: "Note", date: "1 week ago" }
-      ];
+      const bookmarkedContent = [];
 
       function showBookmarksModal() {
         const modal = document.createElement('div');
@@ -1292,6 +1291,52 @@
       // Add event listeners
       document.getElementById('notification-btn')?.addEventListener('click', showNotificationsModal);
       document.getElementById('bookmarks-btn')?.addEventListener('click', showBookmarksModal);
+
+      // Initialize enhanced profile manager for cross-page synchronization
+      if (typeof ProfileManager !== 'undefined') {
+        window.profileManager = new ProfileManager();
+        
+        // Apply theme preferences
+        const preferences = window.profileManager.getPreferences();
+        if (preferences) {
+          document.documentElement.setAttribute('data-theme', preferences.theme?.mode || 'dark');
+          document.documentElement.setAttribute('data-color-scheme', preferences.theme?.colorScheme || 'default');
+          
+          if (preferences.accessibility?.reducedMotion) {
+            document.documentElement.classList.add('reduced-motion');
+          }
+          if (preferences.accessibility?.highContrast) {
+            document.documentElement.classList.add('high-contrast');
+          }
+          if (preferences.accessibility?.keyboardNavigation) {
+            document.documentElement.classList.add('keyboard-navigation');
+          }
+        }
+      }
+      
+      // Initialize enhanced note manager
+      if (typeof EnhancedNoteManager !== 'undefined') {
+        window.enhancedNoteManager = new EnhancedNoteManager();
+      }
+      
+      // Initialize data management tools
+      if (typeof DataExporter !== 'undefined') {
+        window.dataExporter = new DataExporter();
+      }
+      
+      if (typeof BackupManager !== 'undefined') {
+        window.backupManager = new BackupManager();
+      }
+      
+      // Initialize loading state manager
+      if (typeof LoadingStateManager !== 'undefined') {
+        window.loadingStateManager = new LoadingStateManager();
+      }
+      
+      // Initialize error handler
+      if (typeof ErrorHandler !== 'undefined') {
+        window.errorHandler = new ErrorHandler();
+      }
 
       // Initial render
       switchView('grid');

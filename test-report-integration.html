@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-result {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .success { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        .warning { border-left-color: #ffc107; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Report Generator Integration Test</h1>
+    <div id="results"></div>
+
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-analyzer.js"></script>
+    <script src="js/report-generator.js"></script>
+
+    <script>
+        function addResult(message, type = 'info', data = null) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            
+            let content = `<strong>${type.toUpperCase()}:</strong> ${message}`;
+            if (data) {
+                content += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            div.innerHTML = content;
+            results.appendChild(div);
+        }
+
+        function runIntegrationTest() {
+            addResult('Starting Report Generator Integration Test');
+
+            try {
+                // Test 1: Check if all components are loaded
+                if (!window.reportGenerator) {
+                    throw new Error('ReportGenerator not loaded');
+                }
+                if (!window.performanceAnalyzer) {
+                    throw new Error('PerformanceAnalyzer not loaded');
+                }
+                addResult('All required components loaded successfully', 'success');
+
+                // Test 2: Generate sample data
+                addResult('Generating sample performance data...');
+                generateSampleData();
+                addResult('Sample data generated successfully', 'success');
+
+                // Test 3: Generate weekly report
+                addResult('Generating weekly report...');
+                const weeklyReport = window.reportGenerator.generateReport('weekly');
+                addResult('Weekly report generated successfully', 'success', {
+                    type: weeklyReport.metadata.type,
+                    sectionsCount: Object.keys(weeklyReport.sections).length,
+                    chartsCount: Object.keys(weeklyReport.charts).length,
+                    performanceScore: weeklyReport.sections.overview?.summary?.performanceScore?.formatted
+                });
+
+                // Test 4: Generate monthly report
+                addResult('Generating monthly report...');
+                const monthlyReport = window.reportGenerator.generateReport('monthly');
+                addResult('Monthly report generated successfully', 'success', {
+                    type: monthlyReport.metadata.type,
+                    sectionsCount: Object.keys(monthlyReport.sections).length,
+                    chartsCount: Object.keys(monthlyReport.charts).length,
+                    hasComparative: !!monthlyReport.sections.comparative
+                });
+
+                // Test 5: Test export functionality
+                addResult('Testing export functionality...');
+                const htmlExport = window.reportGenerator.exportReport(weeklyReport, 'html');
+                const jsonExport = window.reportGenerator.exportReport(weeklyReport, 'json');
+                addResult('Export functionality working', 'success', {
+                    htmlLength: htmlExport.length,
+                    jsonLength: jsonExport.length
+                });
+
+                // Test 6: Test chart generation
+                addResult('Testing chart generation...');
+                const chartTypes = Object.keys(weeklyReport.charts);
+                const chartDetails = {};
+                chartTypes.forEach(type => {
+                    const chart = weeklyReport.charts[type];
+                    chartDetails[type] = {
+                        title: chart.title,
+                        type: chart.type,
+                        dataPoints: chart.data?.labels?.length || 0
+                    };
+                });
+                addResult('Charts generated successfully', 'success', chartDetails);
+
+                // Test 7: Test insights generation
+                addResult('Testing insights generation...');
+                const insights = weeklyReport.insights;
+                addResult('Insights generated successfully', 'success', {
+                    performanceInsights: Object.keys(insights.performance || {}).length,
+                    trendInsights: {
+                        positive: insights.trends?.positive?.length || 0,
+                        negative: insights.trends?.negative?.length || 0,
+                        stable: insights.trends?.stable?.length || 0
+                    },
+                    achievements: insights.achievements?.length || 0
+                });
+
+                // Test 8: Test recommendations
+                addResult('Testing recommendations...');
+                const recommendations = weeklyReport.recommendations;
+                addResult('Recommendations generated successfully', 'success', {
+                    critical: recommendations.critical?.length || 0,
+                    important: recommendations.important?.length || 0,
+                    suggested: recommendations.suggested?.length || 0
+                });
+
+                addResult('🎉 All integration tests passed successfully!', 'success');
+
+            } catch (error) {
+                addResult(`Integration test failed: ${error.message}`, 'error');
+                console.error('Integration test error:', error);
+            }
+        }
+
+        function generateSampleData() {
+            // Generate realistic sample data for testing
+            const sessions = [];
+            const assessments = [];
+            
+            // Generate 30 days of data
+            for (let i = 0; i < 30; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                // Generate 1-3 sessions per day
+                const sessionsPerDay = Math.floor(Math.random() * 3) + 1;
+                
+                for (let j = 0; j < sessionsPerDay; j++) {
+                    sessions.push({
+                        date: new Date(date.getTime() + j * 3600000), // Spread sessions throughout day
+                        duration: Math.random() * 3600 + 1800, // 30-90 minutes
+                        type: ['mcq', 'flashcard', 'notes'][Math.floor(Math.random() * 3)],
+                        subject: ['Mathematics', 'Science', 'History', 'English'][Math.floor(Math.random() * 4)],
+                        chapter: `Chapter ${Math.floor(Math.random() * 10) + 1}`,
+                        questionsAttempted: Math.floor(Math.random() * 50) + 10,
+                        correctAnswers: Math.floor(Math.random() * 40) + 5,
+                        accuracy: Math.random() * 40 + 60, // 60-100%
+                        averageResponseTime: Math.random() * 30 + 10, // 10-40 seconds
+                        focusQuality: Math.random() * 30 + 70, // 70-100%
+                        completionRate: Math.random() * 20 + 80 // 80-100%
+                    });
+                }
+                
+                // Generate assessments (less frequent)
+                if (Math.random() > 0.6) { // 40% chance of assessment per day
+                    assessments.push({
+                        date: date,
+                        type: ['practice', 'mock', 'quiz'][Math.floor(Math.random() * 3)],
+                        subject: ['Mathematics', 'Science', 'History', 'English'][Math.floor(Math.random() * 4)],
+                        chapter: `Chapter ${Math.floor(Math.random() * 10) + 1}`,
+                        totalQuestions: Math.floor(Math.random() * 50) + 20,
+                        correctAnswers: Math.floor(Math.random() * 40) + 10,
+                        accuracy: Math.random() * 40 + 60,
+                        timeSpent: Math.random() * 3600 + 1200, // 20-80 minutes
+                        difficulty: ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)],
+                        score: Math.floor(Math.random() * 40) + 60,
+                        maxScore: 100
+                    });
+                }
+            }
+            
+            // Record the data using PerformanceAnalyzer
+            sessions.forEach(session => {
+                window.performanceAnalyzer.recordSession(session);
+            });
+            
+            assessments.forEach(assessment => {
+                window.performanceAnalyzer.recordAssessment(assessment);
+            });
+            
+            addResult(`Generated ${sessions.length} sessions and ${assessments.length} assessments`);
+        }
+
+        // Run the integration test when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(runIntegrationTest, 1000); // Give time for all scripts to load
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics System Tests</title>
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .test-results {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .test-summary {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .pass { color: #10b981; }
+        .fail { color: #ef4444; }
+        .info { color: #3b82f6; }
+        .warning { color: #f59e0b; }
+
+        h1, h2, h3 { color: white; }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+
+        .chart-preview {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Analytics System Test Suite</h1>
+        
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <div class="test-controls">
+                <button class="btn primary" onclick="runAllTests()">Run All Tests</button>
+                <button class="btn" onclick="testPerformanceCalculations()">Test Performance Calculations</button>
+                <button class="btn" onclick="testReportGeneration()">Test Report Generation</button>
+                <button class="btn" onclick="testChartRendering()">Test Chart Rendering</button>
+                <button class="btn" onclick="generateTestData()">Generate Test Data</button>
+                <button class="btn" onclick="clearResults()">Clear Results</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Summary</h2>
+            <div class="test-summary" id="testSummary">
+                <p>Click "Run All Tests" to start testing the analytics system.</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Performance Metrics</h2>
+            <div class="metric-grid" id="metricsDisplay">
+                <div class="metric-card">
+                    <div class="metric-value" id="totalTests">0</div>
+                    <div class="metric-label">Total Tests</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="passedTests">0</div>
+                    <div class="metric-label">Passed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="failedTests">0</div>
+                    <div class="metric-label">Failed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="testDuration">0ms</div>
+                    <div class="metric-label">Test Duration</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div class="test-results" id="testResults">
+                Test results will appear here...\n
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Chart Visualization Tests</h2>
+            <div id="chartTests">
+                <div class="chart-preview">
+                    Chart rendering tests will appear here after running chart tests
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-analyzer.js"></script>
+    <script src="js/report-generator.js"></script>
+    <script src="js/progress-visualizer.js"></script>
+    <script src="js/weakness-identifier.js"></script>
+
+    <script>
+        class AnalyticsTestFramework {
+            constructor() {
+                this.tests = [];
+                this.passed = 0;
+                this.failed = 0;
+                this.startTime = 0;
+            }
+
+            assertTrue(condition, message) {
+                if (condition) {
+                    this.log(`✅ PASS: ${message}`, 'pass');
+                    this.passed++;
+                } else {
+                    this.log(`❌ FAIL: ${message}`, 'fail');
+                    this.failed++;
+                }
+                this.updateMetrics();
+            }
+
+            assertEqual(actual, expected, message) {
+                if (actual === expected) {
+                    this.log(`✅ PASS: ${message}`, 'pass');
+                    this.passed++;
+                } else {
+                    this.log(`❌ FAIL: ${message} (Expected: ${expected}, Actual: ${actual})`, 'fail');
+                    this.failed++;
+                }
+                this.updateMetrics();
+            }
+
+            assertNotNull(value, message) {
+                this.assertTrue(value !== null && value !== undefined, message);
+            }
+
+            assertInRange(value, min, max, message) {
+                this.assertTrue(value >= min && value <= max, `${message} (Value: ${value}, Range: ${min}-${max})`);
+            }
+
+            assertApproximatelyEqual(actual, expected, tolerance, message) {
+                const diff = Math.abs(actual - expected);
+                this.assertTrue(diff <= tolerance, `${message} (Diff: ${diff}, Tolerance: ${tolerance})`);
+            }
+
+            log(message, type = 'info') {
+                const results = document.getElementById('testResults');
+                const className = type === 'pass' ? 'pass' : type === 'fail' ? 'fail' : type === 'warning' ? 'warning' : 'info';
+                results.innerHTML += `<span class="${className}">${message}</span>\n`;
+                results.scrollTop = results.scrollHeight;
+            }
+
+            updateMetrics() {
+                const total = this.passed + this.failed;
+                document.getElementById('totalTests').textContent = total;
+                document.getElementById('passedTests').textContent = this.passed;
+                document.getElementById('failedTests').textContent = this.failed;
+                
+                if (this.startTime > 0) {
+                    const duration = Date.now() - this.startTime;
+                    document.getElementById('testDuration').textContent = `${duration}ms`;
+                }
+            }
+
+            updateSummary() {
+                const summary = document.getElementById('testSummary');
+                const total = this.passed + this.failed;
+                const passRate = total > 0 ? ((this.passed / total) * 100).toFixed(1) : 0;
+                
+                summary.innerHTML = `
+                    <h3>Test Execution Summary</h3>
+                    <p><strong>Total Tests:</strong> ${total}</p>
+                    <p><strong>Passed:</strong> <span class="pass">${this.passed}</span></p>
+                    <p><strong>Failed:</strong> <span class="fail">${this.failed}</span></p>
+                    <p><strong>Pass Rate:</strong> ${passRate}%</p>
+                    <p><strong>Status:</strong> ${this.failed === 0 ? '<span class="pass">All Tests Passed ✅</span>' : '<span class="fail">Some Tests Failed ❌</span>'}</p>
+                `;
+            }
+
+            startTesting() {
+                this.startTime = Date.now();
+                this.passed = 0;
+                this.failed = 0;
+                this.updateMetrics();
+            }
+
+            finishTesting() {
+                this.updateSummary();
+                this.log(`\n🏁 Testing completed. Pass rate: ${((this.passed / (this.passed + this.failed)) * 100).toFixed(1)}%`, 'info');
+            }
+        }
+
+        const testFramework = new AnalyticsTestFramework();
+
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = 'Test results cleared...\n';
+            document.getElementById('testSummary').innerHTML = '<p>Ready to run tests.</p>';
+            document.getElementById('chartTests').innerHTML = '<div class="chart-preview">Chart rendering tests will appear here after running chart tests</div>';
+            testFramework.passed = 0;
+            testFramework.failed = 0;
+            testFramework.updateMetrics();
+        }
+
+        function generateTestData() {
+            testFramework.log('🔄 Generating comprehensive test data...', 'info');
+            
+            try {
+                // Clear existing data
+                if (window.performanceAnalyzer) {
+                    window.performanceAnalyzer.performanceData.sessions = [];
+                    window.performanceAnalyzer.performanceData.assessments = [];
+                }
+
+                const sessions = [];
+                const assessments = [];
+                
+                // Generate 60 days of realistic data
+                for (let i = 0; i < 60; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    
+                    // Generate 1-4 sessions per day with varying patterns
+                    const sessionsPerDay = Math.floor(Math.random() * 4) + 1;
+                    
+                    for (let j = 0; j < sessionsPerDay; j++) {
+                        const sessionDate = new Date(date.getTime() + j * 2 * 3600000); // Spread throughout day
+                        
+                        // Create realistic performance patterns
+                        const baseAccuracy = 70 + Math.sin(i / 10) * 15; // Cyclical improvement
+                        const focusDecline = Math.max(0, 100 - (j * 10)); // Focus decreases with session number
+                        
+                        sessions.push({
+                            id: `session_${i}_${j}`,
+                            date: sessionDate,
+                            duration: Math.random() * 2400 + 1800, // 30-70 minutes
+                            type: ['mcq', 'flashcard', 'notes', 'reading'][Math.floor(Math.random() * 4)],
+                            subject: ['Mathematics', 'Science', 'History', 'English', 'Geography'][Math.floor(Math.random() * 5)],
+                            chapter: `Chapter ${Math.floor(Math.random() * 15) + 1}`,
+                            performance: {
+                                questionsAttempted: Math.floor(Math.random() * 40) + 20,
+                                correctAnswers: Math.floor((baseAccuracy / 100) * (Math.random() * 40 + 20)),
+                                accuracy: Math.max(40, baseAccuracy + (Math.random() - 0.5) * 20),
+                                averageResponseTime: Math.random() * 45 + 15 // 15-60 seconds
+                            },
+                            focusQuality: Math.max(50, focusDecline + (Math.random() - 0.5) * 20),
+                            completionRate: Math.random() * 20 + 80 // 80-100%
+                        });
+                    }
+                    
+                    // Generate assessments (2-3 times per week)
+                    if (i % 3 === 0 || Math.random() > 0.7) {
+                        const assessmentAccuracy = baseAccuracy + (Math.random() - 0.5) * 15;
+                        const totalQuestions = Math.floor(Math.random() * 40) + 30;
+                        const correctAnswers = Math.floor((assessmentAccuracy / 100) * totalQuestions);
+                        
+                        assessments.push({
+                            id: `assessment_${i}`,
+                            date: date,
+                            type: ['practice', 'mock', 'quiz', 'chapter_test'][Math.floor(Math.random() * 4)],
+                            subject: ['Mathematics', 'Science', 'History', 'English', 'Geography'][Math.floor(Math.random() * 5)],
+                            chapter: `Chapter ${Math.floor(Math.random() * 15) + 1}`,
+                            totalQuestions: totalQuestions,
+                            correctAnswers: correctAnswers,
+                            accuracy: assessmentAccuracy,
+                            timeSpent: Math.random() * 3600 + 1800, // 30-90 minutes
+                            difficulty: ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)],
+                            score: correctAnswers,
+                            maxScore: totalQuestions
+                        });
+                    }
+                }
+                
+                // Record the data
+                sessions.forEach(session => {
+                    window.performanceAnalyzer.recordSession(session);
+                });
+                
+                assessments.forEach(assessment => {
+                    window.performanceAnalyzer.recordAssessment(assessment);
+                });
+                
+                testFramework.log(`✅ Generated ${sessions.length} sessions and ${assessments.length} assessments`, 'pass');
+                
+            } catch (error) {
+                testFramework.log(`❌ Error generating test data: ${error.message}`, 'fail');
+            }
+        }
+
+        function runAllTests() {
+            testFramework.log('🚀 Starting Analytics System Test Suite', 'info');
+            testFramework.startTesting();
+            
+            // Generate test data first
+            generateTestData();
+            
+            // Run all test categories
+            testPerformanceCalculations();
+            testReportGeneration();
+            testChartRendering();
+            testDataVisualization();
+            testWeaknessIdentification();
+            testAnalyticsIntegration();
+            
+            testFramework.finishTesting();
+        }
+
+        function testPerformanceCalculations() {
+            testFramework.log('\n📊 Testing Performance Calculation Accuracy', 'info');
+            
+            try {
+                // Test 1: Basic metrics calculation
+                const metrics = window.performanceAnalyzer.calculatePerformanceMetrics('monthly');
+                testFramework.assertNotNull(metrics, 'Performance metrics should be calculated');
+                testFramework.assertNotNull(metrics.overallAccuracy, 'Should calculate overall accuracy');
+                testFramework.assertNotNull(metrics.consistencyScore, 'Should calculate consistency score');
+                testFramework.assertNotNull(metrics.totalStudyTime, 'Should calculate total study time');
+                
+                // Test 2: Accuracy calculation validation
+                testFramework.assertInRange(metrics.overallAccuracy, 0, 100, 'Accuracy should be between 0-100%');
+                testFramework.assertInRange(metrics.consistencyScore, 0, 100, 'Consistency should be between 0-100%');
+                testFramework.assertTrue(metrics.totalStudyTime >= 0, 'Study time should be non-negative');
+                
+                // Test 3: Performance score calculation
+                testFramework.assertNotNull(metrics.performanceScore, 'Should calculate performance score');
+                testFramework.assertInRange(metrics.performanceScore, 0, 100, 'Performance score should be 0-100');
+                testFramework.assertNotNull(metrics.performanceGrade, 'Should assign performance grade');
+                
+                // Test 4: Trend analysis
+                const trends = window.performanceAnalyzer.performTrendAnalysis('monthly');
+                testFramework.assertNotNull(trends, 'Should perform trend analysis');
+                testFramework.assertNotNull(trends.dataPoints, 'Should have trend data points');
+                testFramework.assertTrue(trends.dataPoints.length > 0, 'Should have at least one data point');
+                
+                // Test 5: Comparative analysis
+                const comparison = window.performanceAnalyzer.performComparativeAnalysis({
+                    type: 'period',
+                    periods: [
+                        { timeframe: 'weekly', label: 'This Week' },
+                        { timeframe: 'monthly', label: 'This Month' }
+                    ]
+                });
+                testFramework.assertNotNull(comparison, 'Should perform comparative analysis');
+                testFramework.assertNotNull(comparison.comparisons, 'Should have comparison data');
+                
+                // Test 6: Mathematical accuracy of calculations
+                const testSessions = window.performanceAnalyzer.performanceData.sessions.slice(0, 10);
+                if (testSessions.length > 0) {
+                    const manualStudyTime = testSessions.reduce((sum, s) => sum + (s.duration || 0), 0) / 3600;
+                    const calculatedTime = window.performanceAnalyzer.calculateTotalStudyTime(testSessions);
+                    testFramework.assertApproximatelyEqual(calculatedTime, manualStudyTime, 0.01, 'Study time calculation should be accurate');
+                }
+                
+            } catch (error) {
+                testFramework.log(`❌ Performance calculation test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testReportGeneration() {
+            testFramework.log('\n📋 Testing Report Generation Functionality', 'info');
+            
+            try {
+                // Test 1: Weekly report generation
+                const weeklyReport = window.reportGenerator.generateReport('weekly');
+                testFramework.assertNotNull(weeklyReport, 'Weekly report should be generated');
+                testFramework.assertEqual(weeklyReport.metadata.type, 'weekly', 'Report type should be weekly');
+                testFramework.assertNotNull(weeklyReport.sections, 'Report should have sections');
+                testFramework.assertNotNull(weeklyReport.charts, 'Report should have charts');
+                
+                // Test 2: Monthly report generation
+                const monthlyReport = window.reportGenerator.generateReport('monthly');
+                testFramework.assertNotNull(monthlyReport, 'Monthly report should be generated');
+                testFramework.assertEqual(monthlyReport.metadata.type, 'monthly', 'Report type should be monthly');
+                testFramework.assertTrue(Object.keys(monthlyReport.sections).length >= 5, 'Monthly report should have multiple sections');
+                
+                // Test 3: Report sections validation
+                const requiredSections = ['overview', 'performance', 'trends', 'insights', 'recommendations'];
+                requiredSections.forEach(section => {
+                    testFramework.assertNotNull(weeklyReport.sections[section], `Should have ${section} section`);
+                });
+                
+                // Test 4: Report metadata validation
+                testFramework.assertNotNull(weeklyReport.metadata.generatedAt, 'Should have generation timestamp');
+                testFramework.assertNotNull(weeklyReport.metadata.period, 'Should have period information');
+                testFramework.assertTrue(weeklyReport.metadata.generatedAt instanceof Date, 'Generation time should be Date object');
+                
+                // Test 5: Export functionality
+                const htmlExport = window.reportGenerator.exportReport(weeklyReport, 'html');
+                testFramework.assertNotNull(htmlExport, 'HTML export should work');
+                testFramework.assertTrue(typeof htmlExport === 'string', 'HTML export should be string');
+                testFramework.assertTrue(htmlExport.length > 100, 'HTML export should have substantial content');
+                
+                const jsonExport = window.reportGenerator.exportReport(weeklyReport, 'json');
+                testFramework.assertNotNull(jsonExport, 'JSON export should work');
+                testFramework.assertTrue(typeof jsonExport === 'string', 'JSON export should be string');
+                
+                // Test 6: Report caching
+                const startTime = performance.now();
+                const cachedReport = window.reportGenerator.generateReport('weekly');
+                const cacheTime = performance.now() - startTime;
+                testFramework.assertTrue(cacheTime < 50, 'Cached report generation should be fast');
+                
+            } catch (error) {
+                testFramework.log(`❌ Report generation test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testChartRendering() {
+            testFramework.log('\n📈 Testing Chart Rendering and Data Visualization', 'info');
+            
+            try {
+                const report = window.reportGenerator.generateReport('weekly');
+                const charts = report.charts;
+                
+                // Test 1: Chart existence and structure
+                testFramework.assertNotNull(charts, 'Charts should be generated');
+                testFramework.assertTrue(Object.keys(charts).length > 0, 'Should have at least one chart');
+                
+                // Test 2: Chart data structure validation
+                Object.keys(charts).forEach(chartType => {
+                    const chart = charts[chartType];
+                    testFramework.assertNotNull(chart.title, `${chartType} chart should have title`);
+                    testFramework.assertNotNull(chart.type, `${chartType} chart should have type`);
+                    testFramework.assertNotNull(chart.data, `${chartType} chart should have data`);
+                    testFramework.assertNotNull(chart.data.labels, `${chartType} chart should have labels`);
+                    testFramework.assertNotNull(chart.data.datasets, `${chartType} chart should have datasets`);
+                    testFramework.assertTrue(Array.isArray(chart.data.datasets), `${chartType} datasets should be array`);
+                });
+                
+                // Test 3: Specific chart types
+                if (charts.accuracy) {
+                    testFramework.assertEqual(charts.accuracy.type, 'line', 'Accuracy chart should be line type');
+                    testFramework.assertTrue(charts.accuracy.data.labels.length > 0, 'Accuracy chart should have data points');
+                }
+                
+                if (charts.studyTime) {
+                    testFramework.assertEqual(charts.studyTime.type, 'bar', 'Study time chart should be bar type');
+                    testFramework.assertTrue(charts.studyTime.data.labels.length > 0, 'Study time chart should have data points');
+                }
+                
+                // Test 4: Chart insights
+                Object.keys(charts).forEach(chartType => {
+                    const chart = charts[chartType];
+                    if (chart.insights) {
+                        testFramework.assertNotNull(chart.insights.trend, `${chartType} chart should have trend insight`);
+                        testFramework.assertNotNull(chart.insights.average, `${chartType} chart should have average insight`);
+                    }
+                });
+                
+                // Test 5: Chart rendering preview
+                displayChartPreviews(charts);
+                
+            } catch (error) {
+                testFramework.log(`❌ Chart rendering test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testDataVisualization() {
+            testFramework.log('\n📊 Testing Data Visualization Components', 'info');
+            
+            try {
+                // Test 1: Progress visualizer (if available)
+                if (window.progressVisualizer) {
+                    testFramework.log('Testing ProgressVisualizer component', 'info');
+                    // Add specific progress visualizer tests here
+                    testFramework.assertTrue(true, 'ProgressVisualizer component available');
+                } else {
+                    testFramework.log('ProgressVisualizer not available, skipping tests', 'warning');
+                }
+                
+                // Test 2: Data formatting and validation
+                const metrics = window.performanceAnalyzer.calculatePerformanceMetrics('weekly');
+                
+                // Test number formatting
+                testFramework.assertTrue(!isNaN(metrics.overallAccuracy), 'Accuracy should be a valid number');
+                testFramework.assertTrue(!isNaN(metrics.totalStudyTime), 'Study time should be a valid number');
+                testFramework.assertTrue(!isNaN(metrics.consistencyScore), 'Consistency should be a valid number');
+                
+                // Test 3: Data aggregation accuracy
+                const trends = window.performanceAnalyzer.performTrendAnalysis('weekly');
+                if (trends.dataPoints.length > 1) {
+                    const firstPoint = trends.dataPoints[0];
+                    const lastPoint = trends.dataPoints[trends.dataPoints.length - 1];
+                    
+                    testFramework.assertNotNull(firstPoint.accuracy, 'Data points should have accuracy');
+                    testFramework.assertNotNull(firstPoint.studyTime, 'Data points should have study time');
+                    testFramework.assertTrue(firstPoint.date instanceof Date, 'Data points should have valid dates');
+                }
+                
+            } catch (error) {
+                testFramework.log(`❌ Data visualization test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testWeaknessIdentification() {
+            testFramework.log('\n🎯 Testing Weakness Identification System', 'info');
+            
+            try {
+                if (window.weaknessIdentifier) {
+                    // Test 1: Weakness analysis
+                    const analysis = window.weaknessIdentifier.analyzeWeaknesses();
+                    testFramework.assertNotNull(analysis, 'Weakness analysis should be performed');
+                    
+                    if (!analysis.hasInsufficientData) {
+                        testFramework.assertNotNull(analysis.primaryWeaknesses, 'Should identify primary weaknesses');
+                        testFramework.assertNotNull(analysis.secondaryWeaknesses, 'Should identify secondary weaknesses');
+                        testFramework.assertNotNull(analysis.recommendations, 'Should provide recommendations');
+                        
+                        // Test 2: Weakness prioritization
+                        testFramework.assertNotNull(analysis.overallWeaknessScore, 'Should calculate overall weakness score');
+                        testFramework.assertInRange(analysis.overallWeaknessScore, 0, 100, 'Weakness score should be 0-100');
+                        
+                        // Test 3: Adaptive learning plan
+                        testFramework.assertNotNull(analysis.adaptiveLearning, 'Should generate adaptive learning plan');
+                        testFramework.assertNotNull(analysis.adaptiveLearning.focusAreas, 'Should have focus areas');
+                    } else {
+                        testFramework.log('Insufficient data for weakness analysis', 'warning');
+                    }
+                } else {
+                    testFramework.log('WeaknessIdentifier not available, skipping tests', 'warning');
+                }
+                
+            } catch (error) {
+                testFramework.log(`❌ Weakness identification test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function testAnalyticsIntegration() {
+            testFramework.log('\n🔗 Testing Analytics System Integration', 'info');
+            
+            try {
+                // Test 1: Component availability
+                testFramework.assertNotNull(window.performanceAnalyzer, 'PerformanceAnalyzer should be available');
+                testFramework.assertNotNull(window.reportGenerator, 'ReportGenerator should be available');
+                
+                // Test 2: Data flow between components
+                const metrics = window.performanceAnalyzer.calculatePerformanceMetrics('weekly');
+                const report = window.reportGenerator.generateReport('weekly');
+                
+                testFramework.assertNotNull(metrics, 'Performance metrics should be available for reporting');
+                testFramework.assertNotNull(report, 'Report should be generated from metrics');
+                
+                // Test 3: Cross-component data consistency
+                const reportAccuracy = report.sections.overview.summary.overallAccuracy.value;
+                const metricsAccuracy = metrics.overallAccuracy;
+                testFramework.assertApproximatelyEqual(reportAccuracy, metricsAccuracy, 0.1, 'Accuracy should be consistent across components');
+                
+                // Test 4: Event system integration
+                let eventFired = false;
+                window.addEventListener('sessionCompleted', () => { eventFired = true; });
+                
+                window.performanceAnalyzer.recordSession({
+                    date: new Date(),
+                    duration: 1800,
+                    type: 'test',
+                    subject: 'Test',
+                    accuracy: 85
+                });
+                
+                setTimeout(() => {
+                    testFramework.assertTrue(eventFired, 'Session completion event should be fired');
+                }, 100);
+                
+                // Test 5: Cache invalidation
+                window.performanceAnalyzer.invalidateCache();
+                window.reportGenerator.invalidateCache();
+                testFramework.assertTrue(true, 'Cache invalidation should work without errors');
+                
+            } catch (error) {
+                testFramework.log(`❌ Analytics integration test failed: ${error.message}`, 'fail');
+            }
+        }
+
+        function displayChartPreviews(charts) {
+            const chartContainer = document.getElementById('chartTests');
+            let html = '<h3>Chart Rendering Previews</h3>';
+            
+            Object.keys(charts).forEach(chartType => {
+                const chart = charts[chartType];
+                html += `
+                    <div class="chart-preview">
+                        <h4>${chart.title}</h4>
+                        <p><strong>Type:</strong> ${chart.type}</p>
+                        <p><strong>Data Points:</strong> ${chart.data.labels.length}</p>
+                        <p><strong>Datasets:</strong> ${chart.data.datasets.length}</p>
+                        ${chart.insights ? `<p><strong>Trend:</strong> ${chart.insights.trend || 'N/A'}</p>` : ''}
+                        <small>Labels: ${chart.data.labels.slice(0, 3).join(', ')}${chart.data.labels.length > 3 ? '...' : ''}</small>
+                    </div>
+                `;
+            });
+            
+            chartContainer.innerHTML = html;
+        }
+
+        // Initialize test environment
+        document.addEventListener('DOMContentLoaded', function() {
+            testFramework.log('Analytics System Test Suite initialized', 'info');
+            
+            // Check component availability
+            const components = [
+                'performanceAnalyzer',
+                'reportGenerator',
+                'progressVisualizer',
+                'weaknessIdentifier'
+            ];
+            
+            components.forEach(component => {
+                if (window[component]) {
+                    testFramework.log(`✅ ${component} loaded successfully`, 'pass');
+                } else {
+                    testFramework.log(`⚠️ ${component} not available`, 'warning');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

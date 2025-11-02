@@ -9,6 +9,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/news-integration-service.js"></script>
+  <script src="js/news-display-interface.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="styles/glassmorphism.css" rel="stylesheet">
 
@@ -265,8 +267,8 @@
             </button>
           </div>
           <div>
-            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
-            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+            <div id="user-name" class="font-normal text-sm">User</div>
+            <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
           </div>
         </div>
       </div>
@@ -288,6 +290,10 @@
         <a href="news.html" class="nav-item active flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <i data-lucide="newspaper" class="text-white w-5 h-5"></i>
           <span class="font-normal text-sm">News</span>
+        </a>
+        <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Community</span>
         </a>
         <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <div
@@ -354,229 +360,15 @@
 
 
         <!-- News Grid -->
-        <section aria-label="News cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-          <!-- News Card 1 -->
-          <article
-            class="glass-card-interactive rounded-2xl overflow-hidden group cursor-pointer"
-            onclick="viewNews(1)">
-            <div class="h-48 bg-gradient-to-br from-blue-600/20 to-purple-600/20 relative overflow-hidden">
-              <img src="image/polity.png" alt="Supreme Court News" class="w-full h-full object-cover"
-                onerror="this.style.display='none';">
-              <div class="absolute top-3 right-3">
-                <button
-                  class="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition"
-                  title="Bookmark" onclick="event.stopPropagation(); toggleBookmark(1)">
-                  <i data-lucide="bookmark" class="w-4 h-4 text-white/80"></i>
-                </button>
-              </div>
-              <div class="absolute bottom-3 left-3">
-                <span class="px-2.5 py-1 rounded-full bg-yellow-500/90 text-black text-xs font-medium">GS-II</span>
-              </div>
+        <section aria-label="News cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr" id="news-grid">
+          <!-- Empty state - news will be loaded dynamically -->
+          <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
+              <i data-lucide="newspaper" class="w-8 h-8 text-white/50"></i>
             </div>
-            <div class="p-6">
-              <h3
-                class="news-card-title text-lg font-medium leading-snug mb-3 group-hover:text-[var(--teal-primary)] transition-colors">
-                Supreme Court Landmark Judgment on Digital Rights</h3>
-              <p class="news-card-description text-sm text-white/70 mb-4 line-clamp-2">The Supreme Court delivered a
-                landmark judgment on digital rights, emphasizing privacy and data protection under the Constitution...
-              </p>
-              <div class="flex items-center justify-between text-xs text-white/60">
-                <div class="flex items-center gap-2">
-                  <span>Indian Express</span>
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="flex items-center gap-4">
-                  <span>Relevance: <span class="text-white font-medium">5/5</span></span>
-                  <span>2 hours ago</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- News Card 2 -->
-          <article
-            class="glass-card-interactive rounded-2xl overflow-hidden group cursor-pointer"
-            onclick="viewNews(2)">
-            <div class="h-48 bg-gradient-to-br from-green-600/20 to-blue-600/20 relative overflow-hidden">
-              <img src="image/economics.png" alt="Economic Policy News" class="w-full h-full object-cover"
-                onerror="this.style.display='none';">
-              <div class="absolute top-3 right-3">
-                <button
-                  class="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition"
-                  title="Bookmark" onclick="event.stopPropagation(); toggleBookmark(2)">
-                  <i data-lucide="bookmark" class="w-4 h-4 text-white/80"></i>
-                </button>
-              </div>
-              <div class="absolute bottom-3 left-3">
-                <span class="px-2.5 py-1 rounded-full bg-green-500/90 text-black text-xs font-medium">GS-III</span>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3
-                class="text-lg font-medium leading-snug mb-3 group-hover:text-[var(--teal-primary)] transition-colors">
-                New Economic Policy Framework Announced</h3>
-              <p class="text-sm text-white/70 mb-4 line-clamp-2">Government unveils comprehensive economic reforms
-                focusing on digital infrastructure and sustainable development goals...</p>
-              <div class="flex items-center justify-between text-xs text-white/60">
-                <div class="flex items-center gap-2">
-                  <span>The Hindu</span>
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="flex items-center gap-4">
-                  <span>Relevance: <span class="text-white font-medium">4/5</span></span>
-                  <span>4 hours ago</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- News Card 3 -->
-          <article
-            class="glass-card-interactive rounded-2xl overflow-hidden group cursor-pointer"
-            onclick="viewNews(3)">
-            <div class="h-48 bg-gradient-to-br from-purple-600/20 to-pink-600/20 relative overflow-hidden">
-              <img src="image/environment.png" alt="Climate Change News" class="w-full h-full object-cover"
-                onerror="this.style.display='none';">
-              <div class="absolute top-3 right-3">
-                <button
-                  class="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition"
-                  title="Bookmark" onclick="event.stopPropagation(); toggleBookmark(3)">
-                  <i data-lucide="bookmark" class="w-4 h-4 text-white/80"></i>
-                </button>
-              </div>
-              <div class="absolute bottom-3 left-3">
-                <span class="px-2.5 py-1 rounded-full bg-emerald-500/90 text-black text-xs font-medium">GS-III</span>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3
-                class="text-lg font-medium leading-snug mb-3 group-hover:text-[var(--teal-primary)] transition-colors">
-                Climate Change Action Plan 2024</h3>
-              <p class="text-sm text-white/70 mb-4 line-clamp-2">India launches ambitious climate action plan with focus
-                on renewable energy and carbon neutrality goals...</p>
-              <div class="flex items-center justify-between text-xs text-white/60">
-                <div class="flex items-center gap-2">
-                  <span>Times of India</span>
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="flex items-center gap-4">
-                  <span>Relevance: <span class="text-white font-medium">4/5</span></span>
-                  <span>6 hours ago</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- News Card 4 -->
-          <article
-            class="glass-card-interactive rounded-2xl overflow-hidden group cursor-pointer"
-            onclick="viewNews(4)">
-            <div class="h-48 bg-gradient-to-br from-orange-600/20 to-red-600/20 relative overflow-hidden">
-              <img src="image/history.png" alt="International Relations News" class="w-full h-full object-cover"
-                onerror="this.style.display='none';">
-              <div class="absolute top-3 right-3">
-                <button
-                  class="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition"
-                  title="Bookmark" onclick="event.stopPropagation(); toggleBookmark(4)">
-                  <i data-lucide="bookmark" class="w-4 h-4 text-white/80"></i>
-                </button>
-              </div>
-              <div class="absolute bottom-3 left-3">
-                <span class="px-2.5 py-1 rounded-full bg-blue-500/90 text-white text-xs font-medium">GS-II</span>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3
-                class="text-lg font-medium leading-snug mb-3 group-hover:text-[var(--teal-primary)] transition-colors">
-                India's G20 Presidency Achievements</h3>
-              <p class="text-sm text-white/70 mb-4 line-clamp-2">Comprehensive review of India's successful G20
-                presidency and its impact on global governance...</p>
-              <div class="flex items-center justify-between text-xs text-white/60">
-                <div class="flex items-center gap-2">
-                  <span>Economic Times</span>
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="flex items-center gap-4">
-                  <span>Relevance: <span class="text-white font-medium">5/5</span></span>
-                  <span>8 hours ago</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- News Card 5 -->
-          <article
-            class="glass-card-interactive rounded-2xl overflow-hidden group cursor-pointer"
-            onclick="viewNews(5)">
-            <div class="h-48 bg-gradient-to-br from-teal-600/20 to-cyan-600/20 relative overflow-hidden">
-              <img src="image/geography.png" alt="Technology News" class="w-full h-full object-cover"
-                onerror="this.style.display='none';">
-              <div class="absolute top-3 right-3">
-                <button
-                  class="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition"
-                  title="Bookmark" onclick="event.stopPropagation(); toggleBookmark(5)">
-                  <i data-lucide="bookmark" class="w-4 h-4 text-white/80"></i>
-                </button>
-              </div>
-              <div class="absolute bottom-3 left-3">
-                <span class="px-2.5 py-1 rounded-full bg-purple-500/90 text-white text-xs font-medium">GS-III</span>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3
-                class="text-lg font-medium leading-snug mb-3 group-hover:text-[var(--teal-primary)] transition-colors">
-                Digital India 2.0: Next Phase of Transformation</h3>
-              <p class="text-sm text-white/70 mb-4 line-clamp-2">Government launches Digital India 2.0 with focus on AI,
-                blockchain, and quantum computing initiatives...</p>
-              <div class="flex items-center justify-between text-xs text-white/60">
-                <div class="flex items-center gap-2">
-                  <span>Business Standard</span>
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="flex items-center gap-4">
-                  <span>Relevance: <span class="text-white font-medium">4/5</span></span>
-                  <span>10 hours ago</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- News Card 6 -->
-          <article
-            class="glass-card-interactive rounded-2xl overflow-hidden group cursor-pointer"
-            onclick="viewNews(6)">
-            <div class="h-48 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 relative overflow-hidden">
-              <img src="image/mock-test.png" alt="Education Policy News" class="w-full h-full object-cover"
-                onerror="this.style.display='none';">
-              <div class="absolute top-3 right-3">
-                <button
-                  class="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/70 transition"
-                  title="Bookmark" onclick="event.stopPropagation(); toggleBookmark(6)">
-                  <i data-lucide="bookmark" class="w-4 h-4 text-white/80"></i>
-                </button>
-              </div>
-              <div class="absolute bottom-3 left-3">
-                <span class="px-2.5 py-1 rounded-full bg-orange-500/90 text-black text-xs font-medium">GS-I</span>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3
-                class="text-lg font-medium leading-snug mb-3 group-hover:text-[var(--teal-primary)] transition-colors">
-                National Education Policy Implementation Update</h3>
-              <p class="text-sm text-white/70 mb-4 line-clamp-2">Progress report on National Education Policy
-                implementation across states and union territories...</p>
-              <div class="flex items-center justify-between text-xs text-white/60">
-                <div class="flex items-center gap-2">
-                  <span>Hindustan Times</span>
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="flex items-center gap-4">
-                  <span>Relevance: <span class="text-white font-medium">3/5</span></span>
-                  <span>12 hours ago</span>
-                </div>
-              </div>
-            </div>
-          </article>
+            <h3 class="text-lg font-medium text-white mb-2">No News Available</h3>
+            <p class="text-white/60 text-sm max-w-md">News articles will appear here when available. Check back later for the latest UPSC-relevant updates.</p>
+          </div>
         </section>
 
 
@@ -1054,6 +846,16 @@
     // Initialize profile manager for cross-page synchronization
     if (typeof ProfileManager !== 'undefined') {
       window.profileManager = new ProfileManager();
+    }
+
+    // Initialize news display interface
+    if (typeof NewsDisplayInterface !== 'undefined') {
+      window.newsDisplayInterface = new NewsDisplayInterface({
+        containerId: 'main-content',
+        autoRefresh: true,
+        refreshInterval: 300000, // 5 minutes
+        itemsPerPage: 12
+      });
     }
 
     if (window.iconManager) window.iconManager.refresh();

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ Analysis Mode Integration Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="glass-card p-8 max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-white mb-8 text-center">MCQ Analysis Mode Integration Test</h1>
+            
+            <!-- Test MCQ Question -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Sample MCQ Question</h2>
+                <div class="text-white space-y-4">
+                    <p><strong>Question:</strong> Which of the following is the highest peak in India?</p>
+                    <div class="ml-4">
+                        <p>A) Mount Everest</p>
+                        <p>B) Kanchenjunga</p>
+                        <p>C) Nanda Devi</p>
+                        <p>D) K2</p>
+                    </div>
+                    <p><strong>Your Answer:</strong> <span id="user-answer">A</span></p>
+                    <p><strong>Correct Answer:</strong> <span id="correct-answer">B</span></p>
+                </div>
+            </div>
+
+            <!-- Test Controls -->
+            <div class="flex gap-4 mb-8">
+                <button id="test-mcq-analysis" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Analyze MCQ
+                </button>
+                <button id="test-mode-switching" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Mode Switching
+                </button>
+                <button id="test-prompt-generation" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Prompt Generation
+                </button>
+            </div>
+
+            <!-- Results Display -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Test Results</h2>
+                <div id="test-results" class="text-white space-y-4"></div>
+            </div>
+
+            <!-- MCQ Analysis Output -->
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">MCQ Analysis Output</h2>
+                <div id="analysis-output" class="text-white space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Required Scripts -->
+    <script src="js/assistant-mode-manager.js"></script>
+    <script src="js/mcq-analysis-mode.js"></script>
+
+    <script>
+        class MCQAnalysisIntegrationTest {
+            constructor() {
+                this.modeManager = null;
+                this.mcqAnalysis = null;
+                this.testResults = [];
+                this.setupTest();
+            }
+
+            setupTest() {
+                try {
+                    // Initialize components
+                    this.modeManager = new AssistantModeManager();
+                    this.mcqAnalysis = new MCQAnalysisMode(this.modeManager);
+                    
+                    this.logResult('Initialization', 'Components initialized successfully', 'success');
+                    this.setupEventListeners();
+                } catch (error) {
+                    this.logResult('Initialization', `Failed to initialize: ${error.message}`, 'error');
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('test-mcq-analysis').addEventListener('click', () => {
+                    this.testMCQAnalysis();
+                });
+
+                document.getElementById('test-mode-switching').addEventListener('click', () => {
+                    this.testModeSwitching();
+                });
+
+                document.getElementById('test-prompt-generation').addEventListener('click', () => {
+                    this.testPromptGeneration();
+                });
+            }
+
+            async testMCQAnalysis() {
+                this.clearResults();
+                this.logResult('MCQ Analysis', 'Starting MCQ analysis test...', 'info');
+
+                const mcqData = {
+                    id: 'test-mcq-001',
+                    question: "Which of the following is the highest peak in India?",
+                    options: {
+                        A: "Mount Everest",
+                        B: "Kanchenjunga", 
+                        C: "Nanda Devi",
+                        D: "K2"
+                    },
+                    correctAnswer: "B",
+                    userAnswer: "A",
+                    subject: "Geography",
+                    difficulty: "Medium"
+                };
+
+                try {
+                    // Test data validation
+                    const validation = this.mcqAnalysis.validateMCQData(mcqData);
+                    if (validation.isValid) {
+                        this.logResult('MCQ Analysis', 'MCQ data validation: PASSED', 'success');
+                    } else {
+                        this.logResult('MCQ Analysis', `MCQ data validation: FAILED - ${validation.errors.join(', ')}`, 'error');
+                        return;
+                    }
+
+                    // Test prompt generation
+                    const prompt = this.mcqAnalysis.generateMCQPrompt(mcqData);
+                    if (prompt && prompt.includes(mcqData.question)) {
+                        this.logResult('MCQ Analysis', 'Prompt generation: PASSED', 'success');
+                        this.displayPrompt(prompt);
+                    } else {
+                        this.logResult('MCQ Analysis', 'Prompt generation: FAILED', 'error');
+                    }
+
+                    // Test response structuring with mock response
+                    const mockAIResponse = `
+✅ CORRECT ANSWER EXPLANATION
+The correct answer is B) Kanchenjunga. Kanchenjunga is the highest peak entirely within India's borders at 8,586 meters. While Mount Everest is higher, it lies on the border between Nepal and Tibet, and K2 is in Pakistan-administered Kashmir.
+
+❌ INCORRECT OPTIONS ANALYSIS
+A) Mount Everest - While this is the world's highest peak, it's not entirely within India's borders
+C) Nanda Devi - This is a significant peak in Uttarakhand but much lower than Kanchenjunga at 7,816 meters
+D) K2 - This is the world's second-highest peak but located in Pakistan-administered Kashmir
+
+📚 CONCEPT CLARIFICATION
+Kanchenjunga, meaning "Five Treasures of Snow," is located on the border between Nepal and the Indian state of Sikkim. It's the third-highest mountain in the world and the highest peak entirely within or on the border of India.
+
+🎯 EXAM STRATEGY
+Remember the distinction between "highest peak in the world" (Everest), "highest peak in India" (Kanchenjunga), and "highest peak entirely in India" (also Kanchenjunga). This type of geographical distinction is common in UPSC questions.
+
+🔗 RELATED TOPICS
+Study the major mountain ranges of India, the Himalayan system, and the geography of border states like Sikkim and Uttarakhand.
+                    `;
+
+                    const structuredResponse = this.mcqAnalysis.structureMCQResponse(mockAIResponse, mcqData);
+                    if (structuredResponse && structuredResponse.questionSummary) {
+                        this.logResult('MCQ Analysis', 'Response structuring: PASSED', 'success');
+                        this.displayAnalysis(structuredResponse);
+                    } else {
+                        this.logResult('MCQ Analysis', 'Response structuring: FAILED', 'error');
+                    }
+
+                    // Test formatted display
+                    const formattedHTML = this.mcqAnalysis.formatForDisplay(structuredResponse);
+                    if (formattedHTML && formattedHTML.includes('mcq-analysis-container')) {
+                        this.logResult('MCQ Analysis', 'HTML formatting: PASSED', 'success');
+                    } else {
+                        this.logResult('MCQ Analysis', 'HTML formatting: FAILED', 'error');
+                    }
+
+                } catch (error) {
+                    this.logResult('MCQ Analysis', `Test failed: ${error.message}`, 'error');
+                }
+            }
+
+            testModeSwitching() {
+                this.clearResults();
+                this.logResult('Mode Switching', 'Testing mode switching functionality...', 'info');
+
+                try {
+                    // Test initial mode
+                    const initialMode = this.modeManager.getCurrentMode();
+                    this.logResult('Mode Switching', `Initial mode: ${initialMode.mode}`, 'info');
+
+                    // Test switch to MCQ mode
+                    const mcqResult = this.modeManager.setMode('mcq', {
+                        analysisType: 'test',
+                        questionId: 'test-123'
+                    });
+
+                    if (mcqResult.success && this.modeManager.currentMode === 'mcq') {
+                        this.logResult('Mode Switching', 'Switch to MCQ mode: PASSED', 'success');
+                    } else {
+                        this.logResult('Mode Switching', 'Switch to MCQ mode: FAILED', 'error');
+                    }
+
+                    // Test MCQ mode configuration
+                    const mcqConfig = this.modeManager.getCurrentMode();
+                    if (mcqConfig.config && mcqConfig.config.name === 'MCQ Analysis') {
+                        this.logResult('Mode Switching', 'MCQ mode configuration: PASSED', 'success');
+                    } else {
+                        this.logResult('Mode Switching', 'MCQ mode configuration: FAILED', 'error');
+                    }
+
+                    // Test context preservation
+                    if (mcqConfig.context && mcqConfig.context.analysisType === 'test') {
+                        this.logResult('Mode Switching', 'Context preservation: PASSED', 'success');
+                    } else {
+                        this.logResult('Mode Switching', 'Context preservation: FAILED', 'error');
+                    }
+
+                    // Test switch back to general mode
+                    const generalResult = this.modeManager.setMode('general');
+                    if (generalResult.success && this.modeManager.currentMode === 'general') {
+                        this.logResult('Mode Switching', 'Switch back to general mode: PASSED', 'success');
+                    } else {
+                        this.logResult('Mode Switching', 'Switch back to general mode: FAILED', 'error');
+                    }
+
+                    // Test mode history
+                    const history = this.modeManager.getModeHistory();
+                    if (Array.isArray(history) && history.length > 0) {
+                        this.logResult('Mode Switching', 'Mode history tracking: PASSED', 'success');
+                    } else {
+                        this.logResult('Mode Switching', 'Mode history tracking: FAILED', 'error');
+                    }
+
+                } catch (error) {
+                    this.logResult('Mode Switching', `Test failed: ${error.message}`, 'error');
+                }
+            }
+
+            testPromptGeneration() {
+                this.clearResults();
+                this.logResult('Prompt Generation', 'Testing prompt generation...', 'info');
+
+                const mcqData = {
+                    question: "What is the capital of France?",
+                    options: {
+                        A: "London",
+                        B: "Berlin",
+                        C: "Paris",
+                        D: "Madrid"
+                    },
+                    correctAnswer: "C",
+                    userAnswer: "B",
+                    subject: "Geography"
+                };
+
+                try {
+                    // Test MCQ analysis prompt
+                    const mcqPrompt = this.mcqAnalysis.generateMCQPrompt(mcqData);
+                    if (mcqPrompt && mcqPrompt.includes(mcqData.question) && mcqPrompt.includes('CORRECT ANSWER EXPLANATION')) {
+                        this.logResult('Prompt Generation', 'MCQ analysis prompt: PASSED', 'success');
+                    } else {
+                        this.logResult('Prompt Generation', 'MCQ analysis prompt: FAILED', 'error');
+                    }
+
+                    // Test mode manager prompt
+                    this.modeManager.setMode('mcq');
+                    const modePrompt = this.modeManager.generateMCQAnalysisPrompt(mcqData);
+                    if (modePrompt && modePrompt.includes('✅ CORRECT ANSWER EXPLANATION')) {
+                        this.logResult('Prompt Generation', 'Mode manager MCQ prompt: PASSED', 'success');
+                    } else {
+                        this.logResult('Prompt Generation', 'Mode manager MCQ prompt: FAILED', 'error');
+                    }
+
+                    // Test general prompt template
+                    const generalPrompt = this.modeManager.getPromptTemplate("Test question");
+                    if (generalPrompt && generalPrompt.includes("Test question")) {
+                        this.logResult('Prompt Generation', 'General prompt template: PASSED', 'success');
+                    } else {
+                        this.logResult('Prompt Generation', 'General prompt template: FAILED', 'error');
+                    }
+
+                    this.displayPrompt(modePrompt);
+
+                } catch (error) {
+                    this.logResult('Prompt Generation', `Test failed: ${error.message}`, 'error');
+                }
+            }
+
+            displayPrompt(prompt) {
+                const outputDiv = document.getElementById('analysis-output');
+                outputDiv.innerHTML = `
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-2">Generated Prompt:</h3>
+                        <pre class="text-sm text-gray-300 whitespace-pre-wrap">${this.escapeHtml(prompt)}</pre>
+                    </div>
+                `;
+            }
+
+            displayAnalysis(analysis) {
+                const outputDiv = document.getElementById('analysis-output');
+                outputDiv.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-2">Question Summary:</h3>
+                            <p><strong>Question:</strong> ${analysis.questionSummary.question}</p>
+                            <p><strong>Your Answer:</strong> ${analysis.questionSummary.userAnswer}</p>
+                            <p><strong>Correct Answer:</strong> ${analysis.questionSummary.correctAnswer}</p>
+                            <p><strong>Result:</strong> <span class="${analysis.questionSummary.isCorrect ? 'text-green-400' : 'text-red-400'}">${analysis.questionSummary.isCorrect ? 'Correct' : 'Incorrect'}</span></p>
+                        </div>
+                        
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-2">Analysis Sections:</h3>
+                            <ul class="space-y-1">
+                                <li>✅ Correct Answer: ${analysis.correctAnswerExplanation.content ? 'Available' : 'Missing'}</li>
+                                <li>❌ Incorrect Options: ${analysis.incorrectOptionsAnalysis.content ? 'Available' : 'Missing'}</li>
+                                <li>📚 Concepts: ${analysis.conceptClarification.content ? 'Available' : 'Missing'}</li>
+                                <li>🎯 Strategy: ${analysis.examStrategy.content ? 'Available' : 'Missing'}</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-gray-800 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-2">Study Recommendations:</h3>
+                            <div class="space-y-2">
+                                <div><strong>Immediate Actions:</strong> ${analysis.studyRecommendations.immediateActions.length} items</div>
+                                <div><strong>Long-term Study:</strong> ${analysis.studyRecommendations.longTermStudy.length} items</div>
+                                <div><strong>Practice Areas:</strong> ${analysis.studyRecommendations.practiceAreas.length} areas</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            logResult(category, message, status) {
+                const result = { category, message, status, timestamp: new Date().toISOString() };
+                this.testResults.push(result);
+                this.updateResultsDisplay();
+            }
+
+            clearResults() {
+                this.testResults = [];
+                this.updateResultsDisplay();
+                document.getElementById('analysis-output').innerHTML = '';
+            }
+
+            updateResultsDisplay() {
+                const resultsDiv = document.getElementById('test-results');
+                resultsDiv.innerHTML = this.testResults.map(result => {
+                    const statusColor = result.status === 'success' ? 'text-green-400' : 
+                                       result.status === 'error' ? 'text-red-400' : 'text-blue-400';
+                    return `<div class="${statusColor}"><strong>${result.category}:</strong> ${result.message}</div>`;
+                }).join('');
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize test when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new MCQAnalysisIntegrationTest();
+        });
+    </script>
+</body>
+</html>

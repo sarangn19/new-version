@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Revision Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark-1: #1F1F1F;
+            --bg-dark-2: #1A1A1A;
+            --teal-primary: #2C7A7B;
+            --teal-light: #84D0F7;
+
+            /* iOS-style glassmorphism */
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-bg-hover: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-border-hover: rgba(255, 255, 255, 0.25);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --glass-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.5);
+            --glass-blur: 20px;
+
+            /* iOS card styles */
+            --card-bg: rgba(42, 42, 42, 0.6);
+            --card-bg-hover: rgba(50, 50, 50, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark-1);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ensure no stray content appears */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Hide any potential stray text in top-left corner */
+        body>*:first-child::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--bg-dark-1);
+            z-index: 1000;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark-2);
+        }
+
+        /* iOS-style glassmorphism cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .glass-card:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-hover);
+            box-shadow: var(--glass-shadow-hover);
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .priority-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .priority-card:hover {
+            background: var(--card-bg-hover);
+            border-color: var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            transform: translateY(-3px) scale(1.005);
+        }
+
+        /* iOS-style inner cards */
+        .inner-card {
+            background: rgba(26, 26, 26, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .inner-card:hover {
+            background: rgba(26, 26, 26, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .page-transition {
+            animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Sidebar styles */
+        .glass-sidebar {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .scroll-hidden::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scroll-hidden {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .nav-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-item:hover::before {
+            left: 100%;
+        }
+
+        .nav-item:hover {
+            transform: translateX(4px);
+            background: rgba(42, 42, 42, 0.8);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(44, 122, 123, 0.2), rgba(42, 42, 42, 0.9));
+            border-left: 3px solid var(--teal-primary);
+        }
+
+        /* Progress and completion animations */
+        .progress-update {
+            animation: pulseGreen 0.6s ease-in-out;
+        }
+
+        @keyframes pulseGreen {
+            0% {
+                background-color: rgba(34, 197, 94, 0.1);
+            }
+
+            50% {
+                background-color: rgba(34, 197, 94, 0.2);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        .card-dismiss {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .card-dismiss:hover {
+            opacity: 0.7;
+            transform: scale(0.98);
+        }
+
+        /* Info tooltips */
+        .info-tooltip {
+            position: relative;
+        }
+
+        .info-tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
+        }
+
+        .info-tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+            margin-bottom: -5px;
+        }
+
+        /* Performance indicator styles */
+        .performance-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .performance-indicator.improving {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .performance-indicator.needs-work {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .performance-indicator.due-review {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-white antialiased scroll-hidden">
+    <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar"
+            class="hidden lg:flex flex-col w-[280px] glass-sidebar p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+            <!-- Profile and Notifications -->
+            <div class="flex items-center justify-between px-2 mb-10">
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <a href="profile.html"
+                            class="user-avatar block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+                            <div id="user-initials" class="user-initials text-lg font-medium text-black">JD</div>
+                        </a>
+                        <!-- Notification badge -->
+                        <button id="notification-btn" aria-label="Notifications"
+                            class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+                            <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div>
+                        <div id="user-name" class="font-normal text-sm">User</div>
+                        <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="space-y-1.5 pt-10">
+                <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+                </a>
+                <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Learn</span>
+                </a>
+                <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Statistics</span>
+                </a>
+                <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">News</span>
+                </a>
+                <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Community</span>
+                </a>
+                <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <div
+                        class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">
+                        AI</div>
+                    <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main id="main-content" role="main" tabindex="-1"
+            class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden page-transition">
+            <!-- Back Button and Header -->
+            <div class="flex items-center space-x-4 mb-8">
+                <button onclick="goBack()"
+                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-200 group">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-white/70 group-hover:text-white"></i>
+                </button>
+                <div>
+                    <h1 class="text-2xl lg:text-3xl font-medium text-white mb-1">My Personalized Study Plan</h1>
+                    <p class="text-base text-white/60">Welcome back! Your daily revision is ready. Let's focus on the
+                        right areas.</p>
+                </div>
+            </div>
+
+            <!-- Motivational Banner -->
+            <div class="priority-card p-4 mb-6 border border-blue-500/20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 rounded-full bg-blue-500/15 flex items-center justify-center">
+                        <i data-lucide="zap" class="text-blue-400 w-3.5 h-3.5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-medium text-white">Consistency brings results—let's make today's
+                            revision count!</h3>
+                        <p class="text-sm text-white/60">Every practice session moves you closer to mastery.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layout Grid: 2/3 for High Priority, 1/3 for Focus Areas/Tools -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <!-- COLUMN 1: High-Priority Revision (Wider Column) -->
+                <div class="lg:col-span-2 space-y-5">
+                    <div class="flex items-center space-x-3 mb-5">
+                        <div class="w-7 h-7 rounded-full bg-[#F7B84B]/15 flex items-center justify-center">
+                            <i data-lucide="zap" class="text-[#F7B84B] w-4 h-4"></i>
+                        </div>
+                        <h2 class="text-lg font-medium text-white">High-Priority Revision</h2>
+                    </div>
+
+                    <!-- Needs Immediate Practice (Red Zone) -->
+                    <div class="priority-card p-6 border border-red-500/20">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-6 h-6 rounded-full bg-red-500/15 flex items-center justify-center">
+                                <i data-lucide="alert-triangle" class="text-red-400 w-3.5 h-3.5"></i>
+                            </div>
+                            <h3 class="text-base font-medium text-red-400">Needs Immediate Practice</h3>
+                        </div>
+
+                        <!-- Module: Constitutional Amendments -->
+                        <div class="inner-card p-4 mb-4" id="amendments-card">
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="text-base font-medium text-white">Constitutional Amendments (42nd & 44th)
+                                </h4>
+                                <button onclick="dismissCard('amendments-card')"
+                                    class="text-white/40 hover:text-white/60 transition-colors" title="Remind me later">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="w-4 h-4 rounded-full bg-red-500/20 flex items-center justify-center">
+                                    <i data-lucide="flag" class="text-red-400 w-2.5 h-2.5"></i>
+                                </div>
+                                <span class="text-xs text-red-400 font-medium">Topics flagged for revision</span>
+                            </div>
+                            <p class="text-sm text-white/60 mb-3">Strengthen your concepts and master key differences
+                                with focused practice.</p>
+                            <div class="flex flex-col sm:flex-row gap-3 mb-3">
+                                <button onclick="startTargetedQuiz('amendments')"
+                                    class="flex-1 bg-[var(--teal-primary)] hover:bg-[#2d8a8b] text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center">
+                                    <i data-lucide="zap" class="w-4 h-4 mr-2"></i>
+                                    Start Quiz Now
+                                </button>
+                                <button onclick="reviewNotes('amendments')"
+                                    class="flex-1 bg-white/5 hover:bg-white/10 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center border border-white/10">
+                                    <i data-lucide="book-open" class="w-4 h-4 mr-2"></i>
+                                    Review Notes
+                                </button>
+                            </div>
+                            <div class="text-xs text-white/50 text-center">
+                                Ready for a quick challenge? Refresh your memory and boost your confidence.
+                            </div>
+                        </div>
+
+                        <!-- Module: Constitutional Bodies -->
+                        <div class="inner-card p-4" id="bodies-card">
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="text-base font-medium text-white">Constitutional Bodies</h4>
+                                <button onclick="dismissCard('bodies-card')"
+                                    class="text-white/40 hover:text-white/60 transition-colors" title="Remind me later">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="w-4 h-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                                    <i data-lucide="lightbulb" class="text-yellow-400 w-2.5 h-2.5"></i>
+                                </div>
+                                <span class="text-xs text-yellow-400 font-medium">Suggested for review</span>
+                            </div>
+                            <p class="text-sm text-white/60 mb-3">Reinforce your understanding of commissions and
+                                appointments.</p>
+                            <div class="flex flex-col sm:flex-row gap-3 mb-3">
+                                <button onclick="reviewNotes('bodies')"
+                                    class="flex-1 bg-white/5 hover:bg-white/10 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center border border-white/10">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>
+                                    Review Notes
+                                </button>
+                                <button onclick="dismissCard('bodies-card', true)"
+                                    class="px-4 py-2.5 text-white/60 hover:text-white/80 text-sm transition-colors">
+                                    Not now
+                                </button>
+                            </div>
+                            <div class="text-xs text-white/50 text-center">
+                                Take a moment to recap and solidify your foundation.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Due for Spaced Review (Yellow Zone) -->
+                    <div class="priority-card p-6 border border-yellow-500/20">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-6 h-6 rounded-full bg-yellow-500/15 flex items-center justify-center">
+                                <i data-lucide="clock" class="text-yellow-400 w-3.5 h-3.5"></i>
+                            </div>
+                            <h3 class="text-base font-medium text-yellow-400">Due for Spaced Review</h3>
+                        </div>
+
+                        <!-- Module: Mughal Empire - Administration -->
+                        <div class="inner-card p-4" id="mughal-card">
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="text-base font-medium text-white">Mughal Empire - Administration</h4>
+                                <button onclick="dismissCard('mughal-card')"
+                                    class="text-white/40 hover:text-white/60 transition-colors" title="Remind me later">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="w-4 h-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                                    <i data-lucide="refresh-cw" class="text-yellow-400 w-2.5 h-2.5"></i>
+                                </div>
+                                <span class="text-xs text-yellow-400 font-medium">Due for a refresher session</span>
+                            </div>
+                            <p class="text-sm text-white/60 mb-3">Keep your learning sharp and build long-term
+                                retention.</p>
+                            <div class="flex flex-col sm:flex-row gap-3 mb-3">
+                                <button onclick="navigateToRevision()"
+                                    class="flex-1 bg-[#F7B84B] hover:bg-[#f5b041] text-black font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center">
+                                    <i data-lucide="zap" class="w-4 h-4 mr-2"></i>
+                                    Start Now
+                                </button>
+                                <button onclick="dismissCard('mughal-card', true)"
+                                    class="px-4 py-2.5 text-white/60 hover:text-white/80 text-sm transition-colors">
+                                    Later
+                                </button>
+                            </div>
+                            <div class="text-xs text-white/50 text-center">
+                                Quick revision keeps your progress on track!
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- COLUMN 2: Focus Areas & Tools (Narrower Column) -->
+                <div class="lg:col-span-1 space-y-5">
+                    <!-- Recommended Focus Areas Table -->
+                    <div class="priority-card p-6">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-7 h-7 rounded-full bg-[#84D0F7]/15 flex items-center justify-center">
+                                <i data-lucide="target" class="text-[#84D0F7] w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-lg font-medium text-white">Focus Areas</h2>
+                        </div>
+                        <p class="text-sm text-white/60 mb-4">Prioritize your study materials and notes.</p>
+
+                        <div class="space-y-2.5">
+                            <div class="inner-card p-3 cursor-pointer hover:bg-white/5 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-white">Indian Polity</span>
+                                        <div class="text-xs text-white/50 mt-1">Constitutional Bodies</div>
+                                    </div>
+                                    <span class="performance-indicator needs-work">
+                                        <i data-lucide="alert-circle" class="w-3 h-3 mr-1"></i>
+                                        Priority
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="inner-card p-3 cursor-pointer hover:bg-white/5 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-white">Modern History</span>
+                                        <div class="text-xs text-white/50 mt-1">Revolt of 1857</div>
+                                    </div>
+                                    <span class="performance-indicator due-review">
+                                        <i data-lucide="clock" class="w-3 h-3 mr-1"></i>
+                                        Review
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="inner-card p-3 cursor-pointer hover:bg-white/5 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-white">Ancient History</span>
+                                        <div class="text-xs text-white/50 mt-1">Indus Valley Civilization</div>
+                                    </div>
+                                    <span class="performance-indicator needs-work">
+                                        <i data-lucide="book-open" class="w-3 h-3 mr-1"></i>
+                                        Study
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-white/10">
+                            <div class="text-xs text-white/50 text-center">
+                                A short revision now can deliver big gains later!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Study Tools -->
+                    <div class="priority-card p-6">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="w-7 h-7 rounded-full bg-purple-500/15 flex items-center justify-center">
+                                <i data-lucide="brain" class="text-purple-400 w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-lg font-medium text-white">Study Tools</h2>
+                        </div>
+
+                        <!-- Custom Quiz Builder -->
+                        <div class="mb-5">
+                            <h3 class="text-base font-medium text-white mb-2">Custom Quiz Builder</h3>
+                            <p class="text-sm text-white/60 mb-3">Create personalized quizzes from your weakest topics.
+                            </p>
+                            <button onclick="openQuizBuilder()"
+                                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center">
+                                <i data-lucide="sliders" class="w-4 h-4 mr-2"></i>
+                                Build Custom Quiz
+                            </button>
+                        </div>
+
+                        <!-- AI Assistant Integration -->
+                        <div>
+                            <h3 class="text-base font-medium text-white mb-2">AI Assistant</h3>
+                            <p class="text-sm text-white/60 mb-3">Get personalized help based on your weak areas.</p>
+                            <div class="inner-card p-3 mb-3">
+                                <div class="flex items-start space-x-2">
+                                    <i data-lucide="message-square"
+                                        class="w-4 h-4 text-white/40 mt-0.5 flex-shrink-0"></i>
+                                    <span class="text-white/60 italic text-sm">"Help me understand the key differences
+                                        between 42nd and 44th Constitutional Amendments"</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 mb-3">
+                                <button onclick="askAISpecific('amendments')"
+                                    class="flex-1 text-xs bg-white/5 hover:bg-white/10 text-white/70 py-2 px-3 rounded-lg transition-colors">
+                                    Explain Amendments
+                                </button>
+                                <button onclick="askAISpecific('bodies')"
+                                    class="flex-1 text-xs bg-white/5 hover:bg-white/10 text-white/70 py-2 px-3 rounded-lg transition-colors">
+                                    Constitutional Bodies
+                                </button>
+                            </div>
+                            <button onclick="askAI()"
+                                class="w-full bg-[var(--teal-light)]/10 hover:bg-[var(--teal-light)]/20 text-[var(--teal-light)] font-medium py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center justify-center border border-[var(--teal-light)]/20">
+                                <div
+                                    class="w-5 h-5 bg-[var(--teal-light)] rounded-full flex items-center justify-center text-xs font-medium text-black mr-2">
+                                    AI</div>
+                                Ask Custom Question
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript for interactive feedback and icon rendering -->
+    <script>
+        // Initialize Lucide Icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            console.log("Revision UI loaded successfully.");
+        });
+
+        // Modal function with your website's styling
+        function showMessage(title, message) {
+            const existingModal = document.getElementById('app-modal');
+            if (existingModal) existingModal.remove();
+
+            const modalHtml = `
+                <div id="app-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+                    <div class="bg-[#2A2A2A] p-6 rounded-2xl shadow-2xl max-w-sm w-full border border-white/10">
+                        <h3 class="text-xl font-medium text-white mb-3">${title}</h3>
+                        <p class="text-white/70 mb-6">${message}</p>
+                        <button onclick="document.getElementById('app-modal').remove()" class="w-full bg-[var(--teal-primary)] hover:bg-[#2d8a8b] text-white font-medium py-2.5 rounded-xl transition-all duration-200">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function startQuiz(topic) {
+            showMessage("Quiz Started!", `Launching the targeted quiz for: ${topic.toUpperCase()}. Good luck!`);
+        }
+
+        function startTargetedQuiz(topic) {
+            showMessage("Quiz Started!", `Ready for a challenge? Let's strengthen your understanding of ${topic.toUpperCase()}!`);
+        }
+
+        function reviewNotes(topic) {
+            showMessage("Opening Notes", `Time to recap and solidify your foundation in ${topic.toUpperCase()}.`);
+        }
+
+        function startRefresher(topic) {
+            showMessage("Refresher Started", `Quick revision session starting for ${topic.toUpperCase()}. Keep your progress on track!`);
+        }
+
+        function openQuizBuilder() {
+            showMessage("Quiz Builder", "Create your personalized practice session. Let's make it count!");
+        }
+
+        function askAI() {
+            showMessage("AI Assistant", "Your learning companion is ready to help. What would you like to explore?");
+        }
+
+        function askAISpecific(topic) {
+            const questions = {
+                'amendments': 'AI Assistant is ready to help you master Constitutional Amendments. Let\'s clarify those key concepts!',
+                'bodies': 'AI Assistant will help you understand Constitutional Bodies better. Ready to strengthen your knowledge?'
+            };
+
+            showMessage("AI Assistant", questions[topic] || "AI Assistant is here to support your learning journey!");
+        }
+
+        function dismissCard(cardId, temporary = false) {
+            const card = document.getElementById(cardId);
+            if (card) {
+                card.style.opacity = '0.5';
+                card.style.transform = 'scale(0.95)';
+
+                if (temporary) {
+                    showMessage("See You Later!", "No worries! This topic will be here when you're ready to tackle it.");
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'scale(1)';
+                    }, 2000);
+                } else {
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                    }, 300);
+                    showMessage("Topic Saved", "Great! You can always come back to this when you're ready.");
+                }
+            }
+        }
+
+        function goBack() {
+            // Navigate to dashboard
+            window.location.href = 'db.html';
+        }
+
+        function navigateToRevision() {
+            try {
+                window.location.href = 'flashcards.html';
+            } catch (error) {
+                console.error('Navigation error:', error);
+                // Fallback method
+                window.open('flashcards.html', '_self');
+            }
+        }
+
+        // Initialize profile manager for cross-page synchronization
+        if (typeof ProfileManager !== 'undefined') {
+            window.profileManager = new ProfileManager();
+        }
+
+        // Load saved profile picture
+        const savedDP = localStorage.getItem('selectedDP');
+        const userInitialsEl = document.getElementById('user-initials');
+
+        if (savedDP && userInitialsEl) {
+            const parentDiv = userInitialsEl.parentElement;
+            parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+        }
+
+        // Icon refresh for compatibility
+        if (window.iconManager) window.iconManager.refresh();
+    </script>
+</body>
+
+</html>

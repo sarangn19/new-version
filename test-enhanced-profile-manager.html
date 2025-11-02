@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Profile Manager Tests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles/theme-system.css">
+    <link rel="stylesheet" href="styles/accessibility.css">
+    <script src="js/profile-manager.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-primary, #1F1F1F);
+            color: var(--text-primary, white);
+        }
+        .test-section {
+            background: var(--bg-secondary, rgba(26, 26, 26, 0.8));
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+        }
+        .test-result {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background-color: rgba(34, 197, 94, 0.2);
+            border-left: 4px solid #22c55e;
+        }
+        .test-fail {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-left: 4px solid #ef4444;
+        }
+        .test-info {
+            background-color: rgba(59, 130, 246, 0.2);
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Enhanced Profile Manager Tests</h1>
+        
+        <!-- Test Results Container -->
+        <div id="test-results" class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+            <div id="results-container" class="space-y-2"></div>
+        </div>
+
+        <!-- Preference Validation Tests -->
+        <div class="test-section rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Preference Validation Tests</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button id="test-theme-validation" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700">
+                    Test Theme Validation
+                </button>
+                <button id="test-study-validation" class="px-4 py-2 bg-green-600 rounded hover:bg-green-700">
+                    Test Study Validation
+                </button>
+                <button id="test-accessibility-validation" class="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700">
+                    Test Accessibility Validation
+                </button>
+                <button id="test-dashboard-validation" class="px-4 py-2 bg-yellow-600 rounded hover:bg-yellow-700">
+                    Test Dashboard Validation
+                </button>
+            </div>
+        </div>
+
+        <!-- Theme System Tests -->
+        <div class="test-section rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Theme System Tests</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <button id="test-dark-theme" class="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700">
+                    Test Dark Theme
+                </button>
+                <button id="test-light-theme" class="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300">
+                    Test Light Theme
+                </button>
+                <button id="test-auto-theme" class="px-4 py-2 bg-gradient-to-r from-gray-800 to-gray-200 rounded">
+                    Test Auto Theme
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <button id="test-small-font" class="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 text-sm">
+                    Small Font
+                </button>
+                <button id="test-medium-font" class="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700">
+                    Medium Font
+                </button>
+                <button id="test-large-font" class="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 text-lg">
+                    Large Font
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button id="test-default-colors" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700">
+                    Default Colors
+                </button>
+                <button id="test-high-contrast" class="px-4 py-2 bg-yellow-600 text-black rounded hover:bg-yellow-700">
+                    High Contrast
+                </button>
+                <button id="test-colorblind-friendly" class="px-4 py-2 bg-teal-600 rounded hover:bg-teal-700">
+                    Colorblind Friendly
+                </button>
+            </div>
+        </div>
+
+        <!-- Accessibility Tests -->
+        <div class="test-section rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Accessibility Tests</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <button id="test-keyboard-nav" class="px-4 py-2 bg-emerald-600 rounded hover:bg-emerald-700">
+                    Test Keyboard Navigation
+                </button>
+                <button id="test-screen-reader" class="px-4 py-2 bg-rose-600 rounded hover:bg-rose-700">
+                    Test Screen Reader Features
+                </button>
+                <button id="test-reduced-motion" class="px-4 py-2 bg-amber-600 rounded hover:bg-amber-700">
+                    Test Reduced Motion
+                </button>
+                <button id="test-aria-labels" class="px-4 py-2 bg-cyan-600 rounded hover:bg-cyan-700">
+                    Test ARIA Labels
+                </button>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-400 mb-2">Test elements for accessibility:</p>
+                <div class="flex gap-2 flex-wrap">
+                    <button class="px-3 py-1 bg-gray-600 rounded text-sm" tabindex="0">Focusable Button</button>
+                    <input type="text" placeholder="Test input" class="px-3 py-1 bg-gray-700 rounded text-sm" tabindex="0">
+                    <a href="#" class="px-3 py-1 bg-gray-600 rounded text-sm" tabindex="0">Test Link</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Synchronization Tests -->
+        <div class="test-section rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibent mb-4">Preference Synchronization Tests</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button id="test-cross-page-sync" class="px-4 py-2 bg-violet-600 rounded hover:bg-violet-700">
+                    Test Cross-Page Sync
+                </button>
+                <button id="test-real-time-updates" class="px-4 py-2 bg-pink-600 rounded hover:bg-pink-700">
+                    Test Real-Time Updates
+                </button>
+                <button id="test-preference-persistence" class="px-4 py-2 bg-orange-600 rounded hover:bg-orange-700">
+                    Test Preference Persistence
+                </button>
+                <button id="test-event-dispatch" class="px-4 py-2 bg-lime-600 rounded hover:bg-lime-700">
+                    Test Event Dispatch
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Display Test -->
+        <div class="test-section rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Profile Display Test</h2>
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-16 h-16 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center">
+                    <div id="user-initials" class="text-lg font-medium text-black">JD</div>
+                </div>
+                <div>
+                    <div id="user-name" class="font-medium">Jane Doe</div>
+                    <div id="user-email" class="text-sm opacity-70">jane.doe@aspirant.com</div>
+                </div>
+            </div>
+            <button id="run-all-tests" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 font-semibold">
+                Run All Tests
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Test framework
+        class TestFramework {
+            constructor() {
+                this.results = [];
+                this.resultsContainer = document.getElementById('results-container');
+            }
+
+            assert(condition, message) {
+                const result = {
+                    passed: condition,
+                    message: message,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                this.results.push(result);
+                this.displayResult(result);
+                return condition;
+            }
+
+            assertEqual(actual, expected, message) {
+                const condition = actual === expected;
+                const fullMessage = `${message} - Expected: ${expected}, Actual: ${actual}`;
+                return this.assert(condition, fullMessage);
+            }
+
+            assertTrue(condition, message) {
+                return this.assert(condition === true, message);
+            }
+
+            assertFalse(condition, message) {
+                return this.assert(condition === false, message);
+            }
+
+            displayResult(result) {
+                const div = document.createElement('div');
+                div.className = `test-result ${result.passed ? 'test-pass' : 'test-fail'}`;
+                div.innerHTML = `
+                    <span class="font-medium">${result.passed ? '✓ PASS' : '✗ FAIL'}</span>
+                    <span class="ml-2">${result.message}</span>
+                    <span class="ml-auto text-sm opacity-70">${result.timestamp}</span>
+                `;
+                this.resultsContainer.appendChild(div);
+            }
+
+            info(message) {
+                const div = document.createElement('div');
+                div.className = 'test-result test-info';
+                div.innerHTML = `
+                    <span class="font-medium">ℹ INFO</span>
+                    <span class="ml-2">${message}</span>
+                    <span class="ml-auto text-sm opacity-70">${new Date().toLocaleTimeString()}</span>
+                `;
+                this.resultsContainer.appendChild(div);
+            }
+
+            clear() {
+                this.results = [];
+                this.resultsContainer.innerHTML = '';
+            }
+
+            getSummary() {
+                const passed = this.results.filter(r => r.passed).length;
+                const total = this.results.length;
+                return { passed, total, failed: total - passed };
+            }
+        }
+
+        const test = new TestFramework();
+
+        // Test preference validation
+        function testThemeValidation() {
+            test.info('Testing theme preference validation...');
+            
+            const pm = window.profileManager;
+            
+            // Test valid theme mode
+            const result1 = pm.setThemeMode('dark');
+            test.assertTrue(result1, 'Should accept valid theme mode "dark"');
+            test.assertEqual(pm.getCurrentTheme().mode, 'dark', 'Theme mode should be set to dark');
+            
+            // Test invalid theme mode
+            const result2 = pm.setThemeMode('invalid');
+            test.assertFalse(result2, 'Should reject invalid theme mode');
+            
+            // Test valid font size
+            const result3 = pm.setFontSize('large');
+            test.assertTrue(result3, 'Should accept valid font size "large"');
+            test.assertEqual(pm.getCurrentTheme().fontSize, 'large', 'Font size should be set to large');
+            
+            // Test invalid font size
+            const result4 = pm.setFontSize('huge');
+            test.assertFalse(result4, 'Should reject invalid font size');
+            
+            // Test valid color scheme
+            const result5 = pm.setColorScheme('high-contrast');
+            test.assertTrue(result5, 'Should accept valid color scheme');
+            test.assertEqual(pm.getCurrentTheme().colorScheme, 'high-contrast', 'Color scheme should be set');
+        }
+
+        function testStudyValidation() {
+            test.info('Testing study preference validation...');
+            
+            const pm = window.profileManager;
+            
+            // Test valid pomodoro times
+            const result1 = pm.updatePreferences('study', { pomodoroWorkTime: 30 });
+            test.assertTrue(result1, 'Should accept valid pomodoro work time');
+            test.assertEqual(pm.getPreferences('study').pomodoroWorkTime, 30, 'Work time should be updated');
+            
+            // Test invalid pomodoro times (too high)
+            pm.updatePreferences('study', { pomodoroWorkTime: 100 });
+            test.assertEqual(pm.getPreferences('study').pomodoroWorkTime, 25, 'Should reset invalid work time to default');
+            
+            // Test valid daily goal
+            pm.updatePreferences('study', { dailyGoal: 180 });
+            test.assertEqual(pm.getPreferences('study').dailyGoal, 180, 'Should accept valid daily goal');
+            
+            // Test invalid daily goal (too low)
+            pm.updatePreferences('study', { dailyGoal: 5 });
+            test.assertEqual(pm.getPreferences('study').dailyGoal, 120, 'Should reset invalid daily goal to default');
+        }
+
+        function testAccessibilityValidation() {
+            test.info('Testing accessibility preference validation...');
+            
+            const pm = window.profileManager;
+            
+            // Test boolean accessibility preferences
+            const result1 = pm.toggleHighContrast();
+            test.assertTrue(typeof result1 === 'boolean', 'High contrast toggle should return boolean');
+            
+            const result2 = pm.toggleColorblindFriendly();
+            test.assertTrue(typeof result2 === 'boolean', 'Colorblind friendly toggle should return boolean');
+            
+            const result3 = pm.toggleReducedMotion();
+            test.assertTrue(typeof result3 === 'boolean', 'Reduced motion toggle should return boolean');
+            
+            // Test accessibility settings retrieval
+            const settings = pm.getAccessibilitySettings();
+            test.assertTrue(typeof settings === 'object', 'Should return accessibility settings object');
+            test.assertTrue('highContrast' in settings, 'Should include highContrast setting');
+            test.assertTrue('colorblindFriendly' in settings, 'Should include colorblindFriendly setting');
+        }
+
+        function testDashboardValidation() {
+            test.info('Testing dashboard preference validation...');
+            
+            const pm = window.profileManager;
+            
+            // Test valid layout
+            pm.updatePreferences('dashboard', { layout: 'spacious' });
+            test.assertEqual(pm.getPreferences('dashboard').layout, 'spacious', 'Should accept valid layout');
+            
+            // Test invalid layout
+            pm.updatePreferences('dashboard', { layout: 'invalid' });
+            test.assertEqual(pm.getPreferences('dashboard').layout, 'compact', 'Should reset invalid layout to default');
+            
+            // Test widgets array
+            pm.updatePreferences('dashboard', { widgets: ['stats', 'goals'] });
+            test.assertTrue(Array.isArray(pm.getPreferences('dashboard').widgets), 'Widgets should be an array');
+            test.assertEqual(pm.getPreferences('dashboard').widgets.length, 2, 'Should have correct number of widgets');
+        }
+
+        // Test theme system functionality
+        function testThemeSystem() {
+            test.info('Testing theme system functionality...');
+            
+            const pm = window.profileManager;
+            const root = document.documentElement;
+            
+            // Test dark theme
+            pm.setThemeMode('dark');
+            test.assertEqual(root.getAttribute('data-theme'), 'dark', 'Should apply dark theme to document');
+            
+            // Test light theme
+            pm.setThemeMode('light');
+            test.assertEqual(root.getAttribute('data-theme'), 'light', 'Should apply light theme to document');
+            
+            // Test font size changes
+            pm.setFontSize('large');
+            const fontSize = root.style.getPropertyValue('--base-font-size');
+            test.assertEqual(fontSize, '18px', 'Should apply large font size');
+            
+            // Test color scheme
+            pm.setColorScheme('high-contrast');
+            test.assertEqual(root.getAttribute('data-color-scheme'), 'high-contrast', 'Should apply color scheme');
+        }
+
+        function testAccessibilityFeatures() {
+            test.info('Testing accessibility features...');
+            
+            const pm = window.profileManager;
+            const root = document.documentElement;
+            
+            // Test high contrast mode
+            pm.toggleHighContrast();
+            const hasHighContrast = root.classList.contains('high-contrast');
+            test.assertTrue(hasHighContrast, 'Should apply high contrast class');
+            
+            // Test reduced motion
+            pm.toggleReducedMotion();
+            const hasReducedMotion = root.classList.contains('reduced-motion');
+            test.assertTrue(hasReducedMotion, 'Should apply reduced motion class');
+            
+            // Test screen reader announcements
+            try {
+                pm.announceToScreenReader('Test announcement');
+                test.assert(true, 'Screen reader announcement should not throw error');
+            } catch (error) {
+                test.assert(false, 'Screen reader announcement threw error: ' + error.message);
+            }
+        }
+
+        function testPreferenceSynchronization() {
+            test.info('Testing preference synchronization...');
+            
+            const pm = window.profileManager;
+            
+            // Test preference update triggers event
+            let eventFired = false;
+            const handler = () => { eventFired = true; };
+            window.addEventListener('preferencesUpdated', handler);
+            
+            pm.updatePreferences('theme', { mode: 'light' });
+            
+            setTimeout(() => {
+                test.assertTrue(eventFired, 'Preference update should trigger event');
+                window.removeEventListener('preferencesUpdated', handler);
+            }, 100);
+            
+            // Test localStorage persistence
+            const savedProfile = localStorage.getItem('userProfile');
+            test.assertTrue(savedProfile !== null, 'Profile should be saved to localStorage');
+            
+            try {
+                const parsed = JSON.parse(savedProfile);
+                test.assertTrue('preferences' in parsed, 'Saved profile should include preferences');
+            } catch (error) {
+                test.assert(false, 'Saved profile should be valid JSON');
+            }
+        }
+
+        // Event listeners for test buttons
+        document.getElementById('test-theme-validation').addEventListener('click', testThemeValidation);
+        document.getElementById('test-study-validation').addEventListener('click', testStudyValidation);
+        document.getElementById('test-accessibility-validation').addEventListener('click', testAccessibilityValidation);
+        document.getElementById('test-dashboard-validation').addEventListener('click', testDashboardValidation);
+
+        document.getElementById('test-dark-theme').addEventListener('click', () => {
+            window.profileManager.setThemeMode('dark');
+            test.info('Applied dark theme');
+        });
+
+        document.getElementById('test-light-theme').addEventListener('click', () => {
+            window.profileManager.setThemeMode('light');
+            test.info('Applied light theme');
+        });
+
+        document.getElementById('test-auto-theme').addEventListener('click', () => {
+            window.profileManager.setThemeMode('auto');
+            test.info('Applied auto theme');
+        });
+
+        document.getElementById('test-small-font').addEventListener('click', () => {
+            window.profileManager.setFontSize('small');
+            test.info('Applied small font size');
+        });
+
+        document.getElementById('test-medium-font').addEventListener('click', () => {
+            window.profileManager.setFontSize('medium');
+            test.info('Applied medium font size');
+        });
+
+        document.getElementById('test-large-font').addEventListener('click', () => {
+            window.profileManager.setFontSize('large');
+            test.info('Applied large font size');
+        });
+
+        document.getElementById('test-default-colors').addEventListener('click', () => {
+            window.profileManager.setColorScheme('default');
+            test.info('Applied default color scheme');
+        });
+
+        document.getElementById('test-high-contrast').addEventListener('click', () => {
+            window.profileManager.setColorScheme('high-contrast');
+            test.info('Applied high contrast color scheme');
+        });
+
+        document.getElementById('test-colorblind-friendly').addEventListener('click', () => {
+            window.profileManager.setColorScheme('colorblind');
+            test.info('Applied colorblind-friendly color scheme');
+        });
+
+        document.getElementById('test-keyboard-nav').addEventListener('click', () => {
+            test.info('Testing keyboard navigation - try pressing Tab to navigate');
+            document.body.classList.add('keyboard-navigation');
+        });
+
+        document.getElementById('test-screen-reader').addEventListener('click', () => {
+            window.profileManager.toggleScreenReaderOptimization();
+            test.info('Toggled screen reader optimization');
+        });
+
+        document.getElementById('test-reduced-motion').addEventListener('click', () => {
+            window.profileManager.toggleReducedMotion();
+            test.info('Toggled reduced motion');
+        });
+
+        document.getElementById('test-aria-labels').addEventListener('click', () => {
+            window.profileManager.enhanceAriaLabels();
+            test.info('Enhanced ARIA labels');
+        });
+
+        document.getElementById('test-cross-page-sync').addEventListener('click', testPreferenceSynchronization);
+        document.getElementById('test-real-time-updates').addEventListener('click', testPreferenceSynchronization);
+        document.getElementById('test-preference-persistence').addEventListener('click', testPreferenceSynchronization);
+        document.getElementById('test-event-dispatch').addEventListener('click', testPreferenceSynchronization);
+
+        // Run all tests
+        document.getElementById('run-all-tests').addEventListener('click', () => {
+            test.clear();
+            test.info('Starting comprehensive test suite...');
+            
+            setTimeout(() => testThemeValidation(), 100);
+            setTimeout(() => testStudyValidation(), 200);
+            setTimeout(() => testAccessibilityValidation(), 300);
+            setTimeout(() => testDashboardValidation(), 400);
+            setTimeout(() => testThemeSystem(), 500);
+            setTimeout(() => testAccessibilityFeatures(), 600);
+            setTimeout(() => testPreferenceSynchronization(), 700);
+            
+            setTimeout(() => {
+                const summary = test.getSummary();
+                test.info(`Test suite completed: ${summary.passed}/${summary.total} tests passed`);
+            }, 1000);
+        });
+
+        // Initialize
+        test.info('Enhanced Profile Manager test suite loaded. Click "Run All Tests" to begin.');
+    </script>
+</body>
+</html>

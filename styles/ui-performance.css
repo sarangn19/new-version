@@ -1,0 +1,228 @@
+/**
+ * UI Performance Optimization Styles
+ * Styles for optimistic updates, progressive loading, and virtual scrolling
+ */
+
+/* Optimistic Update States */
+.optimistic-update-pending {
+    opacity: 0.7;
+    position: relative;
+}
+
+.optimistic-update-pending::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 1.5s infinite;
+    pointer-events: none;
+}
+
+.optimistic-update-confirmed {
+    animation: confirmPulse 0.3s ease-out;
+}
+
+.optimistic-update-rollback {
+    animation: rollbackShake 0.3s ease-out;
+}
+
+/* Message States */
+.message-pending {
+    opacity: 0.8;
+    border-left: 3px solid #fbbf24;
+}
+
+.message-pending .message-content {
+    position: relative;
+}
+
+.message-pending .message-content::after {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border: 2px solid #fbbf24;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Virtual Scrolling */
+.virtual-scroll-viewport {
+    position: relative;
+}
+
+.virtual-scroll-top-spacer,
+.virtual-scroll-bottom-spacer {
+    flex-shrink: 0;
+}
+
+/* Progressive Loading */
+.progressive-loading-indicator {
+    transition: opacity 0.3s ease;
+}
+
+.progressive-loading-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    margin: 8px;
+}
+
+/* Lazy Loading */
+.lazy-loaded {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Performance Animations */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes confirmPulse {
+    0% {
+        transform: scale(1);
+        background-color: rgba(34, 197, 94, 0.1);
+    }
+    50% {
+        transform: scale(1.02);
+        background-color: rgba(34, 197, 94, 0.2);
+    }
+    100% {
+        transform: scale(1);
+        background-color: transparent;
+    }
+}
+
+@keyframes rollbackShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: translateY(-50%) rotate(0deg);
+    }
+    100% {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Smooth Transitions */
+.message {
+    transition: all 0.2s ease;
+}
+
+.message:hover {
+    transform: translateY(-1px);
+}
+
+.action-btn {
+    transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Performance Indicators */
+.performance-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: monospace;
+    z-index: 1000;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.performance-indicator:hover {
+    opacity: 1;
+}
+
+.performance-indicator.hidden {
+    display: none;
+}
+
+/* Responsive Optimizations */
+@media (max-width: 768px) {
+    .virtual-scroll-viewport {
+        /* Reduce complexity on mobile */
+        will-change: auto;
+    }
+    
+    .message {
+        /* Disable hover effects on mobile */
+        transition: none;
+    }
+    
+    .message:hover {
+        transform: none;
+    }
+}
+
+/* High Performance Mode */
+.high-performance-mode .message {
+    will-change: transform;
+}
+
+.high-performance-mode .action-btn {
+    will-change: transform;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .optimistic-update-pending::after {
+        animation: none;
+    }
+    
+    .message-pending .message-content::after {
+        animation: none;
+    }
+    
+    .optimistic-update-confirmed,
+    .optimistic-update-rollback,
+    .lazy-loaded {
+        animation: none;
+    }
+    
+    .message,
+    .action-btn {
+        transition: none;
+    }
+}

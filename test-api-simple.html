@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple API Test</title>
+    <style>
+        body { font-family: monospace; background: #1a1a1a; color: #fff; padding: 20px; }
+        .result { background: #2a2a2a; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { border-left: 4px solid #4ade80; }
+        .error { border-left: 4px solid #ef4444; }
+        .warning { border-left: 4px solid #f59e0b; }
+        button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Gemini API Diagnostic Test</h1>
+    <p>API Key: <code>AIzaSyA4BG79A4QsdyA20NFVF9YVVvgt4wTJh8A</code></p>
+    
+    <button onclick="runTest()">🚀 Run Diagnostic Test</button>
+    
+    <div id="results"></div>
+
+    <script>
+        async function runTest() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="result">🔄 Running diagnostic tests...</div>';
+            
+            const apiKey = 'AIzaSyA4BG79A4QsdyA20NFVF9YVVvgt4wTJh8A';
+            
+            // Test 1: Check if API key can list models
+            try {
+                results.innerHTML += '<div class="result">📋 Test 1: Checking API key validity...</div>';
+                
+                const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                
+                if (listResponse.ok) {
+                    const data = await listResponse.json();
+                    results.innerHTML += `<div class="result success">✅ API Key is valid! Found ${data.models?.length || 0} models</div>`;
+                    
+                    if (data.models && data.models.length > 0) {
+                        let modelsList = '<div class="result">📝 Available models:<br>';
+                        data.models.forEach(model => {
+                            const name = model.name.replace('models/', '');
+                            const methods = model.supportedGenerationMethods || [];
+                            modelsList += `• ${name} (supports: ${methods.join(', ')})<br>`;
+                        });
+                        modelsList += '</div>';
+                        results.innerHTML += modelsList;
+                        
+                        // Test 2: Try content generation with available models
+                        const genModels = data.models.filter(m => 
+                            m.supportedGenerationMethods?.includes('generateContent')
+                        );
+                        
+                        if (genModels.length > 0) {
+                            results.innerHTML += '<div class="result">🤖 Test 2: Testing content generation...</div>';
+                            
+                            for (const model of genModels.slice(0, 3)) { // Test first 3 models
+                                const modelName = model.name.replace('models/', '');
+                                
+                                try {
+                                    const genResponse = await fetch(
+                                        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+                                        {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                contents: [{
+                                                    parts: [{ text: "Hello! Can you help with UPSC preparation?" }]
+                                                }]
+                                            })
+                                        }
+                                    );
+                                    
+                                    if (genResponse.ok) {
+                                        const genData = await genResponse.json();
+                                        const responseText = genData.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
+                                        results.innerHTML += `<div class="result success">✅ ${modelName} WORKS!<br>Response: "${responseText.substring(0, 100)}..."</div>`;
+                                        
+                                        // Show the working configuration
+                                        results.innerHTML += `<div class="result success">🎉 SUCCESS! Use this configuration:<br><br>
+                                        <strong>Working Model:</strong> ${modelName}<br>
+                                        <strong>API Key:</strong> Valid<br>
+                                        <strong>Endpoint:</strong> Working<br><br>
+                                        
+                                        <strong>Update your js/ai-config.js:</strong><br>
+                                        model: '${modelName}'<br><br>
+                                        
+                                        Your chatbot should work now!</div>`;
+                                        return; // Stop at first working model
+                                    } else {
+                                        const errorText = await genResponse.text();
+                                        results.innerHTML += `<div class="result error">❌ ${modelName} failed: ${genResponse.status}<br>Error: ${errorText}</div>`;
+                                    }
+                                } catch (error) {
+                                    results.innerHTML += `<div class="result error">❌ ${modelName} error: ${error.message}</div>`;
+                                }
+                            }
+                        } else {
+                            results.innerHTML += '<div class="result error">❌ No models support content generation</div>';
+                        }
+                    } else {
+                        results.innerHTML += '<div class="result error">❌ No models available</div>';
+                    }
+                } else {
+                    const errorText = await listResponse.text();
+                    results.innerHTML += `<div class="result error">❌ API Key test failed: ${listResponse.status}<br>Error: ${errorText}</div>`;
+                    
+                    if (listResponse.status === 403) {
+                        results.innerHTML += `<div class="result warning">⚠️ <strong>SOLUTION:</strong><br>
+                        1. Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a><br>
+                        2. Enable "Generative Language API"<br>
+                        3. Set up billing (required for Gemini API)<br>
+                        4. Wait a few minutes and try again</div>`;
+                    } else if (listResponse.status === 404) {
+                        results.innerHTML += `<div class="result warning">⚠️ <strong>POSSIBLE ISSUES:</strong><br>
+                        • API endpoint might be wrong<br>
+                        • API key format might be invalid<br>
+                        • Try regenerating the API key</div>`;
+                    }
+                }
+            } catch (error) {
+                results.innerHTML += `<div class="result error">❌ Network error: ${error.message}<br>
+                This might be a CORS issue or network connectivity problem.</div>`;
+            }
+        }
+        
+        // Auto-run test when page loads
+        window.onload = () => runTest();
+    </script>
+</body>
+</html>

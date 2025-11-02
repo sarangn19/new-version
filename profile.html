@@ -9,7 +9,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/validation-system.js"></script>
+  <script src="js/data-exporter.js"></script>
+  <script src="js/backup-manager.js"></script>
+  <script src="js/import-handler.js"></script>
+  <script src="js/loading-state-manager.js"></script>
+  <script src="js/error-handler.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  <link href="styles/theme-system.css" rel="stylesheet">
+  <link href="styles/accessibility.css" rel="stylesheet">
+  <link href="styles/unified-theme.css" rel="stylesheet">
 
   <style>
     :root {
@@ -180,8 +190,8 @@
             </button>
           </div>
           <div>
-            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
-            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+            <div id="user-name" class="font-normal text-sm">User</div>
+            <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
           </div>
         </div>
       </div>
@@ -203,6 +213,10 @@
         <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
           <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Community</span>
         </a>
         <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <div
@@ -241,8 +255,8 @@
                 </button>
               </div>
               <div>
-                <div id="avatarName" class="text-xl md:text-2xl font-semibold text-white">Jane Doe</div>
-                <div id="avatarEmail" class="text-sm text-white/70">jane.doe@aspirant.com</div>
+                <div id="avatarName" class="text-xl md:text-2xl font-semibold text-white">User</div>
+                <div id="avatarEmail" class="text-sm text-white/70">user@upsc.com</div>
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -261,8 +275,12 @@
                 <div class="py-4 rounded-xl px-2" data-field="name">
                   <div class="flex-1 pr-4">
                     <div class="text-xs uppercase tracking-wide text-[var(--muted)]">Name</div>
-                    <div id="nameValue" class="text-base md:text-lg font-semibold">Jane Doe</div>
+                    <div id="nameValue" class="text-base md:text-lg font-semibold">User</div>
                     <input id="nameInput" type="text"
+                      data-validate="required|minLength:2|maxLength:50|alphanumeric"
+                      data-sanitize="trim|removeExtraSpaces"
+                      data-required-message="Name is required"
+                      data-minLength-message="Name must be at least 2 characters"
                       class="hidden mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#84D0F7]/40" />
                     <p id="nameError" class="hidden text-xs text-red-400 mt-1">Please enter at least 2 characters.</p>
                   </div>
@@ -271,8 +289,12 @@
                 <div class="py-4 rounded-xl px-2" data-field="email">
                   <div class="flex-1 pr-4">
                     <div class="text-xs uppercase tracking-wide text-[var(--muted)]">Email</div>
-                    <div id="emailValue" class="text-base md:text-lg font-semibold">jane.doe@aspirant.com</div>
+                    <div id="emailValue" class="text-base md:text-lg font-semibold">user@upsc.com</div>
                     <input id="emailInput" type="email"
+                      data-validate="required|email"
+                      data-sanitize="trim|lowercase"
+                      data-required-message="Email is required"
+                      data-email-message="Please enter a valid email address"
                       class="hidden mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#84D0F7]/40" />
                     <p id="emailError" class="hidden text-xs text-red-400 mt-1">Enter a valid email address.</p>
                   </div>
@@ -283,6 +305,10 @@
                     <div class="text-xs uppercase tracking-wide text-[var(--muted)]">Mobile Number</div>
                     <div id="mobileValue" class="text-base md:text-lg font-semibold">9876543210</div>
                     <input id="mobileInput" type="tel"
+                      data-validate="required|pattern:^[0-9]{10}$"
+                      data-sanitize="trim|numericOnly"
+                      data-required-message="Mobile number is required"
+                      data-pattern-message="Please enter a valid 10-digit mobile number"
                       class="hidden mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#84D0F7]/40" />
                     <p id="mobileError" class="hidden text-xs text-red-400 mt-1">Enter a valid 10-digit number.</p>
                   </div>
@@ -393,8 +419,8 @@
       }
 
       function syncUI() {
-        const name = nodes.nameValue?.textContent?.trim() || 'Jane Doe';
-        const email = nodes.emailValue?.textContent?.trim() || 'jane.doe@aspirant.com';
+        const name = nodes.nameValue?.textContent?.trim() || 'User';
+        const email = nodes.emailValue?.textContent?.trim() || 'user@upsc.com';
         setText(nodes.avatarName, name);
         setText(nodes.avatarEmail, email);
         setText(nodes.sbName, name);
@@ -485,8 +511,8 @@
 
       // Load initial values from storage
       const initial = {
-        name: getStore('name', nodes.nameValue?.textContent?.trim() || 'Jane Doe'),
-        email: getStore('email', nodes.emailValue?.textContent?.trim() || 'jane.doe@aspirant.com'),
+        name: getStore('name', nodes.nameValue?.textContent?.trim() || 'User'),
+        email: getStore('email', nodes.emailValue?.textContent?.trim() || 'user@upsc.com'),
         mobile: getStore('mobile', nodes.mobileValue?.textContent?.trim() || '9876543210'),
       };
       setText(nodes.nameValue, initial.name);
@@ -541,7 +567,7 @@
 
       // Render lucide icons
       if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        window.if (window.iconManager) window.iconManager.refresh();
+        window.lucide.createIcons();
       }
 
       // DP Selection Modal
@@ -603,7 +629,8 @@
         // Set initial selection
         const currentSelectedOption = modal.querySelector(`[data-dp="${selectedDP}"] div`);
         if (currentSelectedOption) {
-          currentSelectedOption.className = currentSelectedOption.className.replace('border-transparent group-hover:border-[var(--teal-primary)]', 'border-[var(--teal-primary)]');
+          currentSelectedOption.classList.remove('border-transparent', 'group-hover:border-[var(--teal-primary)]');
+          currentSelectedOption.classList.add('border-[var(--teal-primary)]');
         }
 
         // Add event listeners
@@ -621,18 +648,15 @@
             e.stopPropagation();
 
             // Remove selection from all options
-            modal.querySelectorAll('.dp-option').forEach(option => {
-              const div = option.querySelector('div');
+            modal.querySelectorAll('.dp-option div').forEach(div => {
               div.classList.remove('border-[var(--teal-primary)]');
-              div.classList.add('border-transparent');
-              option.classList.remove('selected');
+              div.classList.add('border-transparent', 'group-hover:border-[var(--teal-primary)]');
             });
 
             // Add selection to clicked option
             const selectedDiv = btn.querySelector('div');
-            selectedDiv.classList.remove('border-transparent');
+            selectedDiv.classList.remove('border-transparent', 'group-hover:border-[var(--teal-primary)]');
             selectedDiv.classList.add('border-[var(--teal-primary)]');
-            btn.classList.add('selected');
 
             selectedDP = btn.dataset.dp;
             console.log('Selected DP:', selectedDP);
@@ -653,7 +677,7 @@
 
         // Re-render icons for the modal
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
-          window.if (window.iconManager) window.iconManager.refresh();
+          window.lucide.createIcons();
         }
       }
 
@@ -678,6 +702,14 @@
         localStorage.setItem('selectedDP', dpName);
         console.log('Stored selection:', dpName);
 
+        // Update ProfileManager to sync across all pages
+        if (window.profileManager) {
+          profileManager.updateProfile({
+            selectedDP: dpName,
+            avatar: `image/${dpName}.png`
+          });
+        }
+
         // Show success message
         showToast('Profile picture updated successfully!');
       }
@@ -697,9 +729,22 @@
       }
 
       // Load saved DP on page load
-      const savedDP = localStorage.getItem('selectedDP');
-      if (savedDP) {
-        updateProfilePicture(savedDP);
+      function loadSavedProfilePicture() {
+        const savedDP = localStorage.getItem('selectedDP');
+        if (savedDP) {
+          selectedDP = savedDP;
+          updateProfilePicture(savedDP);
+        }
+      }
+
+      // Initialize on page load
+      document.addEventListener('DOMContentLoaded', loadSavedProfilePicture);
+
+      // Also run immediately if DOM is already loaded
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadSavedProfilePicture);
+      } else {
+        loadSavedProfilePicture();
       }
 
       // Report Issue modal functionality
@@ -781,7 +826,7 @@
 
         // Re-render icons for the modal
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
-          window.if (window.iconManager) window.iconManager.refresh();
+          window.lucide.createIcons();
         }
       }
 
@@ -861,7 +906,7 @@
 
         // Re-render icons for the modal
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
-          window.if (window.iconManager) window.iconManager.refresh();
+          window.lucide.createIcons();
         }
       }
 
@@ -964,7 +1009,7 @@
 
         // Re-render icons for the modal
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
-          window.if (window.iconManager) window.iconManager.refresh();
+          window.lucide.createIcons();
         }
       }
 
@@ -1006,11 +1051,7 @@
 
       // Notification functionality
       const notifications = [
-        { id: 1, title: "New Daily Challenge Available", message: "Complete today's MCQ challenge to maintain your streak!", time: "2 minutes ago", type: "challenge", read: false },
-        { id: 2, title: "Revision Reminder", message: "You have 3 topics due for revision today", time: "1 hour ago", type: "reminder", read: false },
-        { id: 3, title: "New Content Added", message: "Modern History notes have been updated", time: "3 hours ago", type: "content", read: true },
-        { id: 4, title: "Achievement Unlocked", message: "You've completed 50 flashcards this week!", time: "1 day ago", type: "achievement", read: true },
-        { id: 5, title: "Study Streak", message: "Congratulations! 7-day study streak achieved", time: "2 days ago", type: "achievement", read: true }
+        // No notifications yet
       ];
 
       function showNotificationsModal() {
@@ -1072,7 +1113,7 @@
 
         // Re-render icons for the modal
         if (window.lucide && typeof window.lucide.createIcons === 'function') {
-          window.if (window.iconManager) window.iconManager.refresh();
+          window.lucide.createIcons();
         }
       }
 
@@ -1081,8 +1122,28 @@
         showNotificationsModal();
       });
 
-      // Initialize bookmarks display
-      if (typeof profileManager !== 'undefined') {
+      // Initialize enhanced profile manager for cross-page synchronization
+      if (typeof ProfileManager !== 'undefined') {
+        window.profileManager = new ProfileManager();
+        
+        // Apply theme preferences
+        const preferences = window.profileManager.getPreferences();
+        if (preferences) {
+          document.documentElement.setAttribute('data-theme', preferences.theme?.mode || 'dark');
+          document.documentElement.setAttribute('data-color-scheme', preferences.theme?.colorScheme || 'default');
+          
+          if (preferences.accessibility?.reducedMotion) {
+            document.documentElement.classList.add('reduced-motion');
+          }
+          if (preferences.accessibility?.highContrast) {
+            document.documentElement.classList.add('high-contrast');
+          }
+          if (preferences.accessibility?.keyboardNavigation) {
+            document.documentElement.classList.add('keyboard-navigation');
+          }
+        }
+        
+        // Initialize bookmarks display
         profileManager.updateBookmarksDisplay();
 
         // Add clear bookmarks functionality
@@ -1095,6 +1156,29 @@
             showToast('All bookmarks cleared');
           }
         });
+      }
+      
+      // Initialize data management tools
+      if (typeof DataExporter !== 'undefined') {
+        window.dataExporter = new DataExporter();
+      }
+      
+      if (typeof BackupManager !== 'undefined') {
+        window.backupManager = new BackupManager();
+      }
+      
+      if (typeof ImportHandler !== 'undefined') {
+        window.importHandler = new ImportHandler();
+      }
+      
+      // Initialize loading state manager
+      if (typeof LoadingStateManager !== 'undefined') {
+        window.loadingStateManager = new LoadingStateManager();
+      }
+      
+      // Initialize error handler
+      if (typeof ErrorHandler !== 'undefined') {
+        window.errorHandler = new ErrorHandler();
       }
     })();
   </script>

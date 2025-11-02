@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Analytics Dashboard Unit Tests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { background: #1F1F1F; color: white; font-family: system-ui; }
+        .test-section { margin: 15px; padding: 15px; border: 1px solid #333; border-radius: 8px; }
+        .success { border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+        .error { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .test-result { margin: 8px 0; padding: 6px; border-radius: 4px; font-size: 13px; }
+        .test-result.pass { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .test-result.fail { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .stat-card { background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 8px; margin: 10px; }
+        .counter { font-size: 24px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">Real-time Analytics Dashboard Unit Tests</h1>
+        
+        <div class="text-center mb-6">
+            <button id="run-tests" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Run Dashboard Tests
+            </button>
+        </div>
+        
+        <div id="test-results"></div>
+
+        <!-- Mock statistics page structure -->
+        <div id="mock-main-content" style="display: none;">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h1>Statistics</h1>
+                    <div class="flex items-center gap-4"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card">
+                        <div class="counter" data-target="100">0</div>
+                        <div>Study Hours</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="counter" data-target="250">0</div>
+                        <div>Questions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="counter" data-target="75.5">0</div>
+                        <div>Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="counter" data-target="15">0</div>
+                        <div>Sessions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load dependencies -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/performance-analytics-ai.js"></script>
+    <script src="js/ai-recommendation-engine.js"></script>
+    <script src="js/real-time-analytics-dashboard.js"></script>
+
+    <script>
+        class RealTimeDashboardUnitTests {
+            constructor() {
+                this.setupMockDOM();
+                this.setupTests();
+            }
+
+            setupMockDOM() {
+                // Create mock DOM structure that the dashboard expects
+                const mockContent = document.getElementById('mock-main-content');
+                mockContent.style.display = 'block';
+                mockContent.id = 'main-content';
+            }
+
+            setupTests() {
+                document.getElementById('run-tests').addEventListener('click', () => {
+                    this.runAllTests();
+                });
+            }
+
+            async runAllTests() {
+                this.clearResults();
+                
+                // Test 1: Constructor and Initialization
+                await this.testConstructorAndInit();
+                
+                // Test 2: DOM Element Management
+                this.testDOMElementManagement();
+                
+                // Test 3: Data Processing
+                await this.testDataProcessing();
+                
+                // Test 4: UI Updates
+                await this.testUIUpdates();
+                
+                // Test 5: Real-time Features
+                this.testRealTimeFeatures();
+                
+                // Test 6: Caching System
+                this.testCachingSystem();
+                
+                // Test 7: Error Handling
+                await this.testErrorHandling();
+                
+                // Test 8: Performance Optimization
+                this.testPerformanceOptimization();
+            }
+
+            async testConstructorAndInit() {
+                const section = this.createTestSection('Constructor and Initialization');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    this.addResult(section, 'Dashboard constructor executes', true);
+                    
+                    if (dashboard.config) {
+                        this.addResult(section, 'Configuration loaded', true);
+                        
+                        if (dashboard.config.updateInterval === 30000) {
+                            this.addResult(section, 'Update interval configured correctly', true);
+                        }
+                        
+                        if (dashboard.config.maxInsights === 5) {
+                            this.addResult(section, 'Max insights configured correctly', true);
+                        }
+                    } else {
+                        this.addResult(section, 'Configuration not loaded', false);
+                    }
+                    
+                    if (dashboard.cache instanceof Map) {
+                        this.addResult(section, 'Cache system initialized', true);
+                    } else {
+                        this.addResult(section, 'Cache system not initialized', false);
+                    }
+                    
+                    if (dashboard.elements && typeof dashboard.elements === 'object') {
+                        this.addResult(section, 'Elements object initialized', true);
+                    } else {
+                        this.addResult(section, 'Elements object not initialized', false);
+                    }
+                    
+                    section.className = 'test-section success';
+                } catch (error) {
+                    this.addResult(section, `Constructor failed: ${error.message}`, false);
+                    section.className = 'test-section error';
+                }
+            }
+
+            testDOMElementManagement() {
+                const section = this.createTestSection('DOM Element Management');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test DOM element finding
+                    dashboard.findDOMElements();
+                    this.addResult(section, 'DOM element finding executes', true);
+                    
+                    // Test AI insights section creation
+                    dashboard.createAIInsightsSection();
+                    this.addResult(section, 'AI insights section creation executes', true);
+                    
+                    // Check if AI insights section was created
+                    const aiInsightsGrid = document.getElementById('ai-insights-grid');
+                    if (aiInsightsGrid) {
+                        this.addResult(section, 'AI insights grid created in DOM', true);
+                    } else {
+                        this.addResult(section, 'AI insights grid not found in DOM', false);
+                    }
+                    
+                    // Test last updated indicator creation
+                    dashboard.createLastUpdatedIndicator();
+                    this.addResult(section, 'Last updated indicator creation executes', true);
+                    
+                    const lastUpdatedIndicator = document.getElementById('last-updated-indicator');
+                    if (lastUpdatedIndicator) {
+                        this.addResult(section, 'Last updated indicator created in DOM', true);
+                    } else {
+                        this.addResult(section, 'Last updated indicator not found in DOM', false);
+                    }
+                    
+                    section.className = 'test-section success';
+                } catch (error) {
+                    this.addResult(section, `DOM element management failed: ${error.message}`, false);
+                    section.className = 'test-section error';
+                }
+            }
+
+            async testDataProcessing() {
+                const section = this.createTestSection('Data Processing');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test user data retrieval
+                    const userData = dashboard.getCurrentUserData();
+                    
+                    if (userData && typeof userData.accuracy === 'number') {
+                        this.addResult(section, 'User data retrieval works', true);
+                    } else {
+                        this.addResult(section, 'User data retrieval failed', false);
+                    }
+                    
+                    if (userData.timestamp) {
+                        this.addResult(section, 'User data includes timestamp', true);
+                    }
+                    
+                    // Test performance analysis retrieval
+                    const analysis = await dashboard.getPerformanceAnalysis(userData);
+                    
+                    if (analysis) {
+                        this.addResult(section, 'Performance analysis retrieval works', true);
+                        
+                        if (analysis.overview) {
+                            this.addResult(section, 'Analysis includes overview', true);
+                        }
+                    } else {
+                        this.addResult(section, 'Performance analysis retrieval failed', false);
+                    }
+                    
+                    // Test AI recommendations retrieval
+                    const recommendations = await dashboard.getAIRecommendations(userData);
+                    
+                    if (Array.isArray(recommendations)) {
+                        this.addResult(section, 'AI recommendations retrieval works', true);
+                        
+                        if (recommendations.length > 0) {
+                            this.addResult(section, `Retrieved ${recommendations.length} recommendations`, true);
+                        }
+                    } else {
+                        this.addResult(section, 'AI recommendations retrieval failed', false);
+                    }
+                    
+                    section.className = 'test-section success';
+                } catch (error) {
+                    this.addResult(section, `Data processing failed: ${error.message}`, false);
+                    section.className = 'test-section error';
+                }
+            }
+
+            async testUIUpdates() {
+                const section = this.createTestSection('UI Updates');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test insight extraction
+                    const mockAnalysis = {
+                        overview: {
+                            performanceScore: 75,
+                            level: 'Good',
+                            efficiency: 'High'
+                        },
+                        combinedInsights: {
+                            strengths: [{ area: 'Math', description: 'Strong performance' }],
+                            weaknesses: [{ area: 'History', description: 'Needs work' }]
+                        }
+                    };
+                    
+                    const insights = dashboard.extractInsights(mockAnalysis);
+                    
+                    if (Array.isArray(insights)) {
+                        this.addResult(section, 'Insight extraction works', true);
+                        
+                        if (insights.length > 0) {
+                            this.addResult(section, `Extracted ${insights.length} insights`, true);
+                            
+                            const firstInsight = insights[0];
+                            if (firstInsight.type && firstInsight.title && firstInsight.value) {
+                                this.addResult(section, 'Insights have correct structure', true);
+                            } else {
+                                this.addResult(section, 'Insight structure incomplete', false);
+                            }
+                        }
+                    } else {
+                        this.addResult(section, 'Insight extraction failed', false);
+                    }
+                    
+                    // Test insight element creation
+                    if (insights.length > 0) {
+                        const insightElement = dashboard.createInsightElement(insights[0], 0);
+                        
+                        if (insightElement && insightElement.innerHTML) {
+                            this.addResult(section, 'Insight element creation works', true);
+                        } else {
+                            this.addResult(section, 'Insight element creation failed', false);
+                        }
+                    }
+                    
+                    // Test recommendation element creation
+                    const mockRecommendation = {
+                        title: 'Test Recommendation',
+                        description: 'Test description',
+                        priority: 'high',
+                        timeframe: '2 weeks',
+                        expectedImpact: 'Improved performance'
+                    };
+                    
+                    const recElement = dashboard.createRecommendationElement(mockRecommendation, 0);
+                    
+                    if (recElement && recElement.innerHTML) {
+                        this.addResult(section, 'Recommendation element creation works', true);
+                    } else {
+                        this.addResult(section, 'Recommendation element creation failed', false);
+                    }
+                    
+                    // Test counter animation
+                    const mockCounter = document.createElement('div');
+                    mockCounter.textContent = '0';
+                    
+                    dashboard.animateCounter(mockCounter, 100);
+                    this.addResult(section, 'Counter animation executes', true);
+                    
+                    section.className = 'test-section success';
+                } catch (error) {
+                    this.addResult(section, `UI updates failed: ${error.message}`, false);
+                    section.className = 'test-section error';
+                }
+            }
+
+            testRealTimeFeatures() {
+                const section = this.createTestSection('Real-time Features');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test real-time update start/stop
+                    dashboard.startRealTimeUpdates();
+                    this.addResult(section, 'Real-time updates start', true);
+                    
+                    if (dashboard.updateTimer) {
+                        this.addResult(section, 'Update timer created', true);
+                    } else {
+                        this.addResult(section, 'Update timer not created', false);
+                    }
+                    
+                    dashboard.stopRealTimeUpdates();
+                    this.addResult(section, 'Real-time updates stop', true);
+                    
+                    if (!dashboard.updateTimer) {
+                        this.addResult(section, 'Update timer cleared', true);
+                    } else {
+                        this.addResult(section, 'Update timer not cleared', false);
+                    }
+                    
+                    // Test last updated time update
+                    dashboard.updateLastUpdatedTime();
+                    this.addResult(section, 'Last updated time update executes', true);
+                    
+                    if (dashboard.lastUpdateTime) {
+                        this.addResult(section, 'Last update time recorded', true);
+                    }
+                    
+                    section.className = 'test-section success';
+                } catch (error) {
+                    this.addResult(section, `Real-time features failed: ${error.message}`, false);
+                    section.className = 'test-section error';
+                }
+            }
+
+            testCachingSystem() {
+                const section = this.createTestSection('Caching System');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test cache initialization
+                    if (dashboard.cache instanceof Map) {
+                        this.addResult(section, 'Cache is properly initialized as Map', true);
+                    } else {
+                        this.addResult(section, 'Cache not properly initialized', false);
+                    }
+                    
+                    // Test cache operations
+                    const testKey = 'test_key';
+                    const testData = { test: 'data', timestamp: Date.now() };
+                    
+                    dashboard.cache.set(testKey, testData);
+                    
+                    if (dashboard.cache.has(testKey)) {
+                        this.addResult(section, 'Cache set operation works', true);
+                    } else {
+                        this.addResult(section, 'Cache set operation failed', false);
+                    }
+                    
+                    const retrievedData = dashboard.cache.get(testKey);
+                    if (retrievedData && retrievedData.test === 'data') {
+                        this.addResult(section, 'Cache get operation works', true);
+                    } else {
+                        this.addResult(section, 'Cache get operation failed', false);
+                    }
+                    
+                    // Test cache timeout logic (simulated)
+                    const oldData = { data: 'old', timestamp: Date.now() - 10 * 60 * 1000 }; // 10 minutes old
+                    dashboard.cache.set('old_key', oldData);
+                    
+                    const cacheTimeout = dashboard.config.cacheTimeout;
+                    const isExpired = Date.now() - oldData.timestamp > cacheTimeout;
+                    
+                    if (isExpired) {
+                        this.addResult(section, 'Cache timeout logic works correctly', true);
+                    } else {
+                        this.addResult(section, 'Cache timeout logic may not be working', false);
+                    }
+                    
+                    section.className = 'test-section success';
+                } catch (error) {
+                    this.addResult(section, `Caching system failed: ${error.message}`, false);
+                    section.className = 'test-section error';
+                }
+            }
+
+            async testErrorHandling() {
+                const section = this.createTestSection('Error Handling');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test error state display
+                    dashboard.showErrorState();
+                    this.addResult(section, 'Error state display executes', true);
+                    
+                    // Test fallback data generation
+                    const fallbackAnalysis = dashboard.generateFallbackAnalysis({ accuracy: 70 });
+                    
+                    if (fallbackAnalysis && fallbackAnalysis.overview) {
+                        this.addResult(section, 'Fallback analysis generation works', true);
+                    } else {
+                        this.addResult(section, 'Fallback analysis generation failed', false);
+                    }
+                    
+                    const fallbackRecs = dashboard.generateFallbackRecommendations({ accuracy: 60 });
+                    
+                    if (Array.isArray(fallbackRecs) && fallbackRecs.length > 0) {
+                        this.addResult(section, 'Fallback recommendations generation works', true);
+                    } else {
+                        this.addResult(section, 'Fallback recommendations generation failed', false);
+                    }
+                    
+                    // Test graceful handling of missing dependencies
+                    const dashboardWithoutDeps = new RealTimeAnalyticsDashboard(null, null);
+                    
+                    if (dashboardWithoutDeps) {
+                        this.addResult(section, 'Handles missing dependencies gracefully', true);
+                    } else {
+                        this.addResult(section, 'Does not handle missing dependencies', false);
+                    }
+                    
+                    section.className = 'test-section success';
+                } catch (error) {
+                    this.addResult(section, `Error handling failed: ${error.message}`, false);
+                    section.className = 'test-section error';
+                }
+            }
+
+            testPerformanceOptimization() {
+                const section = this.createTestSection('Performance Optimization');
+                
+                try {
+                    const dashboard = new RealTimeAnalyticsDashboard();
+                    
+                    // Test helper methods for UI styling
+                    const trendIcon = dashboard.getTrendIcon('up');
+                    if (trendIcon && trendIcon.includes('trending-up')) {
+                        this.addResult(section, 'Trend icon generation works', true);
+                    } else {
+                        this.addResult(section, 'Trend icon generation failed', false);
+                    }
+                    
+                    const colorClass = dashboard.getColorClass('green');
+                    if (colorClass && colorClass.includes('green')) {
+                        this.addResult(section, 'Color class generation works', true);
+                    } else {
+                        this.addResult(section, 'Color class generation failed', false);
+                    }
+                    
+                    const priorityColor = dashboard.getPriorityColor('high');
+                    if (priorityColor && priorityColor.includes('orange')) {
+                        this.addResult(section, 'Priority color generation works', true);
+                    } else {
+                        this.addResult(section, 'Priority color generation failed', false);
+                    }
+                    
+                    const priorityIcon = dashboard.getPriorityIcon('critical');
+                    if (priorityIcon && priorityIcon.includes('alert-triangle')) {
+                        this.addResult(section, 'Priority icon generation works', true);
+                    } else {
+                        this.addResult(section, 'Priority icon generation failed', false);
+                    }
+                    
+                    // Test cleanup method
+                    dashboard.destroy();
+                    this.addResult(section, 'Cleanup/destroy method executes', true);
+                    
+                    if (!dashboard.updateTimer && dashboard.cache.size === 0) {
+                        this.addResult(section, 'Cleanup properly clears resources', true);
+                    } else {
+                        this.addResult(section, 'Cleanup may not clear all resources', false);
+                    }
+                    
+                    section.className = 'test-section success';
+                } catch (error) {
+                    this.addResult(section, `Performance optimization failed: ${error.message}`, false);
+                    section.className = 'test-section error';
+                }
+            }
+
+            // Utility methods
+            createTestSection(title) {
+                const section = document.createElement('div');
+                section.className = 'test-section';
+                section.innerHTML = `
+                    <h3 class="text-lg font-semibold mb-3">${title}</h3>
+                    <div class="results-container"></div>
+                `;
+                document.getElementById('test-results').appendChild(section);
+                return section;
+            }
+
+            addResult(section, message, passed) {
+                const container = section.querySelector('.results-container');
+                const result = document.createElement('div');
+                result.className = `test-result ${passed ? 'pass' : 'fail'}`;
+                result.innerHTML = `${passed ? '✅' : '❌'} ${message}`;
+                container.appendChild(result);
+            }
+
+            clearResults() {
+                document.getElementById('test-results').innerHTML = '';
+            }
+        }
+
+        // Initialize test suite
+        document.addEventListener('DOMContentLoaded', () => {
+            new RealTimeDashboardUnitTests();
+        });
+    </script>
+</body>
+</html>

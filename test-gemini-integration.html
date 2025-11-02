@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini API Integration Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/ai-response-cache.js"></script>
+    <script src="js/background-processor.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/conversation-storage.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/ai-config.js"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Gemini API Integration Test</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">API Status</h2>
+            <div id="api-status" class="text-gray-400">Initializing...</div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Test AI Response</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Test Message:</label>
+                    <input type="text" id="test-message" 
+                           class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white"
+                           placeholder="Enter a test message..."
+                           value="Explain the concept of federalism in the Indian Constitution">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Mode:</label>
+                    <select id="test-mode" class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white">
+                        <option value="general">General</option>
+                        <option value="mcq">MCQ Analysis</option>
+                        <option value="essay">Essay Feedback</option>
+                        <option value="news">News Analysis</option>
+                    </select>
+                </div>
+                <button id="test-btn" 
+                        class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-medium transition-colors">
+                    Test API
+                </button>
+            </div>
+            
+            <div id="test-result" class="mt-6 hidden">
+                <h3 class="text-lg font-medium mb-2">Response:</h3>
+                <div id="response-content" class="bg-gray-700 rounded-lg p-4 text-sm"></div>
+                <div id="response-metadata" class="mt-2 text-xs text-gray-400"></div>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Cache Statistics</h2>
+            <div id="cache-stats" class="text-gray-400">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        let aiServiceManager = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const statusEl = document.getElementById('api-status');
+            const testBtn = document.getElementById('test-btn');
+            const testMessage = document.getElementById('test-message');
+            const testMode = document.getElementById('test-mode');
+            const testResult = document.getElementById('test-result');
+            const responseContent = document.getElementById('response-content');
+            const responseMetadata = document.getElementById('response-metadata');
+            const cacheStats = document.getElementById('cache-stats');
+
+            try {
+                // Wait for AI service manager to be initialized
+                await new Promise(resolve => {
+                    const checkInit = () => {
+                        if (window.aiServiceManager) {
+                            aiServiceManager = window.aiServiceManager;
+                            resolve();
+                        } else {
+                            setTimeout(checkInit, 100);
+                        }
+                    };
+                    checkInit();
+                });
+
+                if (aiServiceManager && aiServiceManager.isReady()) {
+                    statusEl.innerHTML = '<span class="text-green-400">✅ API Ready</span>';
+                    testBtn.disabled = false;
+                } else {
+                    statusEl.innerHTML = '<span class="text-red-400">❌ API Not Ready</span>';
+                }
+
+                // Update cache stats
+                updateCacheStats();
+
+            } catch (error) {
+                statusEl.innerHTML = `<span class="text-red-400">❌ Error: ${error.message}</span>`;
+            }
+
+            // Test button handler
+            testBtn.addEventListener('click', async () => {
+                const message = testMessage.value.trim();
+                const mode = testMode.value;
+
+                if (!message) {
+                    alert('Please enter a test message');
+                    return;
+                }
+
+                testBtn.disabled = true;
+                testBtn.textContent = 'Testing...';
+                testResult.classList.add('hidden');
+
+                try {
+                    // Set mode
+                    aiServiceManager.setMode(mode);
+
+                    // Send message
+                    const startTime = Date.now();
+                    const response = await aiServiceManager.sendMessage(message);
+                    const endTime = Date.now();
+
+                    // Display result
+                    responseContent.textContent = response.content;
+                    responseMetadata.innerHTML = `
+                        <strong>Processing Time:</strong> ${response.processingTime}ms<br>
+                        <strong>Total Time:</strong> ${endTime - startTime}ms<br>
+                        <strong>Mode:</strong> ${response.mode}<br>
+                        <strong>From Cache:</strong> ${response.fromCache ? 'Yes' : 'No'}<br>
+                        <strong>Tokens:</strong> ${response.usage?.totalTokenCount || 'N/A'}
+                    `;
+                    testResult.classList.remove('hidden');
+
+                    // Update cache stats
+                    updateCacheStats();
+
+                } catch (error) {
+                    responseContent.textContent = `Error: ${error.message}`;
+                    responseMetadata.textContent = '';
+                    testResult.classList.remove('hidden');
+                } finally {
+                    testBtn.disabled = false;
+                    testBtn.textContent = 'Test API';
+                }
+            });
+
+            function updateCacheStats() {
+                if (aiServiceManager) {
+                    const stats = aiServiceManager.getCacheStats();
+                    cacheStats.innerHTML = `
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div><strong>Total Requests:</strong> ${stats.totalRequests || 0}</div>
+                            <div><strong>Cache Hits:</strong> ${stats.hits || 0}</div>
+                            <div><strong>Cache Misses:</strong> ${stats.misses || 0}</div>
+                            <div><strong>Hit Rate:</strong> ${stats.hitRate || '0%'}</div>
+                            <div><strong>Total Entries:</strong> ${stats.totalEntries || 0}</div>
+                            <div><strong>Cache Size:</strong> ${stats.totalSize || '0 KB'}</div>
+                        </div>
+                    `;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

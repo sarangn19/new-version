@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Response Format</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">🔍 Debug API Response Format</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6">
+            <button id="test-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-4">
+                Test API Response Format
+            </button>
+            <div id="result" class="text-sm bg-gray-900 p-4 rounded h-96 overflow-y-auto font-mono"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('test-btn').addEventListener('click', async () => {
+            const resultEl = document.getElementById('result');
+            const apiKey = 'AIzaSyA4BG79A4QsdyA20NFVF9YVVvgt4wTJh8A';
+            const model = 'gemini-2.5-flash-preview-05-20';
+            
+            resultEl.innerHTML = 'Testing API response format...';
+            
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: "Hello! Say hi in one sentence." }]
+                            }]
+                        })
+                    }
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    resultEl.innerHTML = `
+                        <div class="text-green-400 mb-4">✅ API Response Received</div>
+                        <div class="mb-4"><strong>Full Response Structure:</strong></div>
+                        <pre class="text-xs text-gray-300 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>
+                        
+                        <div class="mt-6 mb-2"><strong>Response Analysis:</strong></div>
+                        <div class="text-sm space-y-1">
+                            <div>Has candidates: ${data.candidates ? '✅' : '❌'}</div>
+                            <div>Candidates is array: ${Array.isArray(data.candidates) ? '✅' : '❌'}</div>
+                            <div>Candidates length: ${data.candidates?.length || 0}</div>
+                            <div>Has first candidate: ${data.candidates?.[0] ? '✅' : '❌'}</div>
+                            <div>Has content: ${data.candidates?.[0]?.content ? '✅' : '❌'}</div>
+                            <div>Has parts: ${data.candidates?.[0]?.content?.parts ? '✅' : '❌'}</div>
+                            <div>Parts is array: ${Array.isArray(data.candidates?.[0]?.content?.parts) ? '✅' : '❌'}</div>
+                            <div>Parts length: ${data.candidates?.[0]?.content?.parts?.length || 0}</div>
+                            <div>Has text: ${data.candidates?.[0]?.content?.parts?.[0]?.text ? '✅' : '❌'}</div>
+                        </div>
+                        
+                        ${data.candidates?.[0]?.content?.parts?.[0]?.text ? 
+                            `<div class="mt-4"><strong>Extracted Text:</strong><br><div class="text-gray-300">"${data.candidates[0].content.parts[0].text}"</div></div>` : 
+                            '<div class="mt-4 text-red-400">❌ No text found in response</div>'
+                        }
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    resultEl.innerHTML = `
+                        <div class="text-red-400">❌ API Error: ${response.status}</div>
+                        <pre class="text-xs mt-2">${errorText}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `
+                    <div class="text-red-400">❌ Network Error: ${error.message}</div>
+                `;
+            }
+        });
+        
+        // Auto-run test
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('test-btn').click();
+        });
+    </script>
+</body>
+</html>

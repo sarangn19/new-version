@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tools Unit Tests</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <style>
+        .test-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .test-result {
+            animation: slideIn 0.3s ease-out;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+
+        .test-pass {
+            background-color: rgba(34, 197, 94, 0.2);
+            border-left-color: #22c55e;
+            color: #22c55e;
+        }
+
+        .test-fail {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-left-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .test-info {
+            background-color: rgba(59, 130, 246, 0.2);
+            border-left-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .test-warning {
+            background-color: rgba(245, 158, 11, 0.2);
+            border-left-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+    <!-- Navigation -->
+    <nav class="test-card p-4 m-4 rounded-xl">
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-white">Study Tools Unit Tests</h1>
+            <div class="flex gap-4">
+                <button onclick="runAllTests()" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                    Run All Tests
+                </button>
+                <button onclick="clearResults()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Clear Results
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 pb-8">
+        <!-- Test Progress -->
+        <div class="test-card p-6 mb-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-white mb-4">Test Progress</h2>
+            <div class="w-full bg-white/20 rounded-full h-4 mb-2">
+                <div id="progressBar" class="progress-bar h-4 rounded-full" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-sm text-white/70">
+                <span id="progressText">Ready to run tests</span>
+                <span id="progressCount">0/0</span>
+            </div>
+        </div>
+
+        <!-- Test Summary -->
+        <div class="test-card p-6 mb-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-white mb-4">Test Summary</h2>
+            <div id="testSummary" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div id="totalTests" class="text-2xl font-bold text-white">0</div>
+                    <div class="text-sm text-white/70">Total Tests</div>
+                </div>
+                <div class="text-center">
+                    <div id="passedTests" class="text-2xl font-bold text-green-400">0</div>
+                    <div class="text-sm text-white/70">Passed</div>
+                </div>
+                <div class="text-center">
+                    <div id="failedTests" class="text-2xl font-bold text-red-400">0</div>
+                    <div class="text-sm text-white/70">Failed</div>
+                </div>
+                <div class="text-center">
+                    <div id="successRate" class="text-2xl font-bold text-blue-400">0%</div>
+                    <div class="text-sm text-white/70">Success Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual Test Sections -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- PomodoroTimer Tests -->
+            <div class="test-card p-6 rounded-xl">
+                <h3 class="text-lg font-semibold text-white mb-4">PomodoroTimer Tests</h3>
+                <div class="space-y-2">
+                    <button onclick="testPomodoroTimer()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Run Timer Tests
+                    </button>
+                    <div id="pomodoroResults" class="space-y-1"></div>
+                </div>
+            </div>
+
+            <!-- StudyStreakTracker Tests -->
+            <div class="test-card p-6 rounded-xl">
+                <h3 class="text-lg font-semibold text-white mb-4">StudyStreakTracker Tests</h3>
+                <div class="space-y-2">
+                    <button onclick="testStudyStreakTracker()" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        Run Streak Tests
+                    </button>
+                    <div id="streakResults" class="space-y-1"></div>
+                </div>
+            </div>
+
+            <!-- GoalManager Tests -->
+            <div class="test-card p-6 rounded-xl">
+                <h3 class="text-lg font-semibold text-white mb-4">GoalManager Tests</h3>
+                <div class="space-y-2">
+                    <button onclick="testGoalManager()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        Run Goal Tests
+                    </button>
+                    <div id="goalResults" class="space-y-1"></div>
+                </div>
+            </div>
+
+            <!-- SpacedRepetitionEngine Tests -->
+            <div class="test-card p-6 rounded-xl">
+                <h3 class="text-lg font-semibold text-white mb-4">SpacedRepetitionEngine Tests</h3>
+                <div class="space-y-2">
+                    <button onclick="testSpacedRepetitionEngine()" class="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                        Run Algorithm Tests
+                    </button>
+                    <div id="spacedRepetitionResults" class="space-y-1"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Test Results -->
+        <div class="test-card p-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-white mb-4">Detailed Test Results</h2>
+            <div id="detailedResults" class="space-y-2 max-h-96 overflow-y-auto">
+                <p class="text-white/70">Test results will appear here...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/study-tools.js"></script>
+    <script>
+        // Test Framework
+        class StudyToolsTestFramework {
+            constructor() {
+                this.results = [];
+                this.currentTest = '';
+                this.testCount = 0;
+                this.passedCount = 0;
+                this.failedCount = 0;
+            }
+
+            startTest(testName) {
+                this.currentTest = testName;
+                this.addResult(`Starting ${testName} tests...`, 'info');
+            }
+
+            assert(condition, message) {
+                this.testCount++;
+                const result = {
+                    test: this.currentTest,
+                    passed: condition,
+                    message: message,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                
+                if (condition) {
+                    this.passedCount++;
+                } else {
+                    this.failedCount++;
+                }
+                
+                this.results.push(result);
+                this.addResult(
+                    `${condition ? '✓' : '✗'} ${message}`,
+                    condition ? 'pass' : 'fail'
+                );
+                
+                this.updateProgress();
+                return condition;
+            }
+
+            assertEqual(actual, expected, message) {
+                const condition = actual === expected;
+                const fullMessage = `${message} (Expected: ${expected}, Got: ${actual})`;
+                return this.assert(condition, fullMessage);
+            }
+
+            assertTrue(condition, message) {
+                return this.assert(condition === true, message);
+            }
+
+            assertFalse(condition, message) {
+                return this.assert(condition === false, message);
+            }
+
+            assertThrows(fn, message) {
+                try {
+                    fn();
+                    return this.assert(false, `${message} (Expected exception but none was thrown)`);
+                } catch (error) {
+                    return this.assert(true, `${message} (Correctly threw: ${error.message})`);
+                }
+            }
+
+            addResult(message, type = 'info') {
+                const container = document.getElementById('detailedResults');
+                const div = document.createElement('div');
+                div.className = `test-result test-${type}`;
+                div.innerHTML = `
+                    <span class="font-medium">${type.toUpperCase()}</span>
+                    <span class="ml-2">${message}</span>
+                    <span class="ml-auto text-sm opacity-70">${new Date().toLocaleTimeString()}</span>
+                `;
+                container.appendChild(div);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            updateProgress() {
+                const progress = this.testCount > 0 ? (this.testCount / this.getExpectedTestCount()) * 100 : 0;
+                document.getElementById('progressBar').style.width = `${Math.min(progress, 100)}%`;
+                document.getElementById('progressText').textContent = 
+                    this.testCount === 0 ? 'Ready to run tests' : 
+                    progress >= 100 ? 'All tests completed' : 'Running tests...';
+                document.getElementById('progressCount').textContent = `${this.testCount}/${this.getExpectedTestCount()}`;
+                
+                // Update summary
+                document.getElementById('totalTests').textContent = this.testCount;
+                document.getElementById('passedTests').textContent = this.passedCount;
+                document.getElementById('failedTests').textContent = this.failedCount;
+                document.getElementById('successRate').textContent = 
+                    this.testCount > 0 ? `${Math.round((this.passedCount / this.testCount) * 100)}%` : '0%';
+            }
+
+            getExpectedTestCount() {
+                // Approximate number of tests we expect to run
+                return 50;
+            }
+
+            clear() {
+                this.results = [];
+                this.testCount = 0;
+                this.passedCount = 0;
+                this.failedCount = 0;
+                document.getElementById('detailedResults').innerHTML = '<p class="text-white/70">Test results will appear here...</p>';
+                this.updateProgress();
+            }
+        }
+
+        const testFramework = new StudyToolsTestFramework();
+
+        // Initialize test environment
+        let pomodoroTimer, streakTracker, goalManager, spacedRepetitionEngine;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize profile manager
+            window.profileManager = new ProfileManager();
+            
+            // Initialize study tools
+            pomodoroTimer = new PomodoroTimer();
+            streakTracker = new StudyStreakTracker();
+            goalManager = new GoalManager();
+            spacedRepetitionEngine = new SpacedRepetitionEngine();
+            
+            testFramework.addResult('Study tools initialized successfully', 'info');
+        });
+
+        // PomodoroTimer Tests
+        function testPomodoroTimer() {
+            testFramework.startTest('PomodoroTimer');
+            
+            // Test initialization
+            testFramework.assertTrue(pomodoroTimer instanceof PomodoroTimer, 'PomodoroTimer should be properly initialized');
+            testFramework.assertEqual(pomodoroTimer.workTime, 25, 'Default work time should be 25 minutes');
+            testFramework.assertEqual(pomodoroTimer.breakTime, 5, 'Default break time should be 5 minutes');
+            testFramework.assertEqual(pomodoroTimer.currentPhase, 'work', 'Initial phase should be work');
+            testFramework.assertFalse(pomodoroTimer.isRunning, 'Timer should not be running initially');
+            
+            // Test timer start
+            pomodoroTimer.start();
+            testFramework.assertTrue(pomodoroTimer.isRunning, 'Timer should be running after start');
+            testFramework.assertFalse(pomodoroTimer.isPaused, 'Timer should not be paused after start');
+            
+            // Test timer pause
+            pomodoroTimer.pause();
+            testFramework.assertTrue(pomodoroTimer.isPaused, 'Timer should be paused after pause');
+            testFramework.assertTrue(pomodoroTimer.isRunning, 'Timer should still be running (but paused)');
+            
+            // Test timer stop
+            pomodoroTimer.stop();
+            testFramework.assertFalse(pomodoroTimer.isRunning, 'Timer should not be running after stop');
+            testFramework.assertFalse(pomodoroTimer.isPaused, 'Timer should not be paused after stop');
+            
+            // Test settings update
+            pomodoroTimer.updateSettings({ workTime: 30, breakTime: 10 });
+            testFramework.assertEqual(pomodoroTimer.workTime, 30, 'Work time should be updated to 30 minutes');
+            testFramework.assertEqual(pomodoroTimer.breakTime, 10, 'Break time should be updated to 10 minutes');
+            
+            // Test status retrieval
+            const status = pomodoroTimer.getStatus();
+            testFramework.assertTrue(typeof status === 'object', 'getStatus should return an object');
+            testFramework.assertTrue('currentTime' in status, 'Status should include currentTime');
+            testFramework.assertTrue('currentPhase' in status, 'Status should include currentPhase');
+            testFramework.assertTrue('isRunning' in status, 'Status should include isRunning');
+            
+            // Test time formatting
+            const formattedTime = pomodoroTimer.formatTime(125);
+            testFramework.assertEqual(formattedTime, '02:05', 'Time formatting should work correctly');
+            
+            // Test session statistics
+            const sessionStats = pomodoroTimer.getSessionStats();
+            testFramework.assertTrue(typeof sessionStats === 'object', 'getSessionStats should return an object');
+            testFramework.assertTrue('completedSessions' in sessionStats, 'Session stats should include completedSessions');
+            
+            testFramework.addResult('PomodoroTimer tests completed', 'info');
+        }
+
+        // StudyStreakTracker Tests
+        function testStudyStreakTracker() {
+            testFramework.startTest('StudyStreakTracker');
+            
+            // Test initialization
+            testFramework.assertTrue(streakTracker instanceof StudyStreakTracker, 'StudyStreakTracker should be properly initialized');
+            
+            // Test initial streak status
+            const initialStatus = streakTracker.getStreakStatus();
+            testFramework.assertTrue(typeof initialStatus === 'object', 'getStreakStatus should return an object');
+            testFramework.assertTrue('currentStreak' in initialStatus, 'Status should include currentStreak');
+            testFramework.assertTrue('longestStreak' in initialStatus, 'Status should include longestStreak');
+            testFramework.assertTrue('totalStudyDays' in initialStatus, 'Status should include totalStudyDays');
+            
+            // Test recording study session
+            const result = streakTracker.recordStudySession(60); // 60 minutes
+            testFramework.assertTrue(typeof result === 'object', 'recordStudySession should return status object');
+            
+            // Test streak calculation after first session
+            const statusAfterFirst = streakTracker.getStreakStatus();
+            testFramework.assertTrue(statusAfterFirst.currentStreak >= 1, 'Current streak should be at least 1 after first session');
+            testFramework.assertTrue(statusAfterFirst.studiedToday, 'Should show studied today after recording session');
+            
+            // Test streak history
+            const history = streakTracker.getStreakHistory(7);
+            testFramework.assertTrue(Array.isArray(history), 'getStreakHistory should return an array');
+            testFramework.assertEqual(history.length, 7, 'History should contain 7 days');
+            testFramework.assertTrue('date' in history[0], 'History entries should include date');
+            testFramework.assertTrue('minutes' in history[0], 'History entries should include minutes');
+            
+            // Test weekly progress
+            const weeklyProgress = streakTracker.getWeeklyProgress();
+            testFramework.assertTrue(typeof weeklyProgress === 'object', 'getWeeklyProgress should return an object');
+            testFramework.assertTrue('daysStudied' in weeklyProgress, 'Weekly progress should include daysStudied');
+            testFramework.assertTrue('totalMinutes' in weeklyProgress, 'Weekly progress should include totalMinutes');
+            
+            // Test motivational message
+            const message = streakTracker.getMotivationalMessage();
+            testFramework.assertTrue(typeof message === 'string', 'getMotivationalMessage should return a string');
+            testFramework.assertTrue(message.length > 0, 'Motivational message should not be empty');
+            
+            // Test analytics
+            const analytics = streakTracker.getAnalytics();
+            testFramework.assertTrue(typeof analytics === 'object', 'getAnalytics should return an object');
+            testFramework.assertTrue('currentStreak' in analytics, 'Analytics should include currentStreak');
+            testFramework.assertTrue('totalMinutes' in analytics, 'Analytics should include totalMinutes');
+            
+            // Test streak reset
+            const originalStreak = streakTracker.getStreakStatus().currentStreak;
+            streakTracker.resetStreak();
+            const resetStatus = streakTracker.getStreakStatus();
+            testFramework.assertEqual(resetStatus.currentStreak, 0, 'Streak should be 0 after reset');
+            
+            testFramework.addResult('StudyStreakTracker tests completed', 'info');
+        }
+
+        // GoalManager Tests
+        function testGoalManager() {
+            testFramework.startTest('GoalManager');
+            
+            // Test initialization
+            testFramework.assertTrue(goalManager instanceof GoalManager, 'GoalManager should be properly initialized');
+            
+            // Test goal creation
+            const goalData = {
+                title: 'Test Study Goal',
+                description: 'A test goal for unit testing',
+                type: 'study_time',
+                target: 60,
+                unit: 'hours',
+                timeframe: 'monthly',
+                deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                priority: 'high',
+                category: 'Testing'
+            };
+            
+            const createdGoal = goalManager.createGoal(goalData);
+            testFramework.assertTrue(typeof createdGoal === 'object', 'createGoal should return a goal object');
+            testFramework.assertTrue('id' in createdGoal, 'Created goal should have an ID');
+            testFramework.assertEqual(createdGoal.title, goalData.title, 'Goal title should match input');
+            testFramework.assertEqual(createdGoal.target, goalData.target, 'Goal target should match input');
+            testFramework.assertEqual(createdGoal.status, 'active', 'New goal should have active status');
+            
+            // Test SMART goal validation
+            const invalidGoalData = {
+                title: 'X', // Too short
+                type: 'invalid_type',
+                target: -5, // Invalid target
+                deadline: '2020-01-01' // Past deadline
+            };
+            
+            testFramework.assertThrows(
+                () => goalManager.createGoal(invalidGoalData),
+                'Should throw error for invalid goal data'
+            );
+            
+            // Test goal retrieval
+            const retrievedGoal = goalManager.getGoal(createdGoal.id);
+            testFramework.assertTrue(retrievedGoal !== null, 'Should be able to retrieve created goal');
+            testFramework.assertEqual(retrievedGoal.id, createdGoal.id, 'Retrieved goal should have same ID');
+            
+            // Test progress update
+            const updatedGoal = goalManager.updateGoalProgress(createdGoal.id, 30, 'Test progress update');
+            testFramework.assertEqual(updatedGoal.currentValue, 30, 'Goal current value should be updated');
+            testFramework.assertEqual(updatedGoal.progress, 50, 'Goal progress should be 50% (30/60)');
+            
+            // Test goal completion
+            goalManager.updateGoalProgress(createdGoal.id, 60);
+            const completedGoal = goalManager.getGoal(createdGoal.id);
+            testFramework.assertEqual(completedGoal.status, 'completed', 'Goal should be completed when target reached');
+            testFramework.assertEqual(completedGoal.progress, 100, 'Completed goal should have 100% progress');
+            
+            // Test goal filtering
+            const allGoals = goalManager.getGoals();
+            testFramework.assertTrue(Array.isArray(allGoals), 'getGoals should return an array');
+            
+            const activeGoals = goalManager.getGoals({ status: 'active' });
+            testFramework.assertTrue(Array.isArray(activeGoals), 'Filtered goals should return an array');
+            
+            const completedGoals = goalManager.getGoals({ status: 'completed' });
+            testFramework.assertTrue(completedGoals.length >= 1, 'Should have at least one completed goal');
+            
+            // Test analytics
+            const analytics = goalManager.getGoalAnalytics();
+            testFramework.assertTrue(typeof analytics === 'object', 'getGoalAnalytics should return an object');
+            testFramework.assertTrue('totalGoals' in analytics, 'Analytics should include totalGoals');
+            testFramework.assertTrue('completedGoals' in analytics, 'Analytics should include completedGoals');
+            testFramework.assertTrue('completionRate' in analytics, 'Analytics should include completionRate');
+            
+            // Test goal suggestions
+            const suggestions = goalManager.getGoalSuggestions();
+            testFramework.assertTrue(Array.isArray(suggestions), 'getGoalSuggestions should return an array');
+            
+            testFramework.addResult('GoalManager tests completed', 'info');
+        }
+
+        // SpacedRepetitionEngine Tests
+        function testSpacedRepetitionEngine() {
+            testFramework.startTest('SpacedRepetitionEngine');
+            
+            // Test initialization
+            testFramework.assertTrue(spacedRepetitionEngine instanceof SpacedRepetitionEngine, 'SpacedRepetitionEngine should be properly initialized');
+            testFramework.assertEqual(spacedRepetitionEngine.algorithm, 'sm2', 'Should use SuperMemo 2 algorithm');
+            testFramework.assertEqual(spacedRepetitionEngine.defaultEaseFactor, 2.5, 'Default ease factor should be 2.5');
+            
+            // Test item addition
+            const itemData = {
+                content: 'What is the capital of France?',
+                subject: 'Geography',
+                chapter: 'European Capitals',
+                difficulty: 'easy',
+                type: 'mcq'
+            };
+            
+            const addedItem = spacedRepetitionEngine.addItem(itemData);
+            testFramework.assertTrue(typeof addedItem === 'object', 'addItem should return an item object');
+            testFramework.assertTrue('id' in addedItem, 'Added item should have an ID');
+            testFramework.assertEqual(addedItem.content, itemData.content, 'Item content should match input');
+            testFramework.assertEqual(addedItem.status, 'new', 'New item should have "new" status');
+            testFramework.assertEqual(addedItem.easeFactor, 2.5, 'New item should have default ease factor');
+            testFramework.assertEqual(addedItem.repetitions, 0, 'New item should have 0 repetitions');
+            
+            // Test review processing - correct answer
+            const reviewResult = spacedRepetitionEngine.processReview(addedItem.id, 4, 30); // Quality 4, 30 seconds
+            testFramework.assertTrue(typeof reviewResult === 'object', 'processReview should return a result object');
+            testFramework.assertTrue('item' in reviewResult, 'Review result should include updated item');
+            testFramework.assertTrue('session' in reviewResult, 'Review result should include session data');
+            
+            const reviewedItem = reviewResult.item;
+            testFramework.assertEqual(reviewedItem.totalReviews, 1, 'Item should have 1 total review');
+            testFramework.assertEqual(reviewedItem.correctReviews, 1, 'Item should have 1 correct review');
+            testFramework.assertEqual(reviewedItem.repetitions, 1, 'Item should have 1 repetition after correct answer');
+            testFramework.assertTrue(reviewedItem.interval > 0, 'Item should have positive interval after review');
+            
+            // Test review processing - incorrect answer
+            spacedRepetitionEngine.processReview(addedItem.id, 1); // Quality 1 (incorrect)
+            const itemAfterIncorrect = spacedRepetitionEngine.getItem(addedItem.id);
+            testFramework.assertEqual(itemAfterIncorrect.repetitions, 0, 'Repetitions should reset to 0 after incorrect answer');
+            testFramework.assertEqual(itemAfterIncorrect.status, 'learning', 'Status should be "learning" after incorrect answer');
+            
+            // Test review queue
+            spacedRepetitionEngine.updateReviewQueue();
+            const reviewQueue = spacedRepetitionEngine.getReviewQueue();
+            testFramework.assertTrue(Array.isArray(reviewQueue), 'getReviewQueue should return an array');
+            
+            // Test queue filtering
+            const filteredQueue = spacedRepetitionEngine.getReviewQueue({ limit: 5 });
+            testFramework.assertTrue(filteredQueue.length <= 5, 'Filtered queue should respect limit');
+            
+            const subjectQueue = spacedRepetitionEngine.getReviewQueue({ subject: 'Geography' });
+            testFramework.assertTrue(Array.isArray(subjectQueue), 'Subject-filtered queue should return an array');
+            
+            // Test statistics
+            const stats = spacedRepetitionEngine.getStatistics();
+            testFramework.assertTrue(typeof stats === 'object', 'getStatistics should return an object');
+            testFramework.assertTrue('queueStats' in stats, 'Statistics should include queueStats');
+            testFramework.assertTrue('performanceStats' in stats, 'Statistics should include performanceStats');
+            
+            const queueStats = stats.queueStats;
+            testFramework.assertTrue('total' in queueStats, 'Queue stats should include total');
+            testFramework.assertTrue('new' in queueStats, 'Queue stats should include new items count');
+            testFramework.assertTrue('learning' in queueStats, 'Queue stats should include learning items count');
+            
+            // Test algorithm correctness - SuperMemo 2
+            const testItem2 = spacedRepetitionEngine.addItem({
+                content: 'Test algorithm question',
+                subject: 'Test'
+            });
+            
+            // First correct review
+            spacedRepetitionEngine.processReview(testItem2.id, 4);
+            let item = spacedRepetitionEngine.getItem(testItem2.id);
+            testFramework.assertEqual(item.repetitions, 1, 'First correct review should set repetitions to 1');
+            testFramework.assertTrue(item.interval >= 1, 'First interval should be at least 1 day');
+            
+            // Second correct review
+            spacedRepetitionEngine.processReview(testItem2.id, 4);
+            item = spacedRepetitionEngine.getItem(testItem2.id);
+            testFramework.assertEqual(item.repetitions, 2, 'Second correct review should set repetitions to 2');
+            testFramework.assertTrue(item.interval >= 6, 'Second interval should be at least 6 days');
+            
+            // Test item suspension
+            spacedRepetitionEngine.suspendItem(testItem2.id);
+            const suspendedItem = spacedRepetitionEngine.getItem(testItem2.id);
+            testFramework.assertEqual(suspendedItem.status, 'suspended', 'Item should be suspended');
+            
+            // Test item unsuspension
+            spacedRepetitionEngine.unsuspendItem(testItem2.id);
+            const unsuspendedItem = spacedRepetitionEngine.getItem(testItem2.id);
+            testFramework.assertTrue(unsuspendedItem.status !== 'suspended', 'Item should not be suspended after unsuspend');
+            
+            // Test data export/import
+            const exportedData = spacedRepetitionEngine.exportData();
+            testFramework.assertTrue(typeof exportedData === 'object', 'exportData should return an object');
+            testFramework.assertTrue('items' in exportedData, 'Exported data should include items');
+            testFramework.assertTrue('sessions' in exportedData, 'Exported data should include sessions');
+            
+            testFramework.addResult('SpacedRepetitionEngine tests completed', 'info');
+        }
+
+        // Run all tests
+        function runAllTests() {
+            testFramework.clear();
+            testFramework.addResult('Starting comprehensive study tools test suite...', 'info');
+            
+            setTimeout(() => {
+                try {
+                    testPomodoroTimer();
+                    testStudyStreakTracker();
+                    testGoalManager();
+                    testSpacedRepetitionEngine();
+                    
+                    const summary = {
+                        total: testFramework.testCount,
+                        passed: testFramework.passedCount,
+                        failed: testFramework.failedCount,
+                        successRate: testFramework.testCount > 0 ? 
+                            Math.round((testFramework.passedCount / testFramework.testCount) * 100) : 0
+                    };
+                    
+                    testFramework.addResult(
+                        `Test suite completed: ${summary.passed}/${summary.total} tests passed (${summary.successRate}% success rate)`,
+                        summary.failed === 0 ? 'pass' : 'warning'
+                    );
+                    
+                    if (summary.failed === 0) {
+                        testFramework.addResult('🎉 All tests passed! Study tools are working correctly.', 'pass');
+                    } else {
+                        testFramework.addResult(`⚠️ ${summary.failed} test(s) failed. Please review the results above.`, 'fail');
+                    }
+                    
+                } catch (error) {
+                    testFramework.addResult(`Test suite error: ${error.message}`, 'fail');
+                }
+            }, 100);
+        }
+
+        function clearResults() {
+            testFramework.clear();
+        }
+
+        // Initialize
+        testFramework.addResult('Study Tools Unit Test Suite loaded. Click "Run All Tests" to begin comprehensive testing.', 'info');
+    </script>
+</body>
+</html>

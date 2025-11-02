@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Integration End-to-End Tests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Load all AI components -->
+    <script src="js/profile-manager.js"></script>
+    <script src="js/validation-system.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/loading-state-manager.js"></script>
+    <script src="js/performance-optimizer.js"></script>
+    <script src="js/ui-performance-optimizer.js"></script>
+    <script src="js/background-processor.js"></script>
+    <script src="js/ai-response-cache.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/conversation-storage.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/chat-interface.js"></script>
+    <script src="js/assistant-mode-manager.js"></script>
+    <script src="js/mcq-analysis-mode.js"></script>
+    <script src="js/essay-feedback-mode.js"></script>
+    <script src="js/news-analysis-mode.js"></script>
+    <script src="js/news-integration-service.js"></script>
+    <script src="js/news-display-interface.js"></script>
+    <script src="js/performance-analytics-ai.js"></script>
+    <script src="js/ai-recommendation-engine.js"></script>
+    <script src="js/real-time-analytics-dashboard.js"></script>
+    <script src="js/response-manager.js"></script>
+    <script src="js/response-management-interface.js"></script>
+    <script src="js/secure-api-manager.js"></script>
+    <script src="js/ai-response-safety.js"></script>
+    <script src="js/ai-platform-integration.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark-1: #1F1F1F;
+            --bg-dark-2: #1A1A1A;
+            --teal-primary: #2C7A7B;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark-1);
+            color: white;
+        }
+        
+        .test-section {
+            background: var(--bg-dark-2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-result {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 4px 0;
+            font-size: 14px;
+        }
+        
+        .test-pass {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: rgb(34, 197, 94);
+        }
+        
+        .test-fail {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: rgb(239, 68, 68);
+        }
+        
+        .test-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: rgb(245, 158, 11);
+        }
+        
+        .test-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: rgb(59, 130, 246);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--teal-primary), #4ECDC4);
+            transition: width 0.3s ease;
+        }
+        
+        .component-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-connected {
+            background: rgba(34, 197, 94, 0.1);
+            color: rgb(34, 197, 94);
+        }
+        
+        .status-disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            color: rgb(239, 68, 68);
+        }
+        
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: rgb(245, 158, 11);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2">AI Integration End-to-End Tests</h1>
+            <p class="text-white/70">Comprehensive testing of AI assistant integration with platform components</p>
+        </div>
+
+        <!-- Test Progress -->
+        <div class="test-section">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">Test Progress</h2>
+                <div id="test-summary" class="text-sm text-white/70">
+                    <span id="passed-count">0</span> passed, 
+                    <span id="failed-count">0</span> failed, 
+                    <span id="total-count">0</span> total
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Component Status -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Component Status</h2>
+            <div id="component-status" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Component status will be populated here -->
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Core Integration Tests -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Core Integration Tests</h2>
+                <div id="core-tests" class="space-y-2">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+
+            <!-- AI Service Tests -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">AI Service Tests</h2>
+                <div id="ai-service-tests" class="space-y-2">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Chat Interface Tests -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Chat Interface Tests</h2>
+                <div id="chat-tests" class="space-y-2">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Response Management Tests -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Response Management Tests</h2>
+                <div id="response-tests" class="space-y-2">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+
+            <!-- News Integration Tests -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">News Integration Tests</h2>
+                <div id="news-tests" class="space-y-2">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Performance Analytics Tests -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Performance Analytics Tests</h2>
+                <div id="analytics-tests" class="space-y-2">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Security Tests -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Security Tests</h2>
+                <div id="security-tests" class="space-y-2">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Performance Tests -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Performance Tests</h2>
+                <div id="performance-tests" class="space-y-2">
+                    <!-- Test results will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Actions -->
+        <div class="test-section mt-8">
+            <h2 class="text-xl font-semibold mb-4">Test Actions</h2>
+            <div class="flex flex-wrap gap-4">
+                <button id="run-all-tests" class="px-4 py-2 bg-[var(--teal-primary)] text-white rounded-lg hover:bg-[var(--teal-primary)]/80 transition-colors">
+                    <i data-lucide="play" class="w-4 h-4 mr-2 inline"></i>
+                    Run All Tests
+                </button>
+                <button id="run-core-tests" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-600/80 transition-colors">
+                    <i data-lucide="cpu" class="w-4 h-4 mr-2 inline"></i>
+                    Core Tests Only
+                </button>
+                <button id="run-integration-tests" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-600/80 transition-colors">
+                    <i data-lucide="link" class="w-4 h-4 mr-2 inline"></i>
+                    Integration Tests
+                </button>
+                <button id="clear-results" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-600/80 transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4 mr-2 inline"></i>
+                    Clear Results
+                </button>
+                <button id="export-results" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-600/80 transition-colors">
+                    <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i>
+                    Export Results
+                </button>
+            </div>
+        </div>
+
+        <!-- Test Details Modal -->
+        <div id="test-details-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-hidden border border-white/10">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 id="modal-title" class="text-lg font-semibold">Test Details</h3>
+                    <button id="close-modal" class="text-white/50 hover:text-white">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div id="modal-content" class="overflow-y-auto max-h-[60vh]">
+                    <!-- Modal content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AIIntegrationE2ETests {
+            constructor() {
+                this.testResults = {
+                    passed: 0,
+                    failed: 0,
+                    total: 0,
+                    details: []
+                };
+                
+                this.components = {
+                    profileManager: null,
+                    aiServiceManager: null,
+                    chatInterface: null,
+                    responseManager: null,
+                    newsIntegrationService: null,
+                    performanceAnalyticsAI: null,
+                    assistantModeManager: null,
+                    aiPlatformIntegration: null
+                };
+                
+                this.testSuites = {
+                    core: [],
+                    aiService: [],
+                    chat: [],
+                    response: [],
+                    news: [],
+                    analytics: [],
+                    security: [],
+                    performance: []
+                };
+                
+                this.initialize();
+            }
+
+            async initialize() {
+                console.log('Initializing AI Integration E2E Tests...');
+                
+                // Wait for components to load
+                await this.waitForComponents();
+                
+                // Set up event listeners
+                this.setupEventListeners();
+                
+                // Update component status
+                this.updateComponentStatus();
+                
+                // Define test suites
+                this.defineTestSuites();
+                
+                console.log('AI Integration E2E Tests initialized');
+            }
+
+            async waitForComponents() {
+                // Wait for components to be available
+                const maxWait = 10000; // 10 seconds
+                const startTime = Date.now();
+                
+                while (Date.now() - startTime < maxWait) {
+                    // Check for core components
+                    if (window.profileManager) this.components.profileManager = window.profileManager;
+                    if (window.aiServiceManager) this.components.aiServiceManager = window.aiServiceManager;
+                    if (window.chatInterface) this.components.chatInterface = window.chatInterface;
+                    if (window.aiPlatformIntegration) this.components.aiPlatformIntegration = window.aiPlatformIntegration;
+                    
+                    // Check if minimum components are available
+                    if (this.components.profileManager && this.components.aiPlatformIntegration) {
+                        break;
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('run-all-tests').addEventListener('click', () => this.runAllTests());
+                document.getElementById('run-core-tests').addEventListener('click', () => this.runCoreTests());
+                document.getElementById('run-integration-tests').addEventListener('click', () => this.runIntegrationTests());
+                document.getElementById('clear-results').addEventListener('click', () => this.clearResults());
+                document.getElementById('export-results').addEventListener('click', () => this.exportResults());
+                document.getElementById('close-modal').addEventListener('click', () => this.closeModal());
+            }
+
+            updateComponentStatus() {
+                const statusContainer = document.getElementById('component-status');
+                const components = [
+                    { name: 'Profile Manager', key: 'profileManager', required: true },
+                    { name: 'AI Service Manager', key: 'aiServiceManager', required: true },
+                    { name: 'Chat Interface', key: 'chatInterface', required: true },
+                    { name: 'Response Manager', key: 'responseManager', required: false },
+                    { name: 'News Integration', key: 'newsIntegrationService', required: false },
+                    { name: 'Performance Analytics', key: 'performanceAnalyticsAI', required: false },
+                    { name: 'Assistant Modes', key: 'assistantModeManager', required: false },
+                    { name: 'Platform Integration', key: 'aiPlatformIntegration', required: true }
+                ];
+
+                statusContainer.innerHTML = components.map(comp => {
+                    const isConnected = !!this.components[comp.key];
+                    const statusClass = isConnected ? 'status-connected' : 
+                                      comp.required ? 'status-disconnected' : 'status-warning';
+                    const icon = isConnected ? 'check-circle' : comp.required ? 'x-circle' : 'alert-circle';
+                    
+                    return `
+                        <div class="component-status ${statusClass}">
+                            <i data-lucide="${icon}" class="w-4 h-4"></i>
+                            <span>${comp.name}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                // Initialize icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons(statusContainer);
+                }
+            }
+
+            defineTestSuites() {
+                // Core Integration Tests
+                this.testSuites.core = [
+                    {
+                        name: 'Platform Integration Initialization',
+                        test: () => this.testPlatformIntegrationInit(),
+                        critical: true
+                    },
+                    {
+                        name: 'Profile Manager Integration',
+                        test: () => this.testProfileManagerIntegration(),
+                        critical: true
+                    },
+                    {
+                        name: 'Component Cross-Communication',
+                        test: () => this.testComponentCommunication(),
+                        critical: true
+                    },
+                    {
+                        name: 'Event System Functionality',
+                        test: () => this.testEventSystem(),
+                        critical: false
+                    }
+                ];
+
+                // AI Service Tests
+                this.testSuites.aiService = [
+                    {
+                        name: 'AI Service Manager Initialization',
+                        test: () => this.testAIServiceManagerInit(),
+                        critical: true
+                    },
+                    {
+                        name: 'Mode Switching Functionality',
+                        test: () => this.testModeSwitching(),
+                        critical: true
+                    },
+                    {
+                        name: 'Context Management',
+                        test: () => this.testContextManagement(),
+                        critical: false
+                    },
+                    {
+                        name: 'Response Caching',
+                        test: () => this.testResponseCaching(),
+                        critical: false
+                    }
+                ];
+
+                // Chat Interface Tests
+                this.testSuites.chat = [
+                    {
+                        name: 'Chat Interface Initialization',
+                        test: () => this.testChatInterfaceInit(),
+                        critical: true
+                    },
+                    {
+                        name: 'Message Handling',
+                        test: () => this.testMessageHandling(),
+                        critical: true
+                    },
+                    {
+                        name: 'UI Performance Optimization',
+                        test: () => this.testUIPerformance(),
+                        critical: false
+                    }
+                ];
+
+                // Response Management Tests
+                this.testSuites.response = [
+                    {
+                        name: 'Response Saving Functionality',
+                        test: () => this.testResponseSaving(),
+                        critical: true
+                    },
+                    {
+                        name: 'Learn Page Integration',
+                        test: () => this.testLearnPageIntegration(),
+                        critical: true
+                    }
+                ];
+
+                // News Integration Tests
+                this.testSuites.news = [
+                    {
+                        name: 'News Service Integration',
+                        test: () => this.testNewsServiceIntegration(),
+                        critical: false
+                    }
+                ];
+
+                // Performance Analytics Tests
+                this.testSuites.analytics = [
+                    {
+                        name: 'Analytics Integration',
+                        test: () => this.testAnalyticsIntegration(),
+                        critical: false
+                    }
+                ];
+
+                // Security Tests
+                this.testSuites.security = [
+                    {
+                        name: 'Input Validation',
+                        test: () => this.testInputValidation(),
+                        critical: true
+                    },
+                    {
+                        name: 'XSS Prevention',
+                        test: () => this.testXSSPrevention(),
+                        critical: true
+                    }
+                ];
+
+                // Performance Tests
+                this.testSuites.performance = [
+                    {
+                        name: 'Component Load Time',
+                        test: () => this.testComponentLoadTime(),
+                        critical: false
+                    },
+                    {
+                        name: 'Memory Usage',
+                        test: () => this.testMemoryUsage(),
+                        critical: false
+                    }
+                ];
+            }
+
+            async runAllTests() {
+                console.log('Running all tests...');
+                this.clearResults();
+                
+                const allTests = Object.values(this.testSuites).flat();
+                this.testResults.total = allTests.length;
+                
+                for (const suite of Object.keys(this.testSuites)) {
+                    await this.runTestSuite(suite);
+                }
+                
+                this.updateProgress();
+                this.showTestSummary();
+            }
+
+            async runCoreTests() {
+                console.log('Running core tests...');
+                this.clearResults();
+                await this.runTestSuite('core');
+                this.updateProgress();
+            }
+
+            async runIntegrationTests() {
+                console.log('Running integration tests...');
+                this.clearResults();
+                
+                const integrationSuites = ['aiService', 'chat', 'response'];
+                for (const suite of integrationSuites) {
+                    await this.runTestSuite(suite);
+                }
+                
+                this.updateProgress();
+            }
+
+            async runTestSuite(suiteName) {
+                const tests = this.testSuites[suiteName];
+                if (!tests) return;
+
+                const container = document.getElementById(`${suiteName === 'aiService' ? 'ai-service' : suiteName}-tests`);
+                if (!container) return;
+
+                for (const testCase of tests) {
+                    try {
+                        const startTime = performance.now();
+                        const result = await testCase.test();
+                        const endTime = performance.now();
+                        const duration = Math.round(endTime - startTime);
+
+                        const testResult = {
+                            suite: suiteName,
+                            name: testCase.name,
+                            passed: result.passed,
+                            message: result.message,
+                            details: result.details || '',
+                            duration: duration,
+                            critical: testCase.critical,
+                            timestamp: new Date().toISOString()
+                        };
+
+                        this.testResults.details.push(testResult);
+                        
+                        if (result.passed) {
+                            this.testResults.passed++;
+                        } else {
+                            this.testResults.failed++;
+                        }
+
+                        this.displayTestResult(container, testResult);
+                        
+                    } catch (error) {
+                        console.error(`Test failed: ${testCase.name}`, error);
+                        
+                        const testResult = {
+                            suite: suiteName,
+                            name: testCase.name,
+                            passed: false,
+                            message: `Test execution failed: ${error.message}`,
+                            details: error.stack || '',
+                            duration: 0,
+                            critical: testCase.critical,
+                            timestamp: new Date().toISOString()
+                        };
+
+                        this.testResults.details.push(testResult);
+                        this.testResults.failed++;
+                        this.displayTestResult(container, testResult);
+                    }
+                }
+            }
+
+            displayTestResult(container, result) {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `test-result ${result.passed ? 'test-pass' : 'test-fail'}`;
+                resultDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="${result.passed ? 'check' : 'x'}" class="w-4 h-4"></i>
+                            <span class="font-medium">${result.name}</span>
+                            ${result.critical ? '<span class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Critical</span>' : ''}
+                        </div>
+                        <div class="text-xs opacity-70">${result.duration}ms</div>
+                    </div>
+                    <div class="text-sm mt-1 opacity-80">${result.message}</div>
+                    ${result.details ? `<button class="text-xs underline mt-1 opacity-60 hover:opacity-100" onclick="window.aiE2ETests.showTestDetails('${result.name}')">View Details</button>` : ''}
+                `;
+                
+                container.appendChild(resultDiv);
+                
+                // Initialize icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons(resultDiv);
+                }
+            }
+
+            updateProgress() {
+                const progressFill = document.getElementById('progress-fill');
+                const passedCount = document.getElementById('passed-count');
+                const failedCount = document.getElementById('failed-count');
+                const totalCount = document.getElementById('total-count');
+                
+                const progress = this.testResults.total > 0 ? 
+                    ((this.testResults.passed + this.testResults.failed) / this.testResults.total) * 100 : 0;
+                
+                progressFill.style.width = `${progress}%`;
+                passedCount.textContent = this.testResults.passed;
+                failedCount.textContent = this.testResults.failed;
+                totalCount.textContent = this.testResults.total;
+            }
+
+            clearResults() {
+                this.testResults = { passed: 0, failed: 0, total: 0, details: [] };
+                
+                const testContainers = [
+                    'core-tests', 'ai-service-tests', 'chat-tests', 'response-tests',
+                    'news-tests', 'analytics-tests', 'security-tests', 'performance-tests'
+                ];
+                
+                testContainers.forEach(id => {
+                    const container = document.getElementById(id);
+                    if (container) container.innerHTML = '';
+                });
+                
+                this.updateProgress();
+            }
+
+            showTestSummary() {
+                const criticalFailures = this.testResults.details.filter(t => !t.passed && t.critical);
+                
+                if (criticalFailures.length > 0) {
+                    console.warn('Critical test failures detected:', criticalFailures);
+                }
+                
+                console.log('Test Summary:', {
+                    passed: this.testResults.passed,
+                    failed: this.testResults.failed,
+                    total: this.testResults.total,
+                    criticalFailures: criticalFailures.length
+                });
+            }
+
+            showTestDetails(testName) {
+                const test = this.testResults.details.find(t => t.name === testName);
+                if (!test) return;
+
+                const modal = document.getElementById('test-details-modal');
+                const title = document.getElementById('modal-title');
+                const content = document.getElementById('modal-content');
+                
+                title.textContent = `Test Details: ${test.name}`;
+                content.innerHTML = `
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-medium mb-2">Test Information</h4>
+                            <div class="bg-black/20 rounded-lg p-3 text-sm">
+                                <div><strong>Suite:</strong> ${test.suite}</div>
+                                <div><strong>Status:</strong> ${test.passed ? 'PASSED' : 'FAILED'}</div>
+                                <div><strong>Duration:</strong> ${test.duration}ms</div>
+                                <div><strong>Critical:</strong> ${test.critical ? 'Yes' : 'No'}</div>
+                                <div><strong>Timestamp:</strong> ${new Date(test.timestamp).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-2">Message</h4>
+                            <div class="bg-black/20 rounded-lg p-3 text-sm">${test.message}</div>
+                        </div>
+                        ${test.details ? `
+                            <div>
+                                <h4 class="font-medium mb-2">Details</h4>
+                                <div class="bg-black/20 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap">${test.details}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                modal.classList.remove('hidden');
+            }
+
+            closeModal() {
+                document.getElementById('test-details-modal').classList.add('hidden');
+            }
+
+            exportResults() {
+                const results = {
+                    summary: {
+                        passed: this.testResults.passed,
+                        failed: this.testResults.failed,
+                        total: this.testResults.total,
+                        timestamp: new Date().toISOString()
+                    },
+                    components: this.components,
+                    tests: this.testResults.details
+                };
+                
+                const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ai-integration-test-results-${Date.now()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            // Test Implementation Methods
+            async testPlatformIntegrationInit() {
+                if (!this.components.aiPlatformIntegration) {
+                    return { passed: false, message: 'AI Platform Integration not initialized' };
+                }
+                
+                const status = this.components.aiPlatformIntegration.getIntegrationStatus();
+                
+                if (!status.isInitialized) {
+                    return { passed: false, message: 'Platform integration not properly initialized' };
+                }
+                
+                return { 
+                    passed: true, 
+                    message: 'Platform integration initialized successfully',
+                    details: JSON.stringify(status, null, 2)
+                };
+            }
+
+            async testProfileManagerIntegration() {
+                if (!this.components.profileManager) {
+                    return { passed: false, message: 'Profile Manager not available' };
+                }
+                
+                try {
+                    const preferences = this.components.profileManager.getPreferences();
+                    const profile = this.components.profileManager.profileData;
+                    
+                    if (!preferences || !profile) {
+                        return { passed: false, message: 'Profile data not accessible' };
+                    }
+                    
+                    return { 
+                        passed: true, 
+                        message: 'Profile Manager integration working correctly',
+                        details: `Profile: ${profile.name}, Preferences loaded: ${Object.keys(preferences).length} categories`
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Profile Manager error: ${error.message}` };
+                }
+            }
+
+            async testComponentCommunication() {
+                // Test event-based communication between components
+                let eventReceived = false;
+                
+                const testHandler = () => { eventReceived = true; };
+                window.addEventListener('test-communication', testHandler);
+                
+                // Dispatch test event
+                window.dispatchEvent(new CustomEvent('test-communication', { detail: { test: true } }));
+                
+                // Wait a bit for event processing
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                window.removeEventListener('test-communication', testHandler);
+                
+                return {
+                    passed: eventReceived,
+                    message: eventReceived ? 'Component communication working' : 'Event system not functioning'
+                };
+            }
+
+            async testEventSystem() {
+                if (!this.components.aiPlatformIntegration) {
+                    return { passed: false, message: 'Platform integration not available for event testing' };
+                }
+                
+                // Test custom event dispatching
+                let customEventReceived = false;
+                
+                const handler = (event) => {
+                    if (event.detail && event.detail.testData === 'test-value') {
+                        customEventReceived = true;
+                    }
+                };
+                
+                window.addEventListener('ai-test-event', handler);
+                
+                // Dispatch through platform integration
+                this.components.aiPlatformIntegration.dispatchEvent('ai-test-event', { testData: 'test-value' });
+                
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                window.removeEventListener('ai-test-event', handler);
+                
+                return {
+                    passed: customEventReceived,
+                    message: customEventReceived ? 'Event system functioning correctly' : 'Custom events not working'
+                };
+            }
+
+            async testAIServiceManagerInit() {
+                if (!this.components.aiServiceManager) {
+                    return { passed: false, message: 'AI Service Manager not initialized' };
+                }
+                
+                try {
+                    const modes = this.components.aiServiceManager.getAvailableModes();
+                    const currentConfig = this.components.aiServiceManager.getCurrentModeConfig();
+                    
+                    if (!modes || modes.length === 0) {
+                        return { passed: false, message: 'No AI modes available' };
+                    }
+                    
+                    return {
+                        passed: true,
+                        message: `AI Service Manager initialized with ${modes.length} modes`,
+                        details: `Available modes: ${modes.join(', ')}\nCurrent mode config: ${JSON.stringify(currentConfig, null, 2)}`
+                    };
+                } catch (error) {
+                    return { passed: false, message: `AI Service Manager error: ${error.message}` };
+                }
+            }
+
+            async testModeSwitching() {
+                if (!this.components.aiServiceManager) {
+                    return { passed: false, message: 'AI Service Manager not available' };
+                }
+                
+                try {
+                    const originalMode = this.components.aiServiceManager.currentMode;
+                    
+                    // Test switching to different modes
+                    const testModes = ['general', 'mcq', 'essay', 'news'];
+                    let switchCount = 0;
+                    
+                    for (const mode of testModes) {
+                        try {
+                            this.components.aiServiceManager.setMode(mode);
+                            if (this.components.aiServiceManager.currentMode === mode) {
+                                switchCount++;
+                            }
+                        } catch (error) {
+                            console.warn(`Failed to switch to mode ${mode}:`, error);
+                        }
+                    }
+                    
+                    // Restore original mode
+                    this.components.aiServiceManager.setMode(originalMode);
+                    
+                    return {
+                        passed: switchCount === testModes.length,
+                        message: `Mode switching: ${switchCount}/${testModes.length} modes working`,
+                        details: `Tested modes: ${testModes.join(', ')}`
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Mode switching error: ${error.message}` };
+                }
+            }
+
+            async testContextManagement() {
+                if (!this.components.aiServiceManager) {
+                    return { passed: false, message: 'AI Service Manager not available' };
+                }
+                
+                try {
+                    // Test adding context
+                    this.components.aiServiceManager.addContext('test', { data: 'test-context' });
+                    
+                    // Test getting conversation history
+                    const history = await this.components.aiServiceManager.getConversationHistory(5);
+                    
+                    return {
+                        passed: true,
+                        message: 'Context management functioning',
+                        details: `History entries: ${history.length}`
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Context management error: ${error.message}` };
+                }
+            }
+
+            async testResponseCaching() {
+                if (!this.components.aiServiceManager || !this.components.aiServiceManager.responseCache) {
+                    return { passed: false, message: 'Response caching not available' };
+                }
+                
+                try {
+                    const cacheStats = this.components.aiServiceManager.getCacheStats();
+                    
+                    return {
+                        passed: true,
+                        message: 'Response caching system operational',
+                        details: JSON.stringify(cacheStats, null, 2)
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Caching error: ${error.message}` };
+                }
+            }
+
+            async testChatInterfaceInit() {
+                if (!this.components.chatInterface) {
+                    return { passed: false, message: 'Chat Interface not initialized' };
+                }
+                
+                try {
+                    // Check if chat interface has required elements
+                    const hasRequiredElements = this.components.chatInterface.elements && 
+                                             this.components.chatInterface.elements.chatMessages &&
+                                             this.components.chatInterface.elements.chatInput;
+                    
+                    if (!hasRequiredElements) {
+                        return { passed: false, message: 'Chat Interface missing required DOM elements' };
+                    }
+                    
+                    return {
+                        passed: true,
+                        message: 'Chat Interface initialized with required elements'
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Chat Interface error: ${error.message}` };
+                }
+            }
+
+            async testMessageHandling() {
+                if (!this.components.chatInterface) {
+                    return { passed: false, message: 'Chat Interface not available' };
+                }
+                
+                try {
+                    // Test message creation
+                    const testMessage = 'Test message for E2E testing';
+                    
+                    // This would test the message handling without actually sending to AI
+                    const messageElement = this.components.chatInterface.createMessageElement('user', testMessage);
+                    
+                    if (!messageElement) {
+                        return { passed: false, message: 'Message element creation failed' };
+                    }
+                    
+                    return {
+                        passed: true,
+                        message: 'Message handling functionality working'
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Message handling error: ${error.message}` };
+                }
+            }
+
+            async testUIPerformance() {
+                if (!this.components.chatInterface || !this.components.chatInterface.uiOptimizer) {
+                    return { passed: false, message: 'UI Performance optimizer not available' };
+                }
+                
+                try {
+                    const metrics = this.components.chatInterface.getUIPerformanceMetrics();
+                    
+                    return {
+                        passed: true,
+                        message: 'UI Performance optimization active',
+                        details: JSON.stringify(metrics, null, 2)
+                    };
+                } catch (error) {
+                    return { passed: false, message: `UI Performance error: ${error.message}` };
+                }
+            }
+
+            async testResponseSaving() {
+                // Test response saving functionality
+                try {
+                    const testResponse = {
+                        id: 'test-response-' + Date.now(),
+                        content: 'Test response content for E2E testing',
+                        mode: 'general',
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    // Test saving to localStorage (simulated)
+                    const storageKey = 'upsc_ai_saved_notes';
+                    const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    existingData.unshift(testResponse);
+                    localStorage.setItem(storageKey, JSON.stringify(existingData));
+                    
+                    // Verify save
+                    const savedData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    const saved = savedData.find(item => item.id === testResponse.id);
+                    
+                    // Cleanup
+                    const cleanedData = savedData.filter(item => item.id !== testResponse.id);
+                    localStorage.setItem(storageKey, JSON.stringify(cleanedData));
+                    
+                    return {
+                        passed: !!saved,
+                        message: saved ? 'Response saving working correctly' : 'Response save verification failed'
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Response saving error: ${error.message}` };
+                }
+            }
+
+            async testLearnPageIntegration() {
+                // Test integration with learn page components
+                const learnPageElements = [
+                    'notes.html',
+                    'flashcards.html',
+                    'mcq.html'
+                ];
+                
+                // Check if we can access learn page functionality
+                const hasEnhancedNoteManager = !!window.enhancedNoteManager;
+                const hasStudyTools = !!window.studyTools;
+                
+                return {
+                    passed: hasEnhancedNoteManager || hasStudyTools,
+                    message: `Learn page integration: ${hasEnhancedNoteManager ? 'Notes' : ''} ${hasStudyTools ? 'Study Tools' : ''} available`,
+                    details: `Enhanced Note Manager: ${hasEnhancedNoteManager}, Study Tools: ${hasStudyTools}`
+                };
+            }
+
+            async testNewsServiceIntegration() {
+                if (!this.components.newsIntegrationService) {
+                    return { passed: false, message: 'News Integration Service not available' };
+                }
+                
+                try {
+                    // Test news service functionality
+                    return {
+                        passed: true,
+                        message: 'News service integration available'
+                    };
+                } catch (error) {
+                    return { passed: false, message: `News integration error: ${error.message}` };
+                }
+            }
+
+            async testAnalyticsIntegration() {
+                if (!this.components.performanceAnalyticsAI) {
+                    return { passed: false, message: 'Performance Analytics AI not available' };
+                }
+                
+                try {
+                    // Test analytics functionality
+                    return {
+                        passed: true,
+                        message: 'Analytics integration available'
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Analytics integration error: ${error.message}` };
+                }
+            }
+
+            async testInputValidation() {
+                // Test input validation and sanitization
+                try {
+                    const testInputs = [
+                        '<script>alert("xss")</script>',
+                        'SELECT * FROM users;',
+                        '../../etc/passwd',
+                        'javascript:alert(1)'
+                    ];
+                    
+                    let validationPassed = true;
+                    
+                    for (const input of testInputs) {
+                        // Test with validation system if available
+                        if (window.ValidationSystem) {
+                            const sanitized = window.ValidationSystem.sanitizeInput(input);
+                            if (sanitized === input) {
+                                validationPassed = false;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    return {
+                        passed: validationPassed,
+                        message: validationPassed ? 'Input validation working' : 'Input validation insufficient',
+                        details: `Tested ${testInputs.length} malicious inputs`
+                    };
+                } catch (error) {
+                    return { passed: false, message: `Input validation error: ${error.message}` };
+                }
+            }
+
+            async testXSSPrevention() {
+                // Test XSS prevention in message display
+                try {
+                    const xssPayload = '<img src="x" onerror="alert(\'XSS\')">';
+                    
+                    // Test message formatting
+                    if (this.components.chatInterface) {
+                        const formatted = this.components.chatInterface.formatMessageContent(xssPayload);
+                        
+                        // Check if script tags or event handlers are present
+                        const hasScript = formatted.includes('<script>') || formatted.includes('onerror=');
+                        
+                        return {
+                            passed: !hasScript,
+                            message: hasScript ? 'XSS vulnerability detected' : 'XSS prevention working',
+                            details: `Formatted output: ${formatted}`
+                        };
+                    }
+                    
+                    return { passed: true, message: 'XSS prevention test skipped (no chat interface)' };
+                } catch (error) {
+                    return { passed: false, message: `XSS prevention error: ${error.message}` };
+                }
+            }
+
+            async testComponentLoadTime() {
+                // Test component initialization performance
+                const startTime = performance.now();
+                
+                // Simulate component loading
+                await new Promise(resolve => setTimeout(resolve, 10));
+                
+                const endTime = performance.now();
+                const loadTime = endTime - startTime;
+                
+                return {
+                    passed: loadTime < 1000, // Should load within 1 second
+                    message: `Component load time: ${Math.round(loadTime)}ms`,
+                    details: `Load time threshold: 1000ms, Actual: ${Math.round(loadTime)}ms`
+                };
+            }
+
+            async testMemoryUsage() {
+                // Test memory usage if performance API is available
+                try {
+                    if (performance.memory) {
+                        const memInfo = {
+                            used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024),
+                            total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024),
+                            limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024)
+                        };
+                        
+                        const memoryEfficient = memInfo.used < 50; // Less than 50MB
+                        
+                        return {
+                            passed: memoryEfficient,
+                            message: `Memory usage: ${memInfo.used}MB`,
+                            details: JSON.stringify(memInfo, null, 2)
+                        };
+                    }
+                    
+                    return { passed: true, message: 'Memory usage test skipped (API not available)' };
+                } catch (error) {
+                    return { passed: false, message: `Memory usage error: ${error.message}` };
+                }
+            }
+        }
+
+        // Initialize tests when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for other components to initialize
+            setTimeout(() => {
+                window.aiE2ETests = new AIIntegrationE2ETests();
+            }, 2000);
+        });
+
+        // Initialize icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

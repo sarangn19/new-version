@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct API Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Direct Gemini API Test</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <button id="test-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                Test API Direct
+            </button>
+            <div id="result" class="mt-4 text-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('test-btn').addEventListener('click', async () => {
+            const resultEl = document.getElementById('result');
+            resultEl.innerHTML = 'Testing...';
+            
+            try {
+                // Test different model names
+                const models = [
+                    'gemini-1.5-flash',
+                    'gemini-1.5-pro',
+                    'gemini-pro',
+                    'gemini-1.5-flash-latest'
+                ];
+                
+                // First, let's list available models
+                resultEl.innerHTML += '<br>Listing available models...';
+                try {
+                    const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyA4BG79A4QsdyA20NFVF9YVVvgt4wTJh8A`);
+                    if (listResponse.ok) {
+                        const listData = await listResponse.json();
+                        resultEl.innerHTML += `<br>Available models: ${listData.models?.map(m => m.name).join(', ') || 'None found'}`;
+                        
+                        // Try the first available model that supports generateContent
+                        const availableModel = listData.models?.find(m => 
+                            m.supportedGenerationMethods?.includes('generateContent')
+                        );
+                        
+                        if (availableModel) {
+                            const modelName = availableModel.name.replace('models/', '');
+                            resultEl.innerHTML += `<br>Testing available model: ${modelName}...`;
+                            
+                            const testResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=AIzaSyA4BG79A4QsdyA20NFVF9YVVvgt4wTJh8A`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    contents: [{
+                                        parts: [{
+                                            text: "Hello, can you help me with UPSC preparation?"
+                                        }]
+                                    }]
+                                })
+                            });
+                            
+                            if (testResponse.ok) {
+                                const data = await testResponse.json();
+                                resultEl.innerHTML += `<br>✅ ${modelName} works! Response: ${data.candidates[0].content.parts[0].text.substring(0, 100)}...`;
+                            } else {
+                                const errorData = await testResponse.json().catch(() => ({}));
+                                resultEl.innerHTML += `<br>❌ ${modelName} failed: ${testResponse.status} - ${JSON.stringify(errorData)}`;
+                            }
+                        }
+                    } else {
+                        resultEl.innerHTML += `<br>❌ Failed to list models: ${listResponse.status}`;
+                    }
+                } catch (listError) {
+                    resultEl.innerHTML += `<br>Error listing models: ${listError.message}`;
+                }
+                
+                // Also test the common models
+                for (const model of models) {
+                    resultEl.innerHTML += `<br>Testing model: ${model}...`;
+                    
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=AIzaSyA4BG79A4QsdyA20NFVF9YVVvgt4wTJh8A`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: "Hello, can you help me with UPSC preparation?"
+                                }]
+                            }]
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        resultEl.innerHTML += `<br>✅ ${model} works! Response: ${data.candidates[0].content.parts[0].text.substring(0, 100)}...`;
+                        break;
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        resultEl.innerHTML += `<br>❌ ${model} failed: ${response.status} - ${JSON.stringify(errorData)}`;
+                    }
+                }
+            } catch (error) {
+                resultEl.innerHTML += `<br>Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

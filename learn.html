@@ -8,7 +8,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/study-tools.js"></script>
+  <script src="js/performance-optimizer.js"></script>
+  <script src="js/loading-state-manager.js"></script>
+  <script src="js/error-handler.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="styles/glassmorphism.css" rel="stylesheet">
+  <link href="styles/theme-system.css" rel="stylesheet">
+  <link href="styles/accessibility.css" rel="stylesheet">
+  <link href="styles/unified-theme.css" rel="stylesheet">
 
   <style>
     :root {
@@ -123,7 +131,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen text-white antialiased scroll-hidden">
+<body class="min-h-screen text-white antialiased scroll-hidden" data-theme="dark" data-color-scheme="default" data-dashboard-layout="compact">
 
   <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
     
@@ -134,7 +142,7 @@
         <div class="flex items-center space-x-4"> 
           <div class="relative">
             <a href="profile.html" class="user-avatar block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
-              <div id="user-initials" class="user-initials text-lg font-medium text-black">JD</div>
+              <div id="user-initials" class="user-initials text-lg font-medium text-black">U</div>
             </a>
             <!-- Notification badge -->
             <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
@@ -144,8 +152,8 @@
             </button>
           </div>
           <div>
-            <div id="user-name" class="font-normal text-sm">Jane Doe</div>
-            <div id="user-email" class="font-light text-xs opacity-70">jane.doe@aspirant.com</div>
+            <div id="user-name" class="font-normal text-sm">User</div>
+            <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
           </div>
         </div>
       </div>
@@ -167,6 +175,10 @@
         <a href="news.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <i data-lucide="newspaper" class="text-white opacity-50 w-5 h-5"></i>
           <span class="font-normal text-sm text-white opacity-50">News</span>
+        </a>
+        <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+          <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
+          <span class="font-normal text-sm text-white opacity-50">Community</span>
         </a>
         <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
           <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI</div>
@@ -212,7 +224,7 @@
             <div class="absolute bottom-4 left-6 right-6">
               <div class="flex items-center text-xs text-white/40">
                 <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1.5"></i>
-                <span>24 notes</span>
+                <span id="notes-count">0 notes</span>
               </div>
             </div>
           </a>
@@ -232,7 +244,7 @@
             <div class="absolute bottom-4 left-6 right-6">
               <div class="flex items-center text-xs text-white/40">
                 <i data-lucide="list-checks" class="w-3.5 h-3.5 mr-1.5"></i>
-                <span>50+ questions</span>
+                <span id="mcq-count">0 questions</span>
               </div>
             </div>
           </a>
@@ -252,7 +264,7 @@
             <div class="absolute bottom-4 left-6 right-6">
               <div class="flex items-center text-xs text-white/40">
                 <i data-lucide="layers" class="w-3.5 h-3.5 mr-1.5"></i>
-                <span>30+ cards</span>
+                <span id="flashcards-count">0 cards</span>
               </div>
             </div>
           </a>
@@ -262,9 +274,47 @@
   </div>
 
   <script>
-    // Initialize profile manager for cross-page synchronization
+    // Initialize enhanced profile manager for cross-page synchronization
     if (typeof ProfileManager !== 'undefined') {
       window.profileManager = new ProfileManager();
+      
+      // Apply theme preferences
+      const preferences = window.profileManager.getPreferences();
+      if (preferences) {
+        document.documentElement.setAttribute('data-theme', preferences.theme?.mode || 'dark');
+        document.documentElement.setAttribute('data-color-scheme', preferences.theme?.colorScheme || 'default');
+        document.documentElement.setAttribute('data-dashboard-layout', preferences.dashboard?.layout || 'compact');
+        
+        if (preferences.accessibility?.reducedMotion) {
+          document.documentElement.classList.add('reduced-motion');
+        }
+        if (preferences.accessibility?.highContrast) {
+          document.documentElement.classList.add('high-contrast');
+        }
+        if (preferences.accessibility?.keyboardNavigation) {
+          document.documentElement.classList.add('keyboard-navigation');
+        }
+      }
+    }
+    
+    // Initialize study tools
+    if (typeof PomodoroTimer !== 'undefined') {
+      window.pomodoroTimer = new PomodoroTimer();
+    }
+    
+    // Initialize performance optimizer
+    if (typeof PerformanceOptimizer !== 'undefined') {
+      window.performanceOptimizer = new PerformanceOptimizer();
+    }
+    
+    // Initialize loading state manager
+    if (typeof LoadingStateManager !== 'undefined') {
+      window.loadingStateManager = new LoadingStateManager();
+    }
+    
+    // Initialize error handler
+    if (typeof ErrorHandler !== 'undefined') {
+      window.errorHandler = new ErrorHandler();
     }
     
     // Load saved profile picture
@@ -274,6 +324,11 @@
     if (savedDP && userInitialsEl) {
       const parentDiv = userInitialsEl.parentElement;
       parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
+    }
+    
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
     }
     
     if (window.iconManager) window.iconManager.refresh();

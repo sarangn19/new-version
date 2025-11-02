@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface Test Suite</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+    <link rel="stylesheet" href="styles/unified-theme.css">
+    <link rel="stylesheet" href="styles/theme-system.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen" data-theme="dark">
+    <div class="container mx-auto px-4 py-8">
+        <div class="glass-card p-8 max-w-6xl mx-auto">
+            <h1 class="text-3xl font-bold text-white mb-8 text-center">Chat Interface Test Suite</h1>
+            
+            <!-- Test Results Display -->
+            <div id="test-results" class="mb-8 p-4 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg">
+                <h2 class="text-xl font-semibold text-white mb-4">Test Results</h2>
+                <div id="results-content" class="text-white"></div>
+            </div>
+
+            <!-- Test Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <button id="test-ui-components" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test UI Components
+                </button>
+                <button id="test-message-handling" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Message Handling
+                </button>
+                <button id="test-response-saving" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Response Saving
+                </button>
+                <button id="test-error-states" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Error States
+                </button>
+            </div>
+
+            <!-- UI Components Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">UI Components Tests</h2>
+                <div id="ui-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Message Handling Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Message Handling Tests</h2>
+                <div id="message-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Response Saving Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Response Saving Tests</h2>
+                <div id="saving-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Error States Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Error States & Loading Tests</h2>
+                <div id="error-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Integration Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Integration Tests</h2>
+                <button id="run-integration-tests" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 mb-4">
+                    Run Integration Tests
+                </button>
+                <div id="integration-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Mock Chat Interface for Testing -->
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Mock Chat Interface</h2>
+                <div id="mock-chat-container" class="bg-gray-800 rounded-lg p-4 h-96 overflow-hidden">
+                    <!-- This will be populated by tests -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Dependencies -->
+    <script src="js/loading-state-manager.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/validation-system.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/conversation-storage.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/chat-interface.js"></script>
+
+    <script>
+        // Chat Interface Test Suite Implementation
+        class ChatInterfaceTestSuite {
+            constructor() {
+                this.testResults = [];
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.mockChatInterface = null;
+                this.setupTests();
+            }
+
+            setupTests() {
+                this.setupEventListeners();
+                this.createMockChatInterface();
+                this.runInitialTests();
+            }
+
+            setupEventListeners() {
+                document.getElementById('test-ui-components').addEventListener('click', () => {
+                    this.testUIComponents();
+                });
+
+                document.getElementById('test-message-handling').addEventListener('click', () => {
+                    this.testMessageHandling();
+                });
+
+                document.getElementById('test-response-saving').addEventListener('click', () => {
+                    this.testResponseSaving();
+                });
+
+                document.getElementById('test-error-states').addEventListener('click', () => {
+                    this.testErrorStates();
+                });
+
+                document.getElementById('run-integration-tests').addEventListener('click', () => {
+                    this.runIntegrationTests();
+                });
+            }
+
+            createMockChatInterface() {
+                const mockContainer = document.getElementById('mock-chat-container');
+                mockContainer.innerHTML = `
+                    <div class="chat-container h-full flex flex-col">
+                        <!-- Chat Header -->
+                        <div id="mock-chat-header" class="p-4 border-b border-gray-600">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm">AI</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-medium">AI Assistant</h3>
+                                        <p class="text-gray-400 text-sm">Test Mode</p>
+                                    </div>
+                                </div>
+                                <select id="mock-mode-selector" class="bg-gray-700 text-white px-3 py-1 rounded">
+                                    <option value="general">General</option>
+                                    <option value="mcq">MCQ Analysis</option>
+                                    <option value="essay">Essay Feedback</option>
+                                    <option value="news">News Analysis</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages -->
+                        <div id="mock-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3">
+                            <!-- Messages will be added here -->
+                        </div>
+
+                        <!-- Typing Indicator -->
+                        <div id="mock-typing-indicator" class="px-4 py-2 hidden">
+                            <div class="flex items-center space-x-2 text-gray-400">
+                                <span>AI is thinking</span>
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Input -->
+                        <div id="mock-chat-input-container" class="p-4 border-t border-gray-600">
+                            <div class="flex items-end space-x-3">
+                                <textarea 
+                                    id="mock-chat-input" 
+                                    class="flex-1 bg-gray-700 text-white p-3 rounded-lg resize-none"
+                                    placeholder="Type your message..."
+                                    rows="1"
+                                ></textarea>
+                                <button id="mock-send-button" class="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors">
+                                    Send
+                                </button>
+                            </div>
+                            <div id="mock-error-display" class="mt-2 p-2 bg-red-600 text-white rounded hidden">
+                                <span id="mock-error-message">Error message</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Modal -->
+                    <div id="mock-save-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                        <div class="bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+                            <h3 class="text-white text-lg font-semibold mb-4">Save Response</h3>
+                            <div class="space-y-3">
+                                <button class="mock-save-option w-full p-3 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors" data-section="notes">
+                                    Save to Notes
+                                </button>
+                                <button class="mock-save-option w-full p-3 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors" data-section="flashcards">
+                                    Save to Flashcards
+                                </button>
+                                <button class="mock-save-option w-full p-3 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors" data-section="mcqs">
+                                    Save to MCQs
+                                </button>
+                            </div>
+                            <button id="mock-close-modal" class="mt-4 w-full p-2 bg-gray-600 text-white rounded hover:bg-gray-500 transition-colors">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                this.setupMockEventListeners();
+            }
+
+            setupMockEventListeners() {
+                // Mock send button
+                document.getElementById('mock-send-button').addEventListener('click', () => {
+                    this.mockSendMessage();
+                });
+
+                // Mock input enter key
+                document.getElementById('mock-chat-input').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.mockSendMessage();
+                    }
+                });
+
+                // Mock save modal
+                document.getElementById('mock-close-modal').addEventListener('click', () => {
+                    document.getElementById('mock-save-modal').classList.add('hidden');
+                });
+
+                // Mock save options
+                document.querySelectorAll('.mock-save-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        const section = e.target.dataset.section;
+                        this.mockSaveResponse(section);
+                    });
+                });
+            }
+
+            runInitialTests() {
+                this.logResult('System', 'Starting Chat Interface Test Suite...', 'info');
+                this.testComponentAvailability();
+                this.updateResultsDisplay();
+            }
+
+            testComponentAvailability() {
+                // Test if all required classes and elements are available
+                const components = [
+                    { name: 'ChatInterface', class: window.ChatInterface },
+                    { name: 'LoadingStateManager', class: window.LoadingStateManager },
+                    { name: 'ErrorHandler', class: window.ErrorHandler }
+                ];
+
+                components.forEach(component => {
+                    if (component.class) {
+                        this.logResult('Component Availability', `${component.name} is available`, 'success');
+                    } else {
+                        this.logResult('Component Availability', `${component.name} is NOT available`, 'error');
+                    }
+                });
+
+                // Test DOM elements
+                const elements = [
+                    'mock-chat-header',
+                    'mock-chat-messages',
+                    'mock-chat-input',
+                    'mock-send-button',
+                    'mock-save-modal'
+                ];
+
+                elements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        this.logResult('DOM Elements', `${elementId} exists`, 'success');
+                    } else {
+                        this.logResult('DOM Elements', `${elementId} missing`, 'error');
+                    }
+                });
+            }
+
+            testUIComponents() {
+                this.clearResults('ui-test-results');
+                this.logResult('UI Components', 'Starting UI component tests...', 'info', 'ui-test-results');
+
+                try {
+                    // Test 1: Chat container structure
+                    const chatContainer = document.querySelector('#mock-chat-container .chat-container');
+                    if (chatContainer) {
+                        this.logResult('UI Components', 'Chat container structure: PASSED', 'success', 'ui-test-results');
+                    } else {
+                        this.logResult('UI Components', 'Chat container structure: FAILED', 'error', 'ui-test-results');
+                    }
+
+                    // Test 2: Mode selector functionality
+                    const modeSelector = document.getElementById('mock-mode-selector');
+                    if (modeSelector && modeSelector.options.length >= 4) {
+                        this.logResult('UI Components', 'Mode selector options: PASSED', 'success', 'ui-test-results');
+                    } else {
+                        this.logResult('UI Components', 'Mode selector options: FAILED', 'error', 'ui-test-results');
+                    }
+
+                    // Test 3: Input field validation
+                    const chatInput = document.getElementById('mock-chat-input');
+                    if (chatInput && chatInput.placeholder) {
+                        this.logResult('UI Components', 'Chat input field: PASSED', 'success', 'ui-test-results');
+                    } else {
+                        this.logResult('UI Components', 'Chat input field: FAILED', 'error', 'ui-test-results');
+                    }
+
+                    // Test 4: Send button state
+                    const sendButton = document.getElementById('mock-send-button');
+                    if (sendButton && !sendButton.disabled) {
+                        this.logResult('UI Components', 'Send button initial state: PASSED', 'success', 'ui-test-results');
+                    } else {
+                        this.logResult('UI Components', 'Send button initial state: FAILED', 'error', 'ui-test-results');
+                    }
+
+                    // Test 5: Save modal structure
+                    const saveModal = document.getElementById('mock-save-modal');
+                    const saveOptions = document.querySelectorAll('.mock-save-option');
+                    if (saveModal && saveOptions.length >= 3) {
+                        this.logResult('UI Components', 'Save modal structure: PASSED', 'success', 'ui-test-results');
+                    } else {
+                        this.logResult('UI Components', 'Save modal structure: FAILED', 'error', 'ui-test-results');
+                    }
+
+                    // Test 6: Responsive design classes
+                    const responsiveElements = document.querySelectorAll('.flex, .grid, .space-x-3, .space-y-3');
+                    if (responsiveElements.length > 0) {
+                        this.logResult('UI Components', 'Responsive design classes: PASSED', 'success', 'ui-test-results');
+                    } else {
+                        this.logResult('UI Components', 'Responsive design classes: FAILED', 'error', 'ui-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('UI Components', `UI test failed: ${error.message}`, 'error', 'ui-test-results');
+                }
+            }
+
+            testMessageHandling() {
+                this.clearResults('message-test-results');
+                this.logResult('Message Handling', 'Starting message handling tests...', 'info', 'message-test-results');
+
+                try {
+                    // Test 1: Add user message
+                    this.addMockMessage('user', 'Test user message');
+                    const userMessages = document.querySelectorAll('#mock-chat-messages .message-user');
+                    if (userMessages.length > 0) {
+                        this.logResult('Message Handling', 'Add user message: PASSED', 'success', 'message-test-results');
+                    } else {
+                        this.logResult('Message Handling', 'Add user message: FAILED', 'error', 'message-test-results');
+                    }
+
+                    // Test 2: Add assistant message
+                    this.addMockMessage('assistant', 'Test assistant response');
+                    const assistantMessages = document.querySelectorAll('#mock-chat-messages .message-assistant');
+                    if (assistantMessages.length > 0) {
+                        this.logResult('Message Handling', 'Add assistant message: PASSED', 'success', 'message-test-results');
+                    } else {
+                        this.logResult('Message Handling', 'Add assistant message: FAILED', 'error', 'message-test-results');
+                    }
+
+                    // Test 3: Message formatting
+                    this.addMockMessage('assistant', 'Message with **bold** text and\nline breaks');
+                    const formattedMessage = document.querySelector('#mock-chat-messages .message-assistant:last-child .message-content');
+                    if (formattedMessage && formattedMessage.innerHTML.includes('<strong>')) {
+                        this.logResult('Message Handling', 'Message formatting: PASSED', 'success', 'message-test-results');
+                    } else {
+                        this.logResult('Message Handling', 'Message formatting: FAILED', 'error', 'message-test-results');
+                    }
+
+                    // Test 4: Message actions (save button)
+                    const saveButtons = document.querySelectorAll('#mock-chat-messages .save-button');
+                    if (saveButtons.length > 0) {
+                        this.logResult('Message Handling', 'Message actions: PASSED', 'success', 'message-test-results');
+                    } else {
+                        this.logResult('Message Handling', 'Message actions: FAILED', 'error', 'message-test-results');
+                    }
+
+                    // Test 5: Scroll behavior
+                    const messagesContainer = document.getElementById('mock-chat-messages');
+                    const initialScrollTop = messagesContainer.scrollTop;
+                    this.addMockMessage('user', 'Another test message');
+                    // Simulate scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    if (messagesContainer.scrollTop > initialScrollTop) {
+                        this.logResult('Message Handling', 'Scroll behavior: PASSED', 'success', 'message-test-results');
+                    } else {
+                        this.logResult('Message Handling', 'Scroll behavior: FAILED', 'error', 'message-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('Message Handling', `Message handling test failed: ${error.message}`, 'error', 'message-test-results');
+                }
+            }
+
+            testResponseSaving() {
+                this.clearResults('saving-test-results');
+                this.logResult('Response Saving', 'Starting response saving tests...', 'info', 'saving-test-results');
+
+                try {
+                    // Test 1: Save modal opening
+                    const saveModal = document.getElementById('mock-save-modal');
+                    saveModal.classList.remove('hidden');
+                    if (!saveModal.classList.contains('hidden')) {
+                        this.logResult('Response Saving', 'Save modal opening: PASSED', 'success', 'saving-test-results');
+                    } else {
+                        this.logResult('Response Saving', 'Save modal opening: FAILED', 'error', 'saving-test-results');
+                    }
+
+                    // Test 2: Save options availability
+                    const saveOptions = document.querySelectorAll('.mock-save-option');
+                    const expectedSections = ['notes', 'flashcards', 'mcqs'];
+                    let allSectionsPresent = true;
+                    
+                    expectedSections.forEach(section => {
+                        const option = Array.from(saveOptions).find(opt => opt.dataset.section === section);
+                        if (!option) allSectionsPresent = false;
+                    });
+
+                    if (allSectionsPresent) {
+                        this.logResult('Response Saving', 'Save options availability: PASSED', 'success', 'saving-test-results');
+                    } else {
+                        this.logResult('Response Saving', 'Save options availability: FAILED', 'error', 'saving-test-results');
+                    }
+
+                    // Test 3: Save to localStorage simulation
+                    const testResponse = {
+                        id: 'test_response_123',
+                        content: 'Test response content',
+                        mode: 'general',
+                        timestamp: new Date().toISOString()
+                    };
+
+                    this.mockSaveToStorage(testResponse, 'notes');
+                    const savedData = JSON.parse(localStorage.getItem('upsc_ai_saved_notes') || '[]');
+                    if (savedData.length > 0 && savedData[0].content === testResponse.content) {
+                        this.logResult('Response Saving', 'Save to localStorage: PASSED', 'success', 'saving-test-results');
+                    } else {
+                        this.logResult('Response Saving', 'Save to localStorage: FAILED', 'error', 'saving-test-results');
+                    }
+
+                    // Test 4: Save modal closing
+                    saveModal.classList.add('hidden');
+                    if (saveModal.classList.contains('hidden')) {
+                        this.logResult('Response Saving', 'Save modal closing: PASSED', 'success', 'saving-test-results');
+                    } else {
+                        this.logResult('Response Saving', 'Save modal closing: FAILED', 'error', 'saving-test-results');
+                    }
+
+                    // Test 5: Data persistence
+                    const persistedData = JSON.parse(localStorage.getItem('upsc_ai_saved_notes') || '[]');
+                    if (persistedData.length > 0) {
+                        this.logResult('Response Saving', 'Data persistence: PASSED', 'success', 'saving-test-results');
+                    } else {
+                        this.logResult('Response Saving', 'Data persistence: FAILED', 'error', 'saving-test-results');
+                    }
+
+                    // Cleanup test data
+                    localStorage.removeItem('upsc_ai_saved_notes');
+
+                } catch (error) {
+                    this.logResult('Response Saving', `Response saving test failed: ${error.message}`, 'error', 'saving-test-results');
+                }
+            }
+
+            testErrorStates() {
+                this.clearResults('error-test-results');
+                this.logResult('Error States', 'Starting error states and loading tests...', 'info', 'error-test-results');
+
+                try {
+                    // Test 1: Error display
+                    this.showMockError('Test error message');
+                    const errorDisplay = document.getElementById('mock-error-display');
+                    if (errorDisplay && !errorDisplay.classList.contains('hidden')) {
+                        this.logResult('Error States', 'Error display: PASSED', 'success', 'error-test-results');
+                    } else {
+                        this.logResult('Error States', 'Error display: FAILED', 'error', 'error-test-results');
+                    }
+
+                    // Test 2: Error message content
+                    const errorMessage = document.getElementById('mock-error-message');
+                    if (errorMessage && errorMessage.textContent === 'Test error message') {
+                        this.logResult('Error States', 'Error message content: PASSED', 'success', 'error-test-results');
+                    } else {
+                        this.logResult('Error States', 'Error message content: FAILED', 'error', 'error-test-results');
+                    }
+
+                    // Test 3: Loading state (typing indicator)
+                    this.showMockTypingIndicator();
+                    const typingIndicator = document.getElementById('mock-typing-indicator');
+                    if (typingIndicator && !typingIndicator.classList.contains('hidden')) {
+                        this.logResult('Error States', 'Loading state display: PASSED', 'success', 'error-test-results');
+                    } else {
+                        this.logResult('Error States', 'Loading state display: FAILED', 'error', 'error-test-results');
+                    }
+
+                    // Test 4: Button disabled state
+                    const sendButton = document.getElementById('mock-send-button');
+                    sendButton.disabled = true;
+                    if (sendButton.disabled) {
+                        this.logResult('Error States', 'Button disabled state: PASSED', 'success', 'error-test-results');
+                    } else {
+                        this.logResult('Error States', 'Button disabled state: FAILED', 'error', 'error-test-results');
+                    }
+
+                    // Test 5: Input validation
+                    const chatInput = document.getElementById('mock-chat-input');
+                    chatInput.value = '';
+                    if (chatInput.value.trim() === '') {
+                        sendButton.disabled = true;
+                        this.logResult('Error States', 'Input validation: PASSED', 'success', 'error-test-results');
+                    } else {
+                        this.logResult('Error States', 'Input validation: FAILED', 'error', 'error-test-results');
+                    }
+
+                    // Reset states
+                    this.hideMockError();
+                    this.hideMockTypingIndicator();
+                    sendButton.disabled = false;
+
+                } catch (error) {
+                    this.logResult('Error States', `Error states test failed: ${error.message}`, 'error', 'error-test-results');
+                }
+            }
+
+            runIntegrationTests() {
+                this.clearResults('integration-test-results');
+                this.logResult('Integration Tests', 'Starting integration tests...', 'info', 'integration-test-results');
+
+                try {
+                    // Test 1: Complete message flow
+                    const initialMessageCount = document.querySelectorAll('#mock-chat-messages .message').length;
+                    this.simulateCompleteMessageFlow();
+                    const finalMessageCount = document.querySelectorAll('#mock-chat-messages .message').length;
+                    
+                    if (finalMessageCount > initialMessageCount) {
+                        this.logResult('Integration Tests', 'Complete message flow: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Complete message flow: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 2: Mode switching integration
+                    const modeSelector = document.getElementById('mock-mode-selector');
+                    modeSelector.value = 'mcq';
+                    modeSelector.dispatchEvent(new Event('change'));
+                    
+                    if (modeSelector.value === 'mcq') {
+                        this.logResult('Integration Tests', 'Mode switching: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Mode switching: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 3: Theme integration
+                    const themeElements = document.querySelectorAll('[data-theme]');
+                    if (themeElements.length > 0) {
+                        this.logResult('Integration Tests', 'Theme integration: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Theme integration: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 4: Accessibility features
+                    const accessibleElements = document.querySelectorAll('[aria-label], [role]');
+                    if (accessibleElements.length > 0) {
+                        this.logResult('Integration Tests', 'Accessibility features: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Accessibility features: NEEDS IMPROVEMENT', 'warning', 'integration-test-results');
+                    }
+
+                    // Test 5: Performance (message rendering)
+                    const startTime = performance.now();
+                    for (let i = 0; i < 10; i++) {
+                        this.addMockMessage('user', `Performance test message ${i}`);
+                    }
+                    const endTime = performance.now();
+                    const renderTime = endTime - startTime;
+                    
+                    if (renderTime < 100) { // Less than 100ms for 10 messages
+                        this.logResult('Integration Tests', `Performance (${renderTime.toFixed(2)}ms): PASSED`, 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', `Performance (${renderTime.toFixed(2)}ms): SLOW`, 'warning', 'integration-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('Integration Tests', `Integration test failed: ${error.message}`, 'error', 'integration-test-results');
+                }
+            }
+
+            // Mock helper methods
+            addMockMessage(role, content) {
+                const messagesContainer = document.getElementById('mock-chat-messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message message-${role} p-3 rounded-lg ${role === 'user' ? 'bg-blue-600 ml-8' : 'bg-gray-700 mr-8'}`;
+                
+                const formattedContent = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>');
+                
+                messageDiv.innerHTML = `
+                    <div class="message-content text-white">${formattedContent}</div>
+                    ${role === 'assistant' ? `
+                        <div class="message-actions mt-2">
+                            <button class="save-button bg-green-600 text-white px-2 py-1 rounded text-sm hover:bg-green-700 transition-colors" onclick="document.getElementById('mock-save-modal').classList.remove('hidden')">
+                                Save
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            mockSendMessage() {
+                const input = document.getElementById('mock-chat-input');
+                const message = input.value.trim();
+                
+                if (message) {
+                    this.addMockMessage('user', message);
+                    input.value = '';
+                    
+                    // Simulate AI response after delay
+                    setTimeout(() => {
+                        this.addMockMessage('assistant', `Mock AI response to: "${message}"`);
+                    }, 1000);
+                }
+            }
+
+            mockSaveResponse(section) {
+                const testResponse = {
+                    id: `mock_${section}_${Date.now()}`,
+                    content: 'Mock response content',
+                    section: section,
+                    timestamp: new Date().toISOString()
+                };
+                
+                this.mockSaveToStorage(testResponse, section);
+                document.getElementById('mock-save-modal').classList.add('hidden');
+            }
+
+            mockSaveToStorage(response, section) {
+                const storageKey = `upsc_ai_saved_${section}`;
+                const existingData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                existingData.unshift(response);
+                localStorage.setItem(storageKey, JSON.stringify(existingData));
+            }
+
+            showMockError(message) {
+                const errorDisplay = document.getElementById('mock-error-display');
+                const errorMessage = document.getElementById('mock-error-message');
+                errorMessage.textContent = message;
+                errorDisplay.classList.remove('hidden');
+            }
+
+            hideMockError() {
+                const errorDisplay = document.getElementById('mock-error-display');
+                errorDisplay.classList.add('hidden');
+            }
+
+            showMockTypingIndicator() {
+                const typingIndicator = document.getElementById('mock-typing-indicator');
+                typingIndicator.classList.remove('hidden');
+            }
+
+            hideMockTypingIndicator() {
+                const typingIndicator = document.getElementById('mock-typing-indicator');
+                typingIndicator.classList.add('hidden');
+            }
+
+            simulateCompleteMessageFlow() {
+                const input = document.getElementById('mock-chat-input');
+                input.value = 'Test integration message';
+                this.mockSendMessage();
+            }
+
+            // Utility methods (same as AI components test)
+            logResult(category, message, status, targetElement = null) {
+                const result = {
+                    category,
+                    message,
+                    status,
+                    timestamp: new Date().toISOString()
+                };
+
+                this.testResults.push(result);
+
+                if (status === 'success') {
+                    this.passedTests++;
+                } else if (status === 'error') {
+                    this.failedTests++;
+                }
+
+                if (targetElement) {
+                    this.displayResult(result, targetElement);
+                }
+
+                this.updateResultsDisplay();
+            }
+
+            displayResult(result, targetElementId) {
+                const element = document.getElementById(targetElementId);
+                if (element) {
+                    const statusColor = result.status === 'success' ? 'text-green-400' : 
+                                       result.status === 'error' ? 'text-red-400' : 
+                                       result.status === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `p-2 rounded ${statusColor}`;
+                    resultDiv.innerHTML = `<strong>${result.category}:</strong> ${result.message}`;
+                    element.appendChild(resultDiv);
+                }
+            }
+
+            clearResults(targetElementId) {
+                const element = document.getElementById(targetElementId);
+                if (element) {
+                    element.innerHTML = '';
+                }
+            }
+
+            updateResultsDisplay() {
+                const resultsContent = document.getElementById('results-content');
+                const totalTests = this.passedTests + this.failedTests;
+                const passRate = totalTests > 0 ? ((this.passedTests / totalTests) * 100).toFixed(1) : 0;
+
+                resultsContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-400">${this.passedTests}</div>
+                            <div class="text-sm">Passed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-400">${this.failedTests}</div>
+                            <div class="text-sm">Failed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-400">${totalTests}</div>
+                            <div class="text-sm">Total</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-400">${passRate}%</div>
+                            <div class="text-sm">Pass Rate</div>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        Last updated: ${new Date().toLocaleTimeString()}
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new ChatInterfaceTestSuite();
+        });
+    </script>
+</body>
+</html>

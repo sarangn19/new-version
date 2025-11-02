@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">API Key Verification</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <p class="mb-4">Testing API key: <code class="bg-gray-700 px-2 py-1 rounded">AIzaSyA4BG79A4QsdyA20NFVF9YVVvgt4wTJh8A</code></p>
+            <button id="verify-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                Verify API Key
+            </button>
+            <div id="result" class="mt-4 text-sm"></div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h2 class="text-lg font-semibold mb-4">Troubleshooting Steps:</h2>
+            <ol class="list-decimal list-inside space-y-2 text-sm">
+                <li>Check if the API key is valid and active</li>
+                <li>Verify the API key has Generative AI API enabled</li>
+                <li>Check if there are any usage restrictions</li>
+                <li>Ensure billing is set up (if required)</li>
+                <li>Try different model names</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('verify-btn').addEventListener('click', async () => {
+            const resultEl = document.getElementById('result');
+            const apiKey = 'AIzaSyA4BG79A4QsdyA20NFVF9YVVvgt4wTJh8A';
+            
+            resultEl.innerHTML = 'Verifying API key...';
+            
+            try {
+                // Step 1: Try to list models (this is usually the most basic test)
+                resultEl.innerHTML += '<br><br><strong>Step 1: Listing available models...</strong>';
+                
+                const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                
+                if (listResponse.ok) {
+                    const listData = await listResponse.json();
+                    resultEl.innerHTML += '<br>✅ API key is valid! Available models:';
+                    
+                    if (listData.models && listData.models.length > 0) {
+                        listData.models.forEach(model => {
+                            const modelName = model.name.replace('models/', '');
+                            const methods = model.supportedGenerationMethods || [];
+                            resultEl.innerHTML += `<br>  - ${modelName} (${methods.join(', ')})`;
+                        });
+                        
+                        // Step 2: Try to generate content with the first available model
+                        const generateModel = listData.models.find(m => 
+                            m.supportedGenerationMethods?.includes('generateContent')
+                        );
+                        
+                        if (generateModel) {
+                            const modelName = generateModel.name.replace('models/', '');
+                            resultEl.innerHTML += `<br><br><strong>Step 2: Testing content generation with ${modelName}...</strong>`;
+                            
+                            const generateResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    contents: [{
+                                        parts: [{
+                                            text: "Say hello in one sentence."
+                                        }]
+                                    }]
+                                })
+                            });
+                            
+                            if (generateResponse.ok) {
+                                const generateData = await generateResponse.json();
+                                const responseText = generateData.candidates?.[0]?.content?.parts?.[0]?.text || 'No response text';
+                                resultEl.innerHTML += `<br>✅ Content generation works! Response: "${responseText}"`;
+                                resultEl.innerHTML += `<br><br><strong>🎉 API is fully functional! Use model: ${modelName}</strong>`;
+                            } else {
+                                const errorData = await generateResponse.json().catch(() => ({}));
+                                resultEl.innerHTML += `<br>❌ Content generation failed: ${generateResponse.status} ${generateResponse.statusText}`;
+                                resultEl.innerHTML += `<br>Error details: ${JSON.stringify(errorData, null, 2)}`;
+                            }
+                        } else {
+                            resultEl.innerHTML += '<br>❌ No models support content generation';
+                        }
+                    } else {
+                        resultEl.innerHTML += '<br>❌ No models available';
+                    }
+                } else {
+                    const errorData = await listResponse.json().catch(() => ({}));
+                    resultEl.innerHTML += `<br>❌ API key verification failed: ${listResponse.status} ${listResponse.statusText}`;
+                    resultEl.innerHTML += `<br>Error details: ${JSON.stringify(errorData, null, 2)}`;
+                    
+                    if (listResponse.status === 403) {
+                        resultEl.innerHTML += '<br><br><strong>Possible issues:</strong>';
+                        resultEl.innerHTML += '<br>- API key is invalid or expired';
+                        resultEl.innerHTML += '<br>- Generative AI API is not enabled';
+                        resultEl.innerHTML += '<br>- Billing is not set up';
+                        resultEl.innerHTML += '<br>- API key has usage restrictions';
+                    } else if (listResponse.status === 404) {
+                        resultEl.innerHTML += '<br><br><strong>Possible issues:</strong>';
+                        resultEl.innerHTML += '<br>- Wrong API endpoint';
+                        resultEl.innerHTML += '<br>- API version mismatch';
+                    }
+                }
+            } catch (error) {
+                resultEl.innerHTML += `<br>❌ Network error: ${error.message}`;
+                resultEl.innerHTML += '<br><br><strong>Possible issues:</strong>';
+                resultEl.innerHTML += '<br>- CORS restrictions (try from a server)';
+                resultEl.innerHTML += '<br>- Network connectivity issues';
+                resultEl.innerHTML += '<br>- Firewall blocking the request';
+            }
+        });
+    </script>
+</body>
+</html>

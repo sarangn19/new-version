@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Fixes Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/profile-manager.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1F1F1F;
+            color: white;
+        }
+        .glass-sidebar {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-8">Profile Fixes Test</h1>
+        
+        <!-- Test Profile Display -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Profile Display Test</h2>
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center">
+                    <div id="user-initials" class="text-lg font-medium text-black">JD</div>
+                </div>
+                <div>
+                    <div id="user-name" class="font-medium">Jane Doe</div>
+                    <div id="user-email" class="text-sm text-white/70">jane.doe@aspirant.com</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Sidebar Color -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Sidebar Color Test</h2>
+            <div class="glass-sidebar p-4 rounded-lg">
+                <p>This should have the same background as other pages: rgba(26, 26, 26, 0.8)</p>
+            </div>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h2 class="text-lg font-semibold mb-4">Test Controls</h2>
+            <div class="flex gap-4">
+                <button id="testDP1" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700">
+                    Set DP1
+                </button>
+                <button id="testDP2" class="px-4 py-2 bg-green-600 rounded hover:bg-green-700">
+                    Set DP2
+                </button>
+                <button id="clearDP" class="px-4 py-2 bg-red-600 rounded hover:bg-red-700">
+                    Clear DP
+                </button>
+                <button id="updateProfile" class="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700">
+                    Update Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test profile picture changes
+        document.getElementById('testDP1').addEventListener('click', () => {
+            if (window.profileManager) {
+                profileManager.updateProfile({ selectedDP: 'DP1' });
+                console.log('Set DP1');
+            }
+        });
+
+        document.getElementById('testDP2').addEventListener('click', () => {
+            if (window.profileManager) {
+                profileManager.updateProfile({ selectedDP: 'DP2' });
+                console.log('Set DP2');
+            }
+        });
+
+        document.getElementById('clearDP').addEventListener('click', () => {
+            if (window.profileManager) {
+                profileManager.updateProfile({ selectedDP: null });
+                localStorage.removeItem('selectedDP');
+                console.log('Cleared DP');
+            }
+        });
+
+        document.getElementById('updateProfile').addEventListener('click', () => {
+            if (window.profileManager) {
+                profileManager.updateProfile({
+                    name: 'Test User Updated',
+                    email: 'test.updated@example.com'
+                });
+                console.log('Updated profile');
+            }
+        });
+
+        // Log current profile state
+        console.log('Profile Manager:', window.profileManager);
+        console.log('Selected DP:', localStorage.getItem('selectedDP'));
+    </script>
+</body>
+</html>

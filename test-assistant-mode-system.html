@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant Mode System Test Suite</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/glassmorphism.css">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="glass-card p-8 max-w-6xl mx-auto">
+            <h1 class="text-3xl font-bold text-white mb-8 text-center">Assistant Mode System Test Suite</h1>
+            
+            <!-- Test Results Display -->
+            <div id="test-results" class="mb-8 p-4 rounded-lg bg-white bg-opacity-20 backdrop-blur-lg">
+                <h2 class="text-xl font-semibold text-white mb-4">Test Results</h2>
+                <div id="results-content" class="text-white"></div>
+            </div>
+
+            <!-- Test Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <button id="test-mode-manager" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Mode Manager
+                </button>
+                <button id="test-mcq-mode" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test MCQ Mode
+                </button>
+                <button id="test-essay-mode" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test Essay Mode
+                </button>
+                <button id="test-news-mode" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    Test News Mode
+                </button>
+            </div>
+
+            <!-- Mode Manager Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Assistant Mode Manager Tests</h2>
+                <div id="mode-manager-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- MCQ Mode Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">MCQ Analysis Mode Tests</h2>
+                <div id="mcq-mode-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Essay Mode Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">Essay Feedback Mode Tests</h2>
+                <div id="essay-mode-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- News Mode Tests -->
+            <div class="glass-card p-6 mb-8">
+                <h2 class="text-xl font-semibold text-white mb-4">News Analysis Mode Tests</h2>
+                <div id="news-mode-test-results" class="text-white space-y-2"></div>
+            </div>
+
+            <!-- Integration Tests -->
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Mode System Integration Tests</h2>
+                <button id="run-integration-tests" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 mb-4">
+                    Run Integration Tests
+                </button>
+                <div id="integration-test-results" class="text-white space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Mode System Components -->
+    <script src="js/assistant-mode-manager.js"></script>
+    <script src="js/mcq-analysis-mode.js"></script>
+    <script src="js/essay-feedback-mode.js"></script>
+    <script src="js/news-analysis-mode.js"></script>
+
+    <script>
+        // Assistant Mode System Test Suite Implementation
+        class AssistantModeSystemTestSuite {
+            constructor() {
+                this.testResults = [];
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.setupTests();
+            }
+
+            setupTests() {
+                this.setupEventListeners();
+                this.runInitialTests();
+            }
+
+            setupEventListeners() {
+                document.getElementById('test-mode-manager').addEventListener('click', () => {
+                    this.testModeManager();
+                });
+
+                document.getElementById('test-mcq-mode').addEventListener('click', () => {
+                    this.testMCQMode();
+                });
+
+                document.getElementById('test-essay-mode').addEventListener('click', () => {
+                    this.testEssayMode();
+                });
+
+                document.getElementById('test-news-mode').addEventListener('click', () => {
+                    this.testNewsMode();
+                });
+
+                document.getElementById('run-integration-tests').addEventListener('click', () => {
+                    this.runIntegrationTests();
+                });
+            }
+
+            runInitialTests() {
+                this.logResult('System', 'Starting Assistant Mode System Test Suite...', 'info');
+                this.testComponentAvailability();
+                this.updateResultsDisplay();
+            }
+
+            testComponentAvailability() {
+                // Test if all required classes are available
+                const components = [
+                    { name: 'AssistantModeManager', class: window.AssistantModeManager },
+                    { name: 'MCQAnalysisMode', class: window.MCQAnalysisMode },
+                    { name: 'EssayFeedbackMode', class: window.EssayFeedbackMode },
+                    { name: 'NewsAnalysisMode', class: window.NewsAnalysisMode }
+                ];
+
+                components.forEach(component => {
+                    if (component.class) {
+                        this.logResult('Component Availability', `${component.name} is available`, 'success');
+                    } else {
+                        this.logResult('Component Availability', `${component.name} is NOT available`, 'error');
+                    }
+                });
+            }
+
+            testModeManager() {
+                this.clearResults('mode-manager-test-results');
+                this.logResult('Mode Manager', 'Starting Mode Manager tests...', 'info', 'mode-manager-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const modeManager = new AssistantModeManager();
+                    this.logResult('Mode Manager', 'Constructor: PASSED', 'success', 'mode-manager-test-results');
+
+                    // Test 2: Mode configurations initialization
+                    const expectedModes = ['general', 'mcq', 'essay', 'news'];
+                    const availableModes = Object.keys(modeManager.modeConfigs);
+                    const hasAllModes = expectedModes.every(mode => availableModes.includes(mode));
+                    
+                    if (hasAllModes) {
+                        this.logResult('Mode Manager', 'Mode configurations initialization: PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Mode configurations initialization: FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    // Test 3: Default mode setting
+                    if (modeManager.currentMode === 'general') {
+                        this.logResult('Mode Manager', 'Default mode setting: PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Default mode setting: FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    // Test 4: Mode switching
+                    const switchResult = modeManager.setMode('mcq', { testContext: 'test' });
+                    if (switchResult.success && modeManager.currentMode === 'mcq') {
+                        this.logResult('Mode Manager', 'Mode switching: PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Mode switching: FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    // Test 5: Context preservation
+                    if (modeManager.contextData.testContext === 'test') {
+                        this.logResult('Mode Manager', 'Context preservation: PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Context preservation: FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    // Test 6: Mode history tracking
+                    const history = modeManager.getModeHistory();
+                    if (Array.isArray(history) && history.length > 0) {
+                        this.logResult('Mode Manager', 'Mode history tracking: PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Mode history tracking: FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    // Test 7: Invalid mode handling
+                    const invalidResult = modeManager.setMode('invalid-mode');
+                    if (!invalidResult.success) {
+                        this.logResult('Mode Manager', 'Invalid mode handling: PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Invalid mode handling: FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    // Test 8: Prompt template generation
+                    modeManager.setMode('general');
+                    const prompt = modeManager.getPromptTemplate('Test question');
+                    if (prompt && prompt.includes('Test question')) {
+                        this.logResult('Mode Manager', 'Prompt template generation: PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Prompt template generation: FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    // Test 9: Mode transition validation
+                    const validTransition = modeManager.validateModeTransition('general', 'mcq');
+                    if (validTransition) {
+                        this.logResult('Mode Manager', 'Mode transition validation: PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Mode transition validation: FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    // Test 10: Context management
+                    modeManager.addContext('testKey', 'testValue');
+                    if (modeManager.contextData.testKey === 'testValue') {
+                        this.logResult('Mode Manager', 'Context management (add): PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Context management (add): FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                    modeManager.clearContext();
+                    if (!modeManager.contextData.testKey) {
+                        this.logResult('Mode Manager', 'Context management (clear): PASSED', 'success', 'mode-manager-test-results');
+                    } else {
+                        this.logResult('Mode Manager', 'Context management (clear): FAILED', 'error', 'mode-manager-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('Mode Manager', `Test failed: ${error.message}`, 'error', 'mode-manager-test-results');
+                }
+            }
+
+            testMCQMode() {
+                this.clearResults('mcq-mode-test-results');
+                this.logResult('MCQ Mode', 'Starting MCQ Mode tests...', 'info', 'mcq-mode-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const modeManager = new AssistantModeManager();
+                    const mcqMode = new MCQAnalysisMode(modeManager);
+                    this.logResult('MCQ Mode', 'Constructor: PASSED', 'success', 'mcq-mode-test-results');
+
+                    // Test 2: Template initialization
+                    if (mcqMode.mcqTemplates && mcqMode.mcqTemplates.questionAnalysis) {
+                        this.logResult('MCQ Mode', 'Template initialization: PASSED', 'success', 'mcq-mode-test-results');
+                    } else {
+                        this.logResult('MCQ Mode', 'Template initialization: FAILED', 'error', 'mcq-mode-test-results');
+                    }
+
+                    // Test 3: Analysis structure initialization
+                    if (mcqMode.analysisStructure && mcqMode.analysisStructure.correctAnswerFormat) {
+                        this.logResult('MCQ Mode', 'Analysis structure initialization: PASSED', 'success', 'mcq-mode-test-results');
+                    } else {
+                        this.logResult('MCQ Mode', 'Analysis structure initialization: FAILED', 'error', 'mcq-mode-test-results');
+                    }
+
+                    // Test 4: Valid MCQ data validation
+                    const validMCQData = {
+                        question: "What is the capital of India?",
+                        options: { A: "Mumbai", B: "Delhi", C: "Kolkata", D: "Chennai" },
+                        correctAnswer: "B",
+                        userAnswer: "A",
+                        subject: "Geography"
+                    };
+
+                    const validation = mcqMode.validateMCQData(validMCQData);
+                    if (validation.isValid) {
+                        this.logResult('MCQ Mode', 'Valid data validation: PASSED', 'success', 'mcq-mode-test-results');
+                    } else {
+                        this.logResult('MCQ Mode', 'Valid data validation: FAILED', 'error', 'mcq-mode-test-results');
+                    }
+
+                    // Test 5: Invalid MCQ data validation
+                    const invalidMCQData = { question: "", options: {}, correctAnswer: "" };
+                    const invalidValidation = mcqMode.validateMCQData(invalidMCQData);
+                    if (!invalidValidation.isValid && invalidValidation.errors.length > 0) {
+                        this.logResult('MCQ Mode', 'Invalid data validation: PASSED', 'success', 'mcq-mode-test-results');
+                    } else {
+                        this.logResult('MCQ Mode', 'Invalid data validation: FAILED', 'error', 'mcq-mode-test-results');
+                    }
+
+                    // Test 6: Prompt generation
+                    const prompt = mcqMode.generateMCQPrompt(validMCQData);
+                    if (prompt && prompt.includes(validMCQData.question) && prompt.includes('Delhi')) {
+                        this.logResult('MCQ Mode', 'Prompt generation: PASSED', 'success', 'mcq-mode-test-results');
+                    } else {
+                        this.logResult('MCQ Mode', 'Prompt generation: FAILED', 'error', 'mcq-mode-test-results');
+                    }
+
+                    // Test 7: Response section parsing
+                    const mockResponse = `
+✅ CORRECT ANSWER EXPLANATION
+The correct answer is B) Delhi.
+
+❌ INCORRECT OPTIONS ANALYSIS
+A) Mumbai - Financial capital, not national capital.
+
+📚 CONCEPT CLARIFICATION
+Delhi is the national capital of India.
+
+🎯 EXAM STRATEGY
+Remember key facts about Indian capitals.
+                    `;
+
+                    const sections = mcqMode.parseResponseSections(mockResponse);
+                    if (sections.correctAnswer && sections.incorrectOptions && sections.concepts) {
+                        this.logResult('MCQ Mode', 'Response section parsing: PASSED', 'success', 'mcq-mode-test-results');
+                    } else {
+                        this.logResult('MCQ Mode', 'Response section parsing: FAILED', 'error', 'mcq-mode-test-results');
+                    }
+
+                    // Test 8: Key points extraction
+                    const keyPoints = mcqMode.extractKeyPoints(sections.correctAnswer || '');
+                    if (Array.isArray(keyPoints)) {
+                        this.logResult('MCQ Mode', 'Key points extraction: PASSED', 'success', 'mcq-mode-test-results');
+                    } else {
+                        this.logResult('MCQ Mode', 'Key points extraction: FAILED', 'error', 'mcq-mode-test-results');
+                    }
+
+                    // Test 9: Fallback analysis
+                    const fallback = mcqMode.generateFallbackAnalysis(validMCQData);
+                    if (fallback && fallback.questionSummary && fallback.message) {
+                        this.logResult('MCQ Mode', 'Fallback analysis: PASSED', 'success', 'mcq-mode-test-results');
+                    } else {
+                        this.logResult('MCQ Mode', 'Fallback analysis: FAILED', 'error', 'mcq-mode-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('MCQ Mode', `Test failed: ${error.message}`, 'error', 'mcq-mode-test-results');
+                }
+            }
+
+            testEssayMode() {
+                this.clearResults('essay-mode-test-results');
+                this.logResult('Essay Mode', 'Starting Essay Mode tests...', 'info', 'essay-mode-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const modeManager = new AssistantModeManager();
+                    const essayMode = new EssayFeedbackMode(modeManager);
+                    this.logResult('Essay Mode', 'Constructor: PASSED', 'success', 'essay-mode-test-results');
+
+                    // Test 2: Template initialization
+                    if (essayMode.essayTemplates && essayMode.essayTemplates.essayEvaluation) {
+                        this.logResult('Essay Mode', 'Template initialization: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Template initialization: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 3: Evaluation criteria initialization
+                    if (essayMode.evaluationCriteria && essayMode.evaluationCriteria.content) {
+                        this.logResult('Essay Mode', 'Evaluation criteria initialization: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Evaluation criteria initialization: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 4: Scoring rubric initialization
+                    if (essayMode.scoringRubric && essayMode.scoringRubric.excellent) {
+                        this.logResult('Essay Mode', 'Scoring rubric initialization: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Scoring rubric initialization: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 5: Valid essay data validation
+                    const validEssayData = {
+                        topic: "Role of Technology in Governance",
+                        content: "Technology has revolutionized governance in modern times. Digital platforms have made government services more accessible to citizens. E-governance initiatives have reduced corruption and improved transparency. However, challenges like digital divide and cybersecurity remain. The government must balance technological advancement with inclusive development to ensure no citizen is left behind in the digital transformation.",
+                        wordCount: 150,
+                        timeSpent: "45 minutes"
+                    };
+
+                    const validation = essayMode.validateEssayData(validEssayData);
+                    if (validation.isValid) {
+                        this.logResult('Essay Mode', 'Valid data validation: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Valid data validation: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 6: Invalid essay data validation
+                    const invalidEssayData = { topic: "", content: "Short", wordCount: 5 };
+                    const invalidValidation = essayMode.validateEssayData(invalidEssayData);
+                    if (!invalidValidation.isValid && invalidValidation.errors.length > 0) {
+                        this.logResult('Essay Mode', 'Invalid data validation: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Invalid data validation: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 7: Prompt generation
+                    const prompt = essayMode.generateEssayPrompt(validEssayData);
+                    if (prompt && prompt.includes(validEssayData.topic) && prompt.includes('OVERALL ASSESSMENT')) {
+                        this.logResult('Essay Mode', 'Prompt generation: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Prompt generation: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 8: Score extraction
+                    const scoreText = "The essay deserves a score of 180/250 marks.";
+                    const extractedScore = essayMode.extractScore(scoreText);
+                    if (extractedScore === 180) {
+                        this.logResult('Essay Mode', 'Score extraction: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Score extraction: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 9: Score categorization
+                    const category = essayMode.categorizeScore(180);
+                    if (category === 'good') {
+                        this.logResult('Essay Mode', 'Score categorization: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Score categorization: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 10: Response section parsing
+                    const mockEssayResponse = `
+📊 OVERALL ASSESSMENT
+The essay shows good understanding with a score of 170/250.
+
+💪 STRENGTHS
+- Clear structure and organization
+- Good use of examples
+
+🎯 AREAS FOR IMPROVEMENT
+- Need more current affairs integration
+- Conclusion could be stronger
+
+📚 CONTENT ANALYSIS
+The content demonstrates adequate depth of understanding.
+
+✍️ WRITING QUALITY
+Language is clear and coherent throughout.
+
+🚀 SPECIFIC RECOMMENDATIONS
+- Read more current affairs
+- Practice conclusion writing
+                    `;
+
+                    const sections = essayMode.parseEssayResponseSections(mockEssayResponse);
+                    if (sections.assessment && sections.strengths && sections.improvements) {
+                        this.logResult('Essay Mode', 'Response section parsing: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Response section parsing: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                    // Test 11: Fallback feedback
+                    const fallback = essayMode.generateFallbackFeedback(validEssayData);
+                    if (fallback && fallback.essaySummary && fallback.message) {
+                        this.logResult('Essay Mode', 'Fallback feedback: PASSED', 'success', 'essay-mode-test-results');
+                    } else {
+                        this.logResult('Essay Mode', 'Fallback feedback: FAILED', 'error', 'essay-mode-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('Essay Mode', `Test failed: ${error.message}`, 'error', 'essay-mode-test-results');
+                }
+            }
+
+            testNewsMode() {
+                this.clearResults('news-mode-test-results');
+                this.logResult('News Mode', 'Starting News Mode tests...', 'info', 'news-mode-test-results');
+
+                try {
+                    // Test 1: Constructor
+                    const modeManager = new AssistantModeManager();
+                    const newsMode = new NewsAnalysisMode(modeManager);
+                    this.logResult('News Mode', 'Constructor: PASSED', 'success', 'news-mode-test-results');
+
+                    // Test 2: Template initialization
+                    if (newsMode.newsTemplates && newsMode.newsTemplates.newsAnalysis) {
+                        this.logResult('News Mode', 'Template initialization: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Template initialization: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 3: UPSC subjects initialization
+                    if (newsMode.upscSubjects && newsMode.upscSubjects.polity && newsMode.upscSubjects.economics) {
+                        this.logResult('News Mode', 'UPSC subjects initialization: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'UPSC subjects initialization: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 4: Relevance scoring initialization
+                    if (newsMode.relevanceScoring && newsMode.relevanceScoring.high && newsMode.relevanceScoring.medium) {
+                        this.logResult('News Mode', 'Relevance scoring initialization: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Relevance scoring initialization: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 5: Valid news data validation
+                    const validNewsData = {
+                        headline: "Government Launches New Digital India Initiative",
+                        content: "The Government of India has launched a comprehensive Digital India initiative aimed at transforming the country into a digitally empowered society. The initiative focuses on digital infrastructure, digital literacy, and digital services. Key components include broadband connectivity, mobile governance, and e-governance platforms. The program is expected to create millions of jobs and boost economic growth.",
+                        source: "PIB",
+                        publishDate: "2024-01-15",
+                        category: "Government Policy"
+                    };
+
+                    const validation = newsMode.validateNewsData(validNewsData);
+                    if (validation.isValid) {
+                        this.logResult('News Mode', 'Valid data validation: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Valid data validation: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 6: Invalid news data validation
+                    const invalidNewsData = { headline: "", content: "Short" };
+                    const invalidValidation = newsMode.validateNewsData(invalidNewsData);
+                    if (!invalidValidation.isValid && invalidValidation.errors.length > 0) {
+                        this.logResult('News Mode', 'Invalid data validation: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Invalid data validation: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 7: Prompt generation
+                    const prompt = newsMode.generateNewsPrompt(validNewsData);
+                    if (prompt && prompt.includes(validNewsData.headline) && prompt.includes('UPSC RELEVANCE')) {
+                        this.logResult('News Mode', 'Prompt generation: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Prompt generation: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 8: Primary subject identification
+                    const primarySubject = newsMode.identifyPrimarySubject(validNewsData.content, "This relates to governance and technology policy");
+                    if (primarySubject && typeof primarySubject === 'string') {
+                        this.logResult('News Mode', 'Primary subject identification: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Primary subject identification: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 9: Relevance level extraction
+                    const relevanceText = "This news has high relevance for UPSC preparation";
+                    const relevanceLevel = newsMode.extractRelevanceLevel(relevanceText);
+                    if (relevanceLevel === 'high') {
+                        this.logResult('News Mode', 'Relevance level extraction: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Relevance level extraction: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 10: Exam importance extraction
+                    const importanceText = "Exam importance score: 8/10";
+                    const importance = newsMode.extractExamImportance(importanceText);
+                    if (importance === 8) {
+                        this.logResult('News Mode', 'Exam importance extraction: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Exam importance extraction: FAILED', 'news-mode-test-results');
+                    }
+
+                    // Test 11: Date extraction
+                    const dateText = "The policy was announced on 15 January 2024 and will be implemented by March 2024.";
+                    const dates = newsMode.extractImportantDates(dateText);
+                    if (Array.isArray(dates) && dates.length > 0) {
+                        this.logResult('News Mode', 'Date extraction: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Date extraction: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                    // Test 12: Fallback analysis
+                    const fallback = newsMode.generateFallbackAnalysis(validNewsData);
+                    if (fallback && fallback.newsSummary && fallback.message) {
+                        this.logResult('News Mode', 'Fallback analysis: PASSED', 'success', 'news-mode-test-results');
+                    } else {
+                        this.logResult('News Mode', 'Fallback analysis: FAILED', 'error', 'news-mode-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('News Mode', `Test failed: ${error.message}`, 'error', 'news-mode-test-results');
+                }
+            }
+
+            runIntegrationTests() {
+                this.clearResults('integration-test-results');
+                this.logResult('Integration Tests', 'Starting integration tests...', 'info', 'integration-test-results');
+
+                try {
+                    // Test 1: Mode Manager with all mode classes
+                    const modeManager = new AssistantModeManager();
+                    const mcqMode = new MCQAnalysisMode(modeManager);
+                    const essayMode = new EssayFeedbackMode(modeManager);
+                    const newsMode = new NewsAnalysisMode(modeManager);
+
+                    this.logResult('Integration Tests', 'All mode classes instantiated: PASSED', 'success', 'integration-test-results');
+
+                    // Test 2: Cross-mode switching
+                    modeManager.setMode('general');
+                    modeManager.setMode('mcq');
+                    modeManager.setMode('essay');
+                    modeManager.setMode('news');
+                    modeManager.setMode('general');
+
+                    if (modeManager.currentMode === 'general') {
+                        this.logResult('Integration Tests', 'Cross-mode switching: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Cross-mode switching: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 3: Context preservation across modes
+                    modeManager.setMode('mcq', { testData: 'preserved' });
+                    modeManager.setMode('essay');
+                    modeManager.setMode('mcq');
+
+                    const history = modeManager.getModeHistory();
+                    if (history.length > 0) {
+                        this.logResult('Integration Tests', 'Context preservation across modes: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Context preservation across modes: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 4: Mode-specific prompt generation
+                    const modes = ['general', 'mcq', 'essay', 'news'];
+                    let allPromptsGenerated = true;
+
+                    modes.forEach(mode => {
+                        modeManager.setMode(mode);
+                        const prompt = modeManager.getPromptTemplate('Test query');
+                        if (!prompt || !prompt.includes('Test query')) {
+                            allPromptsGenerated = false;
+                        }
+                    });
+
+                    if (allPromptsGenerated) {
+                        this.logResult('Integration Tests', 'Mode-specific prompt generation: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Mode-specific prompt generation: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 5: Response formatting consistency
+                    const testResponse = "This is a test response with multiple sections.";
+                    
+                    modeManager.setMode('mcq');
+                    const mcqFormatted = modeManager.processResponse(testResponse);
+                    
+                    modeManager.setMode('essay');
+                    const essayFormatted = modeManager.processResponse(testResponse);
+                    
+                    modeManager.setMode('news');
+                    const newsFormatted = modeManager.processResponse(testResponse);
+
+                    if (mcqFormatted.mode === 'mcq' && essayFormatted.mode === 'essay' && newsFormatted.mode === 'news') {
+                        this.logResult('Integration Tests', 'Response formatting consistency: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Response formatting consistency: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 6: Error handling across modes
+                    let errorHandlingWorks = true;
+                    
+                    try {
+                        modeManager.setMode('invalid-mode');
+                        errorHandlingWorks = false; // Should not reach here
+                    } catch (error) {
+                        // Expected behavior
+                    }
+
+                    try {
+                        mcqMode.validateMCQData({});
+                        // Should return validation error, not throw
+                    } catch (error) {
+                        errorHandlingWorks = false;
+                    }
+
+                    if (errorHandlingWorks) {
+                        this.logResult('Integration Tests', 'Error handling across modes: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Error handling across modes: FAILED', 'error', 'integration-test-results');
+                    }
+
+                    // Test 7: Mode configuration consistency
+                    const availableModes = modeManager.getAvailableModes();
+                    const expectedModeCount = 4; // general, mcq, essay, news
+                    
+                    if (availableModes.length === expectedModeCount) {
+                        this.logResult('Integration Tests', 'Mode configuration consistency: PASSED', 'success', 'integration-test-results');
+                    } else {
+                        this.logResult('Integration Tests', 'Mode configuration consistency: FAILED', 'error', 'integration-test-results');
+                    }
+
+                } catch (error) {
+                    this.logResult('Integration Tests', `Integration test failed: ${error.message}`, 'error', 'integration-test-results');
+                }
+            }
+
+            // Utility methods
+            logResult(category, message, status, targetElement = null) {
+                const result = {
+                    category,
+                    message,
+                    status,
+                    timestamp: new Date().toISOString()
+                };
+
+                this.testResults.push(result);
+
+                if (status === 'success') {
+                    this.passedTests++;
+                } else if (status === 'error') {
+                    this.failedTests++;
+                }
+
+                if (targetElement) {
+                    this.displayResult(result, targetElement);
+                }
+
+                this.updateResultsDisplay();
+            }
+
+            displayResult(result, targetElementId) {
+                const element = document.getElementById(targetElementId);
+                if (element) {
+                    const statusColor = result.status === 'success' ? 'text-green-400' : 
+                                       result.status === 'error' ? 'text-red-400' : 'text-blue-400';
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `p-2 rounded ${statusColor}`;
+                    resultDiv.innerHTML = `<strong>${result.category}:</strong> ${result.message}`;
+                    element.appendChild(resultDiv);
+                }
+            }
+
+            clearResults(targetElementId) {
+                const element = document.getElementById(targetElementId);
+                if (element) {
+                    element.innerHTML = '';
+                }
+            }
+
+            updateResultsDisplay() {
+                const resultsContent = document.getElementById('results-content');
+                const totalTests = this.passedTests + this.failedTests;
+                const passRate = totalTests > 0 ? ((this.passedTests / totalTests) * 100).toFixed(1) : 0;
+
+                resultsContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-400">${this.passedTests}</div>
+                            <div class="text-sm">Passed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-400">${this.failedTests}</div>
+                            <div class="text-sm">Failed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-400">${totalTests}</div>
+                            <div class="text-sm">Total</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-400">${passRate}%</div>
+                            <div class="text-sm">Pass Rate</div>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        Last updated: ${new Date().toLocaleTimeString()}
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AssistantModeSystemTestSuite();
+        });
+    </script>
+</body>
+</html>

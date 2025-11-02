@@ -4,6 +4,7 @@
 <head>
     <title>Test Bookmarks</title>
     <script src="js/profile-manager.js"></script>
+    <script src="js/enhanced-bookmark-manager.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -34,10 +35,18 @@
     <h1>Bookmark System Test</h1>
 
     <div class="test-section">
-        <h2>Add Test Bookmarks</h2>
+        <h2>Add Test Bookmarks (Profile Manager)</h2>
         <button onclick="addTestBookmark1()">Add News Article</button>
         <button onclick="addTestBookmark2()">Add Study Material</button>
         <button onclick="addTestBookmark3()">Add Video</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Enhanced Bookmark Manager Tests</h2>
+        <button onclick="testEnhancedBookmarks()">Test Enhanced Features</button>
+        <button onclick="testBulkOperations()">Test Bulk Operations</button>
+        <button onclick="testCategories()">Test Categories</button>
+        <button onclick="testSearch()">Test Search</button>
     </div>
 
     <div class="test-section">
@@ -141,6 +150,75 @@
                 // Retry after a short delay
                 setTimeout(initializeBookmarks, 200);
             }
+        }
+
+        // Enhanced bookmark manager test functions
+        function testEnhancedBookmarks() {
+            if (!window.enhancedBookmarkManager) {
+                alert('Enhanced bookmark manager not available!');
+                return;
+            }
+
+            const testBookmark = {
+                title: 'Enhanced Test Bookmark',
+                url: 'https://example.com/enhanced',
+                description: 'This is a test bookmark with enhanced features',
+                category: 'general',
+                tags: ['test', 'enhanced']
+            };
+
+            const bookmark = window.enhancedBookmarkManager.addBookmark(testBookmark);
+            alert(`Enhanced bookmark added with ID: ${bookmark.id}`);
+            refreshDisplay();
+        }
+
+        function testBulkOperations() {
+            if (!window.enhancedBookmarkManager) {
+                alert('Enhanced bookmark manager not available!');
+                return;
+            }
+
+            // Add multiple bookmarks for testing
+            const bookmarks = [
+                { title: 'Bulk Test 1', category: 'general' },
+                { title: 'Bulk Test 2', category: 'general' },
+                { title: 'Bulk Test 3', category: 'general' }
+            ];
+
+            const addedBookmarks = bookmarks.map(b => window.enhancedBookmarkManager.addBookmark(b));
+            
+            // Select them for bulk operations
+            addedBookmarks.forEach(b => window.enhancedBookmarkManager.selectedBookmarks.add(b.id));
+            
+            alert(`Added ${addedBookmarks.length} bookmarks and selected them for bulk operations`);
+            refreshDisplay();
+        }
+
+        function testCategories() {
+            if (!window.enhancedBookmarkManager) {
+                alert('Enhanced bookmark manager not available!');
+                return;
+            }
+
+            const testCategory = {
+                name: 'Test Category',
+                color: '#FF6B6B',
+                icon: 'star',
+                description: 'A test category'
+            };
+
+            const category = window.enhancedBookmarkManager.addCategory(testCategory);
+            alert(`Category added: ${category.name} with ID: ${category.id}`);
+        }
+
+        function testSearch() {
+            if (!window.enhancedBookmarkManager) {
+                alert('Enhanced bookmark manager not available!');
+                return;
+            }
+
+            const results = window.enhancedBookmarkManager.searchBookmarks('test');
+            alert(`Search for 'test' returned ${results.length} results`);
         }
 
         // Try to initialize immediately, then with delay if needed
