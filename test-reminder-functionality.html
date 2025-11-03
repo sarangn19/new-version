@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Reminder Functionality</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body {
+            background-color: #1F1F1F;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .reminder-note {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+            border: 1px solid #F59E0B;
+            color: #92400E;
+            transform: rotate(-1deg);
+            transition: all 0.2s ease;
+        }
+
+        .reminder-note:nth-child(even) {
+            transform: rotate(1deg);
+        }
+
+        .reminder-note:hover {
+            transform: rotate(0deg) scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .reminder-note textarea {
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: none;
+            color: #92400E;
+            font-weight: 500;
+        }
+
+        .reminder-note textarea::placeholder {
+            color: #D97706;
+            opacity: 0.7;
+        }
+
+        .reminder-delete-btn {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .reminder-note:hover .reminder-delete-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Reminder Functionality Test</h1>
+        
+        <!-- Debug Info -->
+        <div class="bg-gray-800 p-4 rounded-lg mb-6">
+            <h2 class="text-lg font-semibold mb-2">Debug Information</h2>
+            <div id="debug-info">
+                <p>Loading...</p>
+            </div>
+        </div>
+        
+        <!-- Reminders Board -->
+        <div id="reminders-board" class="bg-gray-800 rounded-2xl shadow-xl border border-white/10">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-4 border-b border-white/10">
+                <h4 class="text-base font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="sticky-note" class="w-5 h-5 text-yellow-400"></i>
+                    Reminders Board
+                </h4>
+                <div class="flex items-center gap-2">
+                    <button id="add-reminder-btn" onclick="addNewReminder()"
+                        class="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded-lg text-white text-xs font-medium transition-colors"
+                        title="Add New Reminder">
+                        <i data-lucide="plus" class="w-3 h-3 mr-1 inline-block"></i> New
+                    </button>
+                    <button onclick="clearAllReminders()"
+                        class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-lg text-white text-xs font-medium transition-colors"
+                        title="Clear All">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Board Content -->
+            <div id="board-content" class="p-4 min-h-[200px] max-h-[400px] overflow-y-auto">
+                <div id="reminders-container" class="grid grid-cols-1 gap-3">
+                    <!-- Reminders will be added here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="text-center py-8 text-white/50">
+                    <i data-lucide="sticky-note" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+                    <p class="text-sm">No reminders yet</p>
+                    <p class="text-xs mt-1">Click "New" to add your first reminder</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Controls -->
+        <div class="mt-6 bg-gray-800 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-3">Test Controls</h3>
+            <div class="flex gap-2 flex-wrap">
+                <button onclick="testAddReminder()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">
+                    Test Add Reminder
+                </button>
+                <button onclick="showLocalStorage()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white">
+                    Show LocalStorage
+                </button>
+                <button onclick="testConsoleLog()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white">
+                    Test Console
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- REMINDERS FUNCTIONALITY ---
+        let reminders = JSON.parse(localStorage.getItem('dashboardReminders')) || [];
+        let reminderIdCounter = Date.now();
+
+        function updateDebugInfo() {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.innerHTML = `
+                <p><strong>Reminders Count:</strong> ${reminders.length}</p>
+                <p><strong>LocalStorage Key:</strong> dashboardReminders</p>
+                <p><strong>Current Time:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>Reminder ID Counter:</strong> ${reminderIdCounter}</p>
+                <p><strong>Lucide Available:</strong> ${typeof window.lucide !== 'undefined'}</p>
+            `;
+        }
+
+        function saveReminders() {
+            try {
+                localStorage.setItem('dashboardReminders', JSON.stringify(reminders));
+                console.log('Reminders saved successfully:', reminders);
+                updateDebugInfo();
+            } catch (error) {
+                console.error('Error saving reminders:', error);
+                alert('Error saving reminders: ' + error.message);
+            }
+        }
+
+        function addNewReminder() {
+            try {
+                console.log('Adding new reminder...');
+                
+                const reminder = {
+                    id: reminderIdCounter++,
+                    text: '',
+                    timestamp: Date.now()
+                };
+
+                reminders.unshift(reminder);
+                console.log('New reminder created:', reminder);
+                
+                saveReminders();
+                renderReminders();
+
+                // Focus on the new reminder
+                setTimeout(() => {
+                    const newReminderTextarea = document.querySelector(`[data-reminder-id="${reminder.id}"] textarea`);
+                    if (newReminderTextarea) {
+                        newReminderTextarea.focus();
+                        console.log('Focused on new reminder textarea');
+                    } else {
+                        console.error('Could not find textarea for new reminder');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error adding reminder:', error);
+                alert('Error adding reminder: ' + error.message);
+            }
+        }
+
+        function deleteReminder(id) {
+            try {
+                console.log('Deleting reminder with ID:', id);
+                reminders = reminders.filter(r => r.id !== id);
+                saveReminders();
+                renderReminders();
+                console.log('Reminder deleted successfully');
+            } catch (error) {
+                console.error('Error deleting reminder:', error);
+            }
+        }
+
+        function updateReminder(id, text) {
+            try {
+                const reminder = reminders.find(r => r.id === id);
+                if (reminder) {
+                    reminder.text = text;
+                    saveReminders();
+                    console.log('Reminder updated:', reminder);
+                }
+            } catch (error) {
+                console.error('Error updating reminder:', error);
+            }
+        }
+
+        function renderReminders() {
+            try {
+                console.log('Rendering reminders...');
+                const container = document.getElementById('reminders-container');
+                const emptyState = document.getElementById('empty-state');
+
+                if (!container || !emptyState) {
+                    console.error('Required DOM elements not found');
+                    return;
+                }
+
+                if (reminders.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    console.log('Showing empty state');
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+
+                container.innerHTML = reminders.map(reminder => `
+                    <div class="reminder-note p-3 rounded-lg relative" data-reminder-id="${reminder.id}">
+                        <button onclick="deleteReminder(${reminder.id})" 
+                            class="reminder-delete-btn absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-xs transition-colors"
+                            title="Delete reminder">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </button>
+                        <textarea 
+                            placeholder="Type your reminder here..."
+                            class="w-full h-20 pr-8"
+                            oninput="updateReminder(${reminder.id}, this.value)"
+                            onblur="if(!this.value.trim()) deleteReminder(${reminder.id})"
+                        >${reminder.text}</textarea>
+                        <div class="text-xs text-amber-700 mt-1 opacity-70">
+                            ${new Date(reminder.timestamp).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+
+                // Refresh icons for delete buttons
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                    console.log('Lucide icons refreshed');
+                }
+                
+                console.log('Reminders rendered successfully');
+                updateDebugInfo();
+                
+            } catch (error) {
+                console.error('Error rendering reminders:', error);
+                alert('Error rendering reminders: ' + error.message);
+            }
+        }
+
+        // Test functions
+        function testAddReminder() {
+            console.log('Test: Adding reminder manually');
+            addNewReminder();
+        }
+
+        function showLocalStorage() {
+            const stored = localStorage.getItem('dashboardReminders');
+            console.log('LocalStorage content:', stored);
+            alert('LocalStorage content: ' + (stored || 'null'));
+        }
+
+        function testConsoleLog() {
+            console.log('Console test - this should appear in browser console');
+            alert('Check the browser console for test message');
+        }
+
+        function clearAllReminders() {
+            if (confirm('Are you sure you want to clear all reminders?')) {
+                reminders = [];
+                saveReminders();
+                renderReminders();
+                console.log('All reminders cleared');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing reminders...');
+            renderReminders();
+            updateDebugInfo();
+            
+            // Initialize Lucide icons
+            if (window.lucide) {
+                window.lucide.createIcons();
+                console.log('Lucide icons initialized');
+            }
+        });
+    </script>
+</body>
+</html>

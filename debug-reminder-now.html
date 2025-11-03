@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Reminder Issue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #1F1F1F;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .console-output {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Reminder Debug Console</h1>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Debug Actions -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Debug Actions</h2>
+                <div class="space-y-3">
+                    <button onclick="runDiagnostics()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">
+                        Run Full Diagnostics
+                    </button>
+                    <button onclick="testFunctions()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white">
+                        Test Functions
+                    </button>
+                    <button onclick="clearStorage()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">
+                        Clear LocalStorage
+                    </button>
+                    <button onclick="openMainPage()" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white">
+                        Open db.html
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quick Status -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Quick Status</h2>
+                <div id="quick-status" class="space-y-2 text-sm">
+                    <p class="text-yellow-400">Click "Run Full Diagnostics" to check status</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Console Output -->
+        <div class="mt-6 bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">Console Output</h2>
+            <div id="console-output" class="console-output">
+                Console messages will appear here...
+            </div>
+            <button onclick="clearConsole()" class="mt-2 bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">
+                Clear Console
+            </button>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="mt-6 bg-blue-900/20 border border-blue-500/30 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4 text-blue-400">Instructions</h2>
+            <ol class="list-decimal list-inside space-y-2 text-sm">
+                <li>Click "Run Full Diagnostics" to see what's wrong</li>
+                <li>Check the console output for specific errors</li>
+                <li>If needed, click "Clear LocalStorage" to reset reminder data</li>
+                <li>Open db.html and try adding a reminder</li>
+                <li>If it still doesn't work, check your browser's developer console (F12)</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Capture console messages
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(message, type = 'log') {
+            const output = document.getElementById('console-output');
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? '#ff6b6b' : type === 'warn' ? '#ffd93d' : '#6bcf7f';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole(args.join(' '), 'warn');
+        };
+
+        function runDiagnostics() {
+            console.log('🔍 Starting comprehensive diagnostics...');
+            
+            const checks = [
+                {
+                    name: 'LocalStorage Access',
+                    test: () => {
+                        try {
+                            localStorage.setItem('test', 'value');
+                            const result = localStorage.getItem('test') === 'value';
+                            localStorage.removeItem('test');
+                            return result;
+                        } catch (e) {
+                            return false;
+                        }
+                    }
+                },
+                {
+                    name: 'Reminder Data in LocalStorage',
+                    test: () => localStorage.getItem('dashboardReminders') !== null
+                },
+                {
+                    name: 'JavaScript Enabled',
+                    test: () => true
+                },
+                {
+                    name: 'Console Available',
+                    test: () => typeof console !== 'undefined'
+                }
+            ];
+            
+            const results = checks.map(check => ({
+                name: check.name,
+                passed: check.test()
+            }));
+            
+            updateQuickStatus(results);
+            
+            // Check reminder data
+            const reminderData = localStorage.getItem('dashboardReminders');
+            if (reminderData) {
+                try {
+                    const parsed = JSON.parse(reminderData);
+                    console.log('📝 Current reminders in storage:', parsed.length);
+                    console.log('📝 Reminder data:', parsed);
+                } catch (e) {
+                    console.error('❌ Invalid reminder data in localStorage');
+                }
+            } else {
+                console.log('📝 No reminder data in localStorage');
+            }
+            
+            console.log('✅ Diagnostics complete');
+        }
+        
+        function testFunctions() {
+            console.log('🧪 Testing functions...');
+            
+            // Test if we can access the main page's functions
+            try {
+                // Open db.html in a new window to test
+                const testWindow = window.open('db.html', '_blank');
+                
+                setTimeout(() => {
+                    try {
+                        if (testWindow.addNewReminder) {
+                            console.log('✅ addNewReminder function found in main page');
+                        } else {
+                            console.log('❌ addNewReminder function not found in main page');
+                        }
+                        testWindow.close();
+                    } catch (e) {
+                        console.log('⚠️ Cannot access main page functions (cross-origin)');
+                        testWindow.close();
+                    }
+                }, 2000);
+                
+            } catch (e) {
+                console.error('❌ Error testing functions:', e.message);
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.removeItem('dashboardReminders');
+            console.log('🗑️ Reminder data cleared from localStorage');
+        }
+        
+        function openMainPage() {
+            window.open('db.html', '_blank');
+            console.log('🔗 Opening db.html in new tab');
+        }
+        
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = 'Console cleared...';
+        }
+        
+        function updateQuickStatus(results) {
+            const statusDiv = document.getElementById('quick-status');
+            statusDiv.innerHTML = results.map(result => `
+                <div class="flex items-center gap-2">
+                    <span class="${result.passed ? 'text-green-400' : 'text-red-400'}">
+                        ${result.passed ? '✅' : '❌'}
+                    </span>
+                    <span>${result.name}</span>
+                </div>
+            `).join('');
+        }
+        
+        // Auto-run diagnostics on load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Debug page loaded');
+            setTimeout(runDiagnostics, 500);
+        });
+    </script>
+</body>
+</html>

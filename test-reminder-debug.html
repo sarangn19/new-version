@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder Debug Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body {
+            background-color: #1F1F1F;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Reminder Functionality Debug</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Test Results -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+                <div id="test-results" class="space-y-2">
+                    <p class="text-yellow-400">Running tests...</p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Quick Actions</h2>
+                <div class="space-y-3">
+                    <button onclick="testLocalStorage()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">
+                        Test LocalStorage
+                    </button>
+                    <button onclick="testDOMElements()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white">
+                        Test DOM Elements
+                    </button>
+                    <button onclick="testJavaScriptFunctions()" class="w-full bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white">
+                        Test JavaScript Functions
+                    </button>
+                    <button onclick="clearAllData()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">
+                        Clear All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="mt-8 bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">Instructions</h2>
+            <ol class="list-decimal list-inside space-y-2 text-gray-300">
+                <li>Run the tests above to identify any issues</li>
+                <li>If tests pass, go to <a href="db.html" class="text-blue-400 hover:underline">db.html</a> and try adding a reminder</li>
+                <li>If reminders still don't work, check the browser console for errors (F12)</li>
+                <li>Try the <a href="test-reminder-functionality.html" class="text-blue-400 hover:underline">isolated test page</a></li>
+            </ol>
+        </div>
+        
+        <!-- Console Output -->
+        <div class="mt-6 bg-gray-900 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Console Output</h3>
+            <div id="console-output" class="text-sm text-gray-400 font-mono max-h-40 overflow-y-auto">
+                <!-- Console messages will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Capture console messages
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsoleOutput(message, type = 'log') {
+            const output = document.getElementById('console-output');
+            const div = document.createElement('div');
+            div.className = type === 'error' ? 'text-red-400' : type === 'warn' ? 'text-yellow-400' : 'text-gray-300';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsoleOutput(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsoleOutput(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsoleOutput(args.join(' '), 'warn');
+        };
+
+        function updateTestResults(results) {
+            const container = document.getElementById('test-results');
+            container.innerHTML = results.map(result => `
+                <div class="flex items-center gap-2">
+                    <span class="${result.passed ? 'text-green-400' : 'text-red-400'}">
+                        ${result.passed ? '✅' : '❌'}
+                    </span>
+                    <span>${result.test}</span>
+                </div>
+            `).join('');
+        }
+
+        function testLocalStorage() {
+            console.log('Testing LocalStorage...');
+            const results = [];
+            
+            try {
+                // Test basic localStorage functionality
+                localStorage.setItem('test', 'value');
+                const retrieved = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                results.push({
+                    test: 'LocalStorage basic functionality',
+                    passed: retrieved === 'value'
+                });
+                
+                // Test reminder data
+                const reminderData = localStorage.getItem('dashboardReminders');
+                results.push({
+                    test: 'Reminder data exists in LocalStorage',
+                    passed: reminderData !== null
+                });
+                
+                if (reminderData) {
+                    try {
+                        const parsed = JSON.parse(reminderData);
+                        results.push({
+                            test: 'Reminder data is valid JSON',
+                            passed: Array.isArray(parsed)
+                        });
+                        console.log('Current reminders:', parsed);
+                    } catch (e) {
+                        results.push({
+                            test: 'Reminder data is valid JSON',
+                            passed: false
+                        });
+                    }
+                }
+                
+            } catch (error) {
+                console.error('LocalStorage test error:', error);
+                results.push({
+                    test: 'LocalStorage access',
+                    passed: false
+                });
+            }
+            
+            updateTestResults(results);
+        }
+
+        function testDOMElements() {
+            console.log('Testing DOM Elements...');
+            const results = [];
+            
+            // Test if we're on the right page
+            results.push({
+                test: 'Current page has reminder elements',
+                passed: window.location.href.includes('db.html') || 
+                       document.getElementById('reminders-container') !== null
+            });
+            
+            // Test for required elements (simulate db.html structure)
+            const requiredElements = [
+                'reminders-container',
+                'empty-state', 
+                'add-reminder-btn'
+            ];
+            
+            requiredElements.forEach(id => {
+                const element = document.getElementById(id);
+                results.push({
+                    test: `Element #${id} exists`,
+                    passed: element !== null
+                });
+            });
+            
+            updateTestResults(results);
+        }
+
+        function testJavaScriptFunctions() {
+            console.log('Testing JavaScript Functions...');
+            const results = [];
+            
+            const requiredFunctions = [
+                'addNewReminder',
+                'deleteReminder',
+                'updateReminder',
+                'renderReminders',
+                'saveReminders'
+            ];
+            
+            requiredFunctions.forEach(funcName => {
+                results.push({
+                    test: `Function ${funcName} exists`,
+                    passed: typeof window[funcName] === 'function'
+                });
+            });
+            
+            // Test Lucide icons
+            results.push({
+                test: 'Lucide library loaded',
+                passed: typeof window.lucide !== 'undefined'
+            });
+            
+            updateTestResults(results);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all reminder data?')) {
+                localStorage.removeItem('dashboardReminders');
+                console.log('All reminder data cleared');
+                alert('All reminder data has been cleared. Try adding reminders again.');
+            }
+        }
+
+        // Run initial tests
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Debug page loaded');
+            
+            // Initialize Lucide icons
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            
+            setTimeout(() => {
+                testLocalStorage();
+                testDOMElements();
+                testJavaScriptFunctions();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
