@@ -88,12 +88,11 @@
     <script src="js/background-processor.js"></script>
     <script src="js/gemini-api-client.js"></script>
     <script src="js/ai-service-manager.js"></script>
-    <script src="js/ai-daily-challenge.js"></script>
+
     <script src="js/real-time-data-manager.js"></script>
 
     <script src="js/dashboard-fixes.js"></script>
-    <script src="js/daily-challenge-immediate-fix.js"></script>
-    <script src="js/daily-challenge-fix.js"></script>
+
     <link href="styles/glassmorphism.css" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Montserrat:wght@400&family=Roboto:wght@300&display=swap"
@@ -537,58 +536,7 @@
             }
         ];
 
-        // Daily Challenge Data - will be loaded from AI generator or fallback
-        let dailyChallenge = {
-            mcqs: [
-                {
-                    question: "Which Article of the Indian Constitution deals with the Right to Equality?",
-                    options: ["Article 14", "Article 15", "Article 16", "All of the above"],
-                    answerIndex: 3,
-                    explanation: "Articles 14, 15, and 16 all deal with different aspects of the Right to Equality. Article 14 provides equality before law, Article 15 prohibits discrimination, and Article 16 ensures equality of opportunity in public employment."
-                },
-                {
-                    question: "The Economic Survey is presented by which ministry?",
-                    options: ["Ministry of Finance", "Ministry of Commerce", "NITI Aayog", "RBI"],
-                    answerIndex: 0,
-                    explanation: "The Economic Survey is an annual document prepared by the Economic Division of the Department of Economic Affairs, Ministry of Finance, Government of India."
-                },
-                {
-                    question: "Which gas is primarily responsible for global warming?",
-                    options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
-                    answerIndex: 2,
-                    explanation: "Carbon dioxide (CO2) is the primary greenhouse gas responsible for global warming, mainly released through burning fossil fuels and deforestation."
-                }
-            ],
-            flashcards: flashcards,
-            currentMCQ: 0,
-            currentFlashcard: 0
-        };
 
-        // Load AI-generated daily challenge if available
-        function loadAIDailyChallenge() {
-            try {
-                const aiChallenge = localStorage.getItem('dailyChallenge');
-                if (aiChallenge) {
-                    const challenge = JSON.parse(aiChallenge);
-                    console.log('🎯 Loading AI daily challenge:', challenge);
-                    
-                    // Convert AI format to dashboard format
-                    if (challenge.questions && Array.isArray(challenge.questions)) {
-                        dailyChallenge.mcqs = challenge.questions.map(q => ({
-                            question: q.question,
-                            options: q.options,
-                            answerIndex: q.correct,
-                            explanation: q.explanation
-                        }));
-                        dailyChallenge.title = challenge.title;
-                        dailyChallenge.subject = challenge.subject;
-                        console.log('✅ AI challenge loaded successfully');
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading AI challenge:', error);
-            }
-        }
 
         // --- GLOBAL STATE ---
         const skeletonCount = 4;
@@ -598,9 +546,7 @@
         let currentFlashcardIndex = 0;
         let flashcardFlipped = false;
 
-        let selectedOptionIndex = null; // Quiz state
-        let quizAttempted = false;
-        let quizCorrect = false;
+
 
         // --- TOAST & UTILITIES ---
         function showToast(message, type = 'info') {
@@ -775,10 +721,11 @@
         }
 
         // --- FLASHCARD LOGIC ---
+        let currentFlashcardIndex = 0;
 
         function renderFlashcard() {
             const cardContainer = document.getElementById('flashcard-container');
-            const card = dailyChallenge.flashcards[dailyChallenge.currentFlashcard];
+            const card = flashcards[currentFlashcardIndex];
 
             cardContainer.innerHTML = `
                 <button id="card-inner" aria-pressed="${flashcardFlipped ? 'true' : 'false'}" aria-label="Flashcard: ${card.front}. Press Enter or Space to flip" 
@@ -801,8 +748,8 @@
                 </button>
             `;
 
-            document.getElementById('flashcard-prev').disabled = dailyChallenge.currentFlashcard === 0;
-            document.getElementById('flashcard-next').disabled = dailyChallenge.currentFlashcard === dailyChallenge.flashcards.length - 1;
+            document.getElementById('flashcard-prev').disabled = currentFlashcardIndex === 0;
+            document.getElementById('flashcard-next').disabled = currentFlashcardIndex === flashcards.length - 1;
         }
 
         function flipFlashcard() {
@@ -812,16 +759,16 @@
 
         function navigateFlashcard(direction) {
             flashcardFlipped = false; // Reset flip state
-            if (direction === 'next' && dailyChallenge.currentFlashcard < dailyChallenge.flashcards.length - 1) {
-                dailyChallenge.currentFlashcard++;
-            } else if (direction === 'prev' && dailyChallenge.currentFlashcard > 0) {
-                dailyChallenge.currentFlashcard--;
+            if (direction === 'next' && currentFlashcardIndex < flashcards.length - 1) {
+                currentFlashcardIndex++;
+            } else if (direction === 'prev' && currentFlashcardIndex > 0) {
+                currentFlashcardIndex--;
             }
             renderFlashcard();
         }
 
         function flashcardAction(action) {
-            const card = dailyChallenge.flashcards[dailyChallenge.currentFlashcard];
+            const card = flashcards[currentFlashcardIndex];
             if (action === 'learned') {
                 showToast(`Card on "${card.front.substring(0, 30)}..." marked as Learned!`, 'success');
                 // In a real app, you'd remove this card from the active deck
@@ -830,143 +777,14 @@
                 // In a real app, you'd mark it for priority revision
             }
             // Move to next card (if not the last one)
-            if (dailyChallenge.currentFlashcard < dailyChallenge.flashcards.length - 1) {
+            if (currentFlashcardIndex < flashcards.length - 1) {
                 navigateFlashcard('next');
             } else {
                 showToast("End of Flashcards for today! Great job.", 'info');
             }
         }
 
-        // --- DAILY QUIZ LOGIC ---
 
-        function renderQuiz() {
-            const optionsContainer = document.getElementById('quiz-options');
-            const questionEl = document.getElementById('daily-quiz-question');
-            const feedbackDiv = document.getElementById('quiz-feedback');
-            const checkBtn = document.getElementById('check-answer-btn');
-            const retryBtn = document.getElementById('retry-quiz-btn');
-            const nextBtn = document.getElementById('next-question-btn');
-            const questionCounter = document.getElementById('question-counter');
-
-            // Populate the question text
-            const currentMCQ = dailyChallenge.mcqs[dailyChallenge.currentMCQ];
-            if (questionEl) questionEl.textContent = currentMCQ.question;
-            if (questionCounter) questionCounter.textContent = `Question ${dailyChallenge.currentMCQ + 1} of ${dailyChallenge.mcqs.length}`;
-
-            optionsContainer.innerHTML = currentMCQ.options.map((option, index) => {
-                // Use role=radio buttons for accessibility
-                let classes = 'p-3 rounded-xl cursor-pointer transition duration-200 text-white border border-white/10 inline-flex items-center w-full text-left';
-                let ariaChecked = 'false';
-
-                if (quizAttempted) {
-                    if (index === currentMCQ.answerIndex) {
-                        classes += ' bg-green-800/50 border-green-500 shadow-md';
-                        ariaChecked = 'true';
-                    } else if (index === selectedOptionIndex) {
-                        classes += ' bg-red-800/50 border-red-500 shadow-md';
-                        ariaChecked = 'true';
-                    } else {
-                        classes += ' bg-gray-700/50';
-                    }
-                } else {
-                    classes += ' bg-gray-700/50 hover:bg-gray-600/70';
-                    if (index === selectedOptionIndex) {
-                        classes += ' border-teal-primary ring-2 ring-teal-primary shadow-lg';
-                        ariaChecked = 'true';
-                    }
-                }
-
-                return `
-                    <button role="radio" tabindex="0" aria-checked="${ariaChecked}" class="${classes}" onclick="selectQuizOptionFixed(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); selectQuizOptionFixed(${index}); }">
-                        <span class="text-sm">${String.fromCharCode(65 + index)}. ${option}</span>
-                    </button>
-                `;
-            }).join('');
-
-            if (quizAttempted) {
-                checkBtn.classList.add('hidden');
-                if (dailyChallenge.currentMCQ < dailyChallenge.mcqs.length - 1) {
-                    nextBtn.classList.remove('hidden');
-                    retryBtn.classList.add('hidden');
-                } else {
-                    nextBtn.classList.add('hidden');
-                    retryBtn.classList.remove('hidden');
-                }
-                feedbackDiv.classList.remove('hidden');
-                feedbackDiv.innerHTML = `
-                    <div class="p-3 rounded-lg ${quizCorrect ? 'bg-green-700/30 border-l-4 border-green-500' : 'bg-red-700/30 border-l-4 border-red-500'}">
-                        <p class="text-xs font-medium ${quizCorrect ? 'text-green-400' : 'text-red-400'}"> <!-- REDUCED from text-sm -->
-                            ${quizCorrect ? 'Correct! Excellent work.' : 'Incorrect.'}
-                        </p>
-                        <p class="text-xs text-white/70 pt-1">${currentMCQ.explanation}</p>
-                    </div>
-                `;
-            } else {
-                checkBtn.classList.remove('hidden');
-                nextBtn.classList.add('hidden');
-                retryBtn.classList.add('hidden');
-                feedbackDiv.classList.add('hidden');
-                checkBtn.disabled = selectedOptionIndex === null;
-            }
-        }
-
-        function selectQuizOption(index) {
-            console.log('🎯 Option selected:', index);
-            if (quizAttempted) {
-                console.log('⚠️ Quiz already attempted, ignoring selection');
-                return;
-            }
-            selectedOptionIndex = index;
-            console.log('✅ Selected option index set to:', selectedOptionIndex);
-            renderQuiz();
-        }
-
-        // Make functions globally accessible
-        window.selectQuizOption = selectQuizOption;
-        window.checkQuizAnswer = checkQuizAnswer;
-        window.nextQuestion = nextQuestion;
-        window.resetQuiz = resetQuiz;
-
-        function checkQuizAnswer() {
-            console.log('🔍 Checking answer. Selected option:', selectedOptionIndex);
-            if (selectedOptionIndex === null || selectedOptionIndex === undefined) {
-                console.log('❌ No option selected');
-                showToast("Please select an option first!", 'error');
-                return;
-            }
-
-            quizAttempted = true;
-            const currentQuestion = dailyChallenge.mcqs[dailyChallenge.currentMCQ];
-            quizCorrect = selectedOptionIndex === currentQuestion.answerIndex;
-            console.log('🎯 Correct answer index:', currentQuestion.answerIndex, 'Selected:', selectedOptionIndex, 'Correct:', quizCorrect);
-
-            if (quizCorrect) {
-                showToast("You nailed the daily challenge!", 'success');
-            } else {
-                showToast("Keep going, you'll get it next time.", 'info');
-            }
-
-            renderQuiz();
-        }
-
-        function nextQuestion() {
-            if (dailyChallenge.currentMCQ < dailyChallenge.mcqs.length - 1) {
-                dailyChallenge.currentMCQ++;
-                quizAttempted = false;
-                selectedOptionIndex = null;
-                quizCorrect = false;
-                renderQuiz();
-            }
-        }
-
-        function resetQuiz() {
-            dailyChallenge.currentMCQ = 0;
-            quizAttempted = false;
-            selectedOptionIndex = null;
-            quizCorrect = false;
-            showToast("Quiz reset. Good luck!", 'info');
-            renderQuiz();
-        }
 
         // --- DASHBOARD ACTIONS (from previous code) ---
         function handleSearch(event) {
@@ -1109,14 +927,10 @@
                 userInitialsEl.textContent = profileManager.generateInitials(profileManager.profileData.name);
             }
 
-            // Load AI-generated daily challenge
-            loadAIDailyChallenge();
-            
             // Initial Render Calls
             renderContent(); // Show skeletons initially
             renderFilterChips();
             renderFlashcard();
-            renderQuiz();
 
             // Simulate data fetching delay
             setTimeout(() => {
@@ -1689,40 +1503,7 @@
                 <!-- RIGHT COLUMN: Widgets (Quiz & Flashcards) -->
                 <div class="mt-8 lg:mt-0 space-y-6">
 
-                    <!-- Daily Quiz Widget -->
-                    <div id="daily-quiz-widget"
-                        class="bg-[var(--bg-dark-2)] rounded-2xl p-5 shadow-xl space-y-3 border border-white/10">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-base font-semibold text-white flex items-center gap-2">
-                                Daily Challenge <i data-lucide="trophy" class="w-5 h-5 text-yellow-400"></i>
-                            </h4>
-                            <span id="question-counter" class="text-xs text-white/60">Question 1 of 10</span>
-                        </div>
-                        <p id="daily-quiz-question" class="text-white/80 font-normal leading-snug text-sm">
-                            <!-- Question will be populated by JS -->
-                        </p>
-                        <div id="quiz-options" class="space-y-2" role="radiogroup"
-                            aria-labelledby="daily-quiz-question">
-                            <!-- Options rendered by JS -->
-                        </div>
-                        <div id="quiz-feedback" class="pt-2 hidden">
-                            <!-- Feedback rendered by JS -->
-                        </div>
-                        <div id="quiz-actions" class="pt-3">
-                            <button id="check-answer-btn" onclick="checkQuizAnswerFixed()"
-                                class="btn-primary-gradient btn-unified w-full px-4 py-1.5 text-white font-medium text-sm">
-                                Check Answer
-                            </button>
-                            <button id="next-question-btn" onclick="nextQuestionFixed()"
-                                class="btn-primary-gradient btn-unified w-full px-4 py-1.5 text-white font-medium text-sm hidden mt-2">
-                                Next Question
-                            </button>
-                            <button id="retry-quiz-btn" onclick="resetQuizFixed()"
-                                class="btn-secondary-subtle btn-unified w-full px-4 py-1.5 text-white font-medium text-sm hidden mt-2">
-                                Restart Challenge
-                            </button>
-                        </div>
-                    </div>
+
 
                     <!-- Flashcard Carousel -->
                     <div id="flashcard-carousel"

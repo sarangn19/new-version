@@ -24,6 +24,9 @@
         document.querySelectorAll('#quiz-options button').forEach(btn => {
             btn.classList.remove('border-teal-primary', 'ring-2', 'ring-teal-primary', 'shadow-lg');
             btn.classList.remove('border-[var(--teal-primary)]', 'ring-[var(--teal-primary)]');
+            btn.classList.remove('border-teal-500', 'ring-teal-500');
+            btn.style.borderColor = '';
+            btn.style.boxShadow = '';
             btn.setAttribute('aria-checked', 'false');
         });
 
@@ -34,7 +37,10 @@
         // Apply selection styling with CSS variable support
         const selectedButton = document.querySelector(`#quiz-options button:nth-child(${index + 1})`);
         if (selectedButton) {
-            selectedButton.classList.add('border-[var(--teal-primary)]', 'ring-2', 'ring-[var(--teal-primary)]', 'shadow-lg');
+            // Try CSS variable approach first, fallback to direct classes
+            selectedButton.classList.add('border-teal-500', 'ring-2', 'ring-teal-500', 'shadow-lg');
+            selectedButton.style.borderColor = 'var(--teal-primary, #2C7A7B)';
+            selectedButton.style.boxShadow = '0 0 0 2px var(--teal-primary, #2C7A7B)';
             selectedButton.setAttribute('aria-checked', 'true');
         }
 

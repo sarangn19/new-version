@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Challenge Selection Fix Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        :root {
+            --teal-primary: #2C7A7B;
+        }
+        
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .option-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">🔧 Daily Challenge Selection Fix Test</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">Daily Challenge 🏆</h3>
+                <span id="question-counter" class="text-sm text-gray-400">Question 1 of 3</span>
+            </div>
+            
+            <p id="daily-quiz-question" class="text-white/80 mb-4">
+                Which Article of the Indian Constitution deals with the Right to Equality?
+            </p>
+            
+            <div id="quiz-options" class="space-y-2 mb-4">
+                <button class="option-btn p-3 rounded-xl cursor-pointer transition duration-200 text-white border border-white/10 bg-gray-700/50 hover:bg-gray-600/70 w-full text-left" onclick="selectQuizOptionFixed(0)">
+                    <span class="text-sm">A. Article 14</span>
+                </button>
+                <button class="option-btn p-3 rounded-xl cursor-pointer transition duration-200 text-white border border-white/10 bg-gray-700/50 hover:bg-gray-600/70 w-full text-left" onclick="selectQuizOptionFixed(1)">
+                    <span class="text-sm">B. Article 15</span>
+                </button>
+                <button class="option-btn p-3 rounded-xl cursor-pointer transition duration-200 text-white border border-white/10 bg-gray-700/50 hover:bg-gray-600/70 w-full text-left" onclick="selectQuizOptionFixed(2)">
+                    <span class="text-sm">C. Article 16</span>
+                </button>
+                <button class="option-btn p-3 rounded-xl cursor-pointer transition duration-200 text-white border border-white/10 bg-gray-700/50 hover:bg-gray-600/70 w-full text-left" onclick="selectQuizOptionFixed(3)">
+                    <span class="text-sm">D. All of the above</span>
+                </button>
+            </div>
+            
+            <div id="quiz-feedback" class="hidden mb-4"></div>
+            
+            <div class="space-y-2">
+                <button id="check-answer-btn" onclick="checkQuizAnswerFixed()" 
+                    class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" 
+                    disabled>
+                    Check Answer
+                </button>
+                <button id="next-question-btn" onclick="nextQuestionFixed()" 
+                    class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg hidden">
+                    Next Question
+                </button>
+                <button id="retry-quiz-btn" onclick="resetQuizFixed()" 
+                    class="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg hidden">
+                    Restart Challenge
+                </button>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-4">
+            <h3 class="text-lg font-semibold mb-3">Test Status</h3>
+            <div id="test-log" class="space-y-1 text-sm font-mono">
+                <div class="text-yellow-400">⏳ Loading fix...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the fix -->
+    <script src="js/daily-challenge-immediate-fix.js"></script>
+    
+    <!-- Mock daily challenge data -->
+    <script>
+        // Mock daily challenge data
+        window.dailyChallenge = {
+            currentMCQ: 0,
+            mcqs: [
+                {
+                    question: "Which Article of the Indian Constitution deals with the Right to Equality?",
+                    options: ["Article 14", "Article 15", "Article 16", "All of the above"],
+                    answerIndex: 3,
+                    explanation: "Articles 14, 15, and 16 all deal with the Right to Equality in different aspects."
+                }
+            ]
+        };
+        
+        // Toast function for testing
+        window.showToast = function(message, type) {
+            const log = document.getElementById('test-log');
+            const color = type === 'success' ? 'text-green-400' : 
+                         type === 'error' ? 'text-red-400' : 'text-blue-400';
+            log.innerHTML += `<div class="${color}">📢 ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        };
+        
+        // Test logging
+        function logTest(message, type = 'info') {
+            const log = document.getElementById('test-log');
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            const color = type === 'success' ? 'text-green-400' : 
+                         type === 'error' ? 'text-red-400' : 
+                         type === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+            log.innerHTML += `<div class="${color}">${icon} ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // Check if fix loaded
+        setTimeout(() => {
+            if (typeof window.selectQuizOptionFixed === 'function') {
+                logTest('Daily challenge fix loaded successfully', 'success');
+                logTest('Try selecting an option and clicking "Check Answer"', 'info');
+            } else {
+                logTest('Fix failed to load', 'error');
+            }
+        }, 500);
+        
+        // Test automatic selection
+        setTimeout(() => {
+            logTest('Auto-testing option selection...', 'info');
+            if (window.selectQuizOptionFixed) {
+                window.selectQuizOptionFixed(1); // Select option B
+                logTest('Auto-selected option B for testing', 'success');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
