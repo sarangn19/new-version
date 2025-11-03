@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test News Fix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="js/auto-news-updater.js"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        .upsc-news-analysis { font-family: 'Inter', sans-serif; }
+        .exam-relevance-banner { background: linear-gradient(135deg, #059669, #047857); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
+        .exam-relevance-banner h2 { color: white; margin: 0 0 0.5rem 0; font-size: 1.25rem; }
+        .relevance-tags { display: flex; gap: 0.5rem; }
+        .tag { background: rgba(255,255,255,0.2); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
+        .key-facts-box { background: #1e40af20; border-left: 4px solid #3b82f6; padding: 1rem; margin: 1rem 0; border-radius: 0.25rem; }
+        .syllabus-mapping { background: #7c2d1220; border-left: 4px solid #dc2626; padding: 1rem; margin: 1rem 0; border-radius: 0.25rem; }
+        .syllabus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; }
+        .syllabus-item h4 { color: #dc2626; margin-bottom: 0.5rem; }
+        .exam-questions { background: #92400e20; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1rem 0; border-radius: 0.25rem; }
+        .question-type { margin: 0.5rem 0; }
+        .question-type h4 { color: #f59e0b; margin-bottom: 0.25rem; }
+        .related-topics { background: #16537e20; border-left: 4px solid #0ea5e9; padding: 1rem; margin: 1rem 0; border-radius: 0.25rem; }
+        .mnemonic-box { background: #7c2d1220; border: 2px dashed #dc2626; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; text-align: center; }
+        .mnemonic-box h3 { color: #dc2626; }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">🧪 News Functionality Test</h1>
+        
+        <!-- Status Panel -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">System Status</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-700 rounded p-4">
+                    <div class="text-sm text-gray-400">Auto Updater</div>
+                    <div id="updater-status" class="text-lg font-semibold text-yellow-400">Initializing...</div>
+                </div>
+                <div class="bg-gray-700 rounded p-4">
+                    <div class="text-sm text-gray-400">Last Update</div>
+                    <div id="last-update" class="text-lg font-semibold text-blue-400">--</div>
+                </div>
+                <div class="bg-gray-700 rounded p-4">
+                    <div class="text-sm text-gray-400">Next Update</div>
+                    <div id="next-update" class="text-lg font-semibold text-green-400">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Controls</h3>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="forceUpdate()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm">
+                    Force News Update
+                </button>
+                <button onclick="showSampleNews()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-sm">
+                    Show Sample News
+                </button>
+                <button onclick="testModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm">
+                    Test Modal Function
+                </button>
+                <button onclick="clearCache()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm">
+                    Clear News Cache
+                </button>
+            </div>
+        </div>
+
+        <!-- News Grid -->
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Latest UPSC News</h3>
+            <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="text-center py-8 text-gray-400">
+                    <i data-lucide="newspaper" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
+                    <p>Loading news articles...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Panel -->
+        <div class="bg-gray-800 rounded-lg p-6 mt-6">
+            <h3 class="text-lg font-semibold mb-4">Activity Log</h3>
+            <div id="activity-log" class="space-y-1 text-sm font-mono max-h-64 overflow-y-auto bg-black/50 p-4 rounded">
+                <div class="text-blue-400">[INFO] Test page initialized</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global news data for testing
+        window.newsData = [
+            {
+                id: 1,
+                title: "Supreme Court Landmark Judgment on Digital Rights",
+                category: "Polity",
+                date: "2024-11-04",
+                time: "2 hours ago",
+                summary: "The Supreme Court delivered a significant judgment regarding digital privacy rights and data protection in the digital age.",
+                originalSource: "https://www.thehindu.com/news/national/supreme-court-digital-rights-judgment/article67890123.ece",
+                sourceTitle: "The Hindu",
+                content: `
+                    <div class="upsc-news-analysis">
+                        <div class="exam-relevance-banner">
+                            <h2>🎯 UPSC Exam Relevance: HIGH</h2>
+                            <div class="relevance-tags">
+                                <span class="tag prelims">Prelims</span>
+                                <span class="tag mains">Mains GS-2</span>
+                                <span class="tag interview">Interview</span>
+                            </div>
+                        </div>
+
+                        <h2>Supreme Court Delivers Landmark Judgment on Digital Rights</h2>
+                        
+                        <div class="key-facts-box">
+                            <h3>📋 Key Facts for UPSC</h3>
+                            <ul>
+                                <li><strong>Constitutional Basis:</strong> Article 21 (Right to Life and Personal Liberty)</li>
+                                <li><strong>Bench:</strong> 9-judge Constitutional Bench</li>
+                                <li><strong>Case:</strong> Justice K.S. Puttaswamy vs Union of India</li>
+                                <li><strong>Year:</strong> 2017 (Referenced in current context)</li>
+                            </ul>
+                        </div>
+
+                        <h3>🔍 Detailed Analysis</h3>
+                        <p>The Supreme Court's judgment on digital privacy rights establishes a crucial precedent for India's digital governance framework. This decision directly impacts multiple UPSC syllabus areas.</p>
+                        
+                        <div class="syllabus-mapping">
+                            <h3>📚 Syllabus Mapping</h3>
+                            <div class="syllabus-grid">
+                                <div class="syllabus-item">
+                                    <h4>Prelims</h4>
+                                    <ul>
+                                        <li>Fundamental Rights (Article 21)</li>
+                                        <li>Supreme Court judgments</li>
+                                        <li>Digital India initiatives</li>
+                                    </ul>
+                                </div>
+                                <div class="syllabus-item">
+                                    <h4>Mains GS-2</h4>
+                                    <ul>
+                                        <li>Constitutional provisions</li>
+                                        <li>Judiciary and its role</li>
+                                        <li>Government policies and interventions</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-questions">
+                            <h3>🤔 Possible Exam Questions</h3>
+                            <div class="question-type">
+                                <h4>Prelims Style:</h4>
+                                <p><em>"The right to privacy was declared a fundamental right by the Supreme Court in which case?"</em></p>
+                            </div>
+                            <div class="question-type">
+                                <h4>Mains Style:</h4>
+                                <p><em>"Discuss the implications of the Supreme Court's judgment on digital privacy rights for India's digital governance framework. (250 words)"</em></p>
+                            </div>
+                        </div>
+
+                        <div class="related-topics">
+                            <h3>🔗 Related Topics to Study</h3>
+                            <ul>
+                                <li>Data Protection Bill 2023</li>
+                                <li>Digital Personal Data Protection Act</li>
+                                <li>IT Act 2000 and amendments</li>
+                                <li>Aadhaar judgment (2018)</li>
+                                <li>Right to be forgotten</li>
+                            </ul>
+                        </div>
+
+                        <div class="mnemonic-box">
+                            <h3>🧠 Memory Aid</h3>
+                            <p><strong>PRIDE:</strong> <strong>P</strong>rivacy as fundamental right, <strong>R</strong>ight to life (Art 21), <strong>I</strong>nformation protection, <strong>D</strong>ata collection guidelines, <strong>E</strong>nhanced citizen rights</p>
+                        </div>
+                    </div>
+                `,
+                image: "image/polity.png"
+            }
+        ];
+
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('activity-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-blue-400',
+                success: 'text-green-400',
+                warning: 'text-yellow-400',
+                error: 'text-red-400'
+            };
+            
+            logEl.innerHTML += `<div class="${colors[type] || colors.info}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function updateStatus() {
+            if (window.autoNewsUpdater) {
+                const status = window.autoNewsUpdater.getUpdateStatus();
+                document.getElementById('updater-status').textContent = 'Active';
+                document.getElementById('updater-status').className = 'text-lg font-semibold text-green-400';
+                document.getElementById('last-update').textContent = status.lastUpdate.toLocaleTimeString();
+                document.getElementById('next-update').textContent = status.nextUpdate.toLocaleTimeString();
+            } else {
+                document.getElementById('updater-status').textContent = 'Not Available';
+                document.getElementById('updater-status').className = 'text-lg font-semibold text-red-400';
+            }
+        }
+
+        function forceUpdate() {
+            log('Forcing news update...', 'info');
+            if (window.autoNewsUpdater) {
+                window.autoNewsUpdater.forceUpdate();
+                log('Update triggered successfully', 'success');
+                setTimeout(updateStatus, 1000);
+                setTimeout(renderNews, 1500);
+            } else {
+                log('Auto updater not available', 'error');
+            }
+        }
+
+        function showSampleNews() {
+            log('Displaying sample news...', 'info');
+            renderNews();
+        }
+
+        function testModal() {
+            log('Testing modal functionality...', 'info');
+            if (window.newsData && window.newsData.length > 0) {
+                showNewsModal(window.newsData[0]);
+                log('Modal opened successfully', 'success');
+            } else {
+                log('No news data available for modal test', 'error');
+            }
+        }
+
+        function clearCache() {
+            log('Clearing news cache...', 'warning');
+            localStorage.removeItem('lastNewsUpdate');
+            localStorage.removeItem('upscNewsCache');
+            log('Cache cleared', 'success');
+        }
+
+        function renderNews() {
+            const grid = document.getElementById('news-grid');
+            if (!window.newsData || window.newsData.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-400">No news articles available</div>';
+                return;
+            }
+
+            const html = window.newsData.map(article => `
+                <article class="bg-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-600 transition-colors" onclick="viewNews(${article.id})">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2 py-1 rounded text-xs bg-teal-600/20 text-teal-400">${article.category}</span>
+                        <span class="text-xs text-gray-400">${article.time}</span>
+                    </div>
+                    <h4 class="font-semibold mb-2 line-clamp-2">${article.title}</h4>
+                    <p class="text-sm text-gray-300 mb-2 line-clamp-2">${article.summary}</p>
+                    <div class="text-xs text-gray-500">Source: ${article.sourceTitle || 'News Source'}</div>
+                </article>
+            `).join('');
+
+            grid.innerHTML = html;
+            log(`Rendered ${window.newsData.length} news articles`, 'success');
+        }
+
+        function viewNews(newsId) {
+            log(`Opening news article ID: ${newsId}`, 'info');
+            const news = window.newsData.find(n => n.id === newsId);
+            if (news) {
+                showNewsModal(news);
+                log('News modal opened', 'success');
+            } else {
+                log(`News article not found: ${newsId}`, 'error');
+            }
+        }
+
+        function showNewsModal(news) {
+            // Remove existing modal
+            const existingModal = document.getElementById('news-modal');
+            if (existingModal) {
+                document.body.removeChild(existingModal);
+            }
+
+            const modal = document.createElement('div');
+            modal.id = 'news-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            
+            modal.innerHTML = `
+                <div class="bg-gray-800 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/10 shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <button id="backToNews" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                                <i data-lucide="arrow-left" class="w-5 h-5 text-white"></i>
+                            </button>
+                            <div>
+                                <span class="px-3 py-1 rounded-full text-xs bg-teal-600/20 text-teal-400 font-medium">${news.category}</span>
+                                <span class="text-white/60 text-sm ml-3">${news.time}</span>
+                            </div>
+                        </div>
+                        <button id="closeNewsModal" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5 text-white/70 hover:text-white"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-y-auto max-h-[75vh] custom-scrollbar">
+                        <h1 class="text-2xl font-bold text-white mb-4">${news.title}</h1>
+                        <div class="prose prose-invert max-w-none text-white/90 leading-relaxed">
+                            ${news.content}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Add event listeners
+            const closeModal = () => {
+                const modalToRemove = document.getElementById('news-modal');
+                if (modalToRemove && document.body.contains(modalToRemove)) {
+                    document.body.removeChild(modalToRemove);
+                }
+            };
+
+            modal.querySelector('#closeNewsModal').addEventListener('click', closeModal);
+            modal.querySelector('#backToNews').addEventListener('click', closeModal);
+
+            // Close on escape key
+            const handleKeyPress = (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.removeEventListener('keydown', handleKeyPress);
+                }
+            };
+            document.addEventListener('keydown', handleKeyPress);
+
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Render icons
+            setTimeout(() => {
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                }
+            }, 100);
+        }
+
+        // Listen for news updates
+        window.addEventListener('newsUpdated', (event) => {
+            log('News updated via auto-updater', 'success');
+            if (event.detail.articles) {
+                window.newsData = event.detail.articles;
+                renderNews();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Page loaded, initializing...', 'info');
+            
+            // Render initial news
+            renderNews();
+            
+            // Update status periodically
+            setInterval(updateStatus, 5000);
+            setTimeout(updateStatus, 1000);
+            
+            // Initialize icons
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
+            
+            log('Initialization complete', 'success');
+        });
+    </script>
+</body>
+</html>

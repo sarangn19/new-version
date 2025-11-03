@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug News Opening</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">🐛 Debug News Opening Issue</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Test News Articles</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Test Article 1 -->
+                <div class="bg-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-600 transition-colors" onclick="testViewNews(1)">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2 py-1 rounded text-xs bg-teal-600/20 text-teal-400">Polity</span>
+                        <button onclick="event.stopPropagation(); logTest('Bookmark clicked', 'info')" class="p-1 rounded hover:bg-white/10">
+                            <i data-lucide="bookmark" class="w-4 h-4 text-white/60"></i>
+                        </button>
+                    </div>
+                    <h4 class="font-semibold mb-2">Supreme Court Digital Rights Judgment</h4>
+                    <p class="text-sm text-white/70 mb-2">The Supreme Court delivered a significant judgment regarding digital privacy rights...</p>
+                    <div class="text-xs text-white/50">2 hours ago</div>
+                </div>
+                
+                <!-- Test Article 2 -->
+                <div class="bg-gray-700 rounded-lg p-4 cursor-pointer hover:bg-gray-600 transition-colors" onclick="testViewNews(2)">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2 py-1 rounded text-xs bg-blue-600/20 text-blue-400">Economy</span>
+                        <button onclick="event.stopPropagation(); logTest('Bookmark clicked', 'info')" class="p-1 rounded hover:bg-white/10">
+                            <i data-lucide="bookmark" class="w-4 h-4 text-white/60"></i>
+                        </button>
+                    </div>
+                    <h4 class="font-semibold mb-2">New Economic Policy Framework</h4>
+                    <p class="text-sm text-white/70 mb-2">Government announces comprehensive economic policy framework...</p>
+                    <div class="text-xs text-white/50">1 day ago</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Direct Function Tests</h3>
+            <div class="space-y-2">
+                <button onclick="testViewNewsFunction()" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm">
+                    Test viewNews Function Directly
+                </button>
+                <button onclick="testShowModalFunction()" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-sm">
+                    Test showNewsModal Function Directly
+                </button>
+                <button onclick="checkNewsData()" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm">
+                    Check News Data Availability
+                </button>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Debug Log</h3>
+            <div id="debug-log" class="space-y-1 text-sm font-mono max-h-64 overflow-y-auto bg-black/50 p-4 rounded">
+                <div class="text-yellow-400">🐛 Debug session started...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock news data for testing
+        const testNewsData = [
+            {
+                id: 1,
+                title: "Supreme Court Digital Rights Judgment",
+                category: "Polity",
+                time: "2 hours ago",
+                summary: "The Supreme Court delivered a significant judgment regarding digital privacy rights and data protection in the digital age.",
+                content: `
+                    <h2>Supreme Court Delivers Landmark Judgment on Digital Rights</h2>
+                    <p>In a groundbreaking decision that will reshape India's digital landscape, the Supreme Court today delivered a comprehensive judgment on digital privacy rights and data protection.</p>
+                    
+                    <h3>Key Highlights</h3>
+                    <ul>
+                        <li>Right to digital privacy recognized as a fundamental right under Article 21</li>
+                        <li>Stricter guidelines for data collection by government agencies</li>
+                        <li>Enhanced protection for citizens' digital footprint</li>
+                        <li>Mandatory consent requirements for data processing</li>
+                    </ul>
+                    
+                    <p>This judgment will significantly impact how personal data is collected, processed, and stored by both government and private entities.</p>
+                `,
+                image: "image/polity.png"
+            },
+            {
+                id: 2,
+                title: "New Economic Policy Framework",
+                category: "Economy",
+                time: "1 day ago",
+                summary: "Government announces comprehensive economic policy framework focusing on sustainable growth and employment generation.",
+                content: `
+                    <h2>Government Unveils New Economic Policy Framework</h2>
+                    <p>The government today announced a comprehensive economic policy framework aimed at achieving sustainable growth while addressing employment challenges.</p>
+                    
+                    <h3>Policy Highlights</h3>
+                    <ul>
+                        <li>Focus on manufacturing sector growth</li>
+                        <li>Enhanced support for MSMEs</li>
+                        <li>Green economy initiatives</li>
+                        <li>Digital infrastructure development</li>
+                    </ul>
+                    
+                    <p>The policy framework includes specific measures to generate employment opportunities across various sectors.</p>
+                `,
+                image: "image/economy.png"
+            }
+        ];
+        
+        function logTest(message, type = 'info') {
+            const log = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            const color = type === 'success' ? 'text-green-400' : 
+                         type === 'error' ? 'text-red-400' : 
+                         type === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+            log.innerHTML += `<div class="${color}">[${timestamp}] ${icon} ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function testViewNews(newsId) {
+            logTest(`Testing viewNews with ID: ${newsId}`, 'info');
+            
+            try {
+                const news = testNewsData.find(n => n.id === newsId);
+                if (news) {
+                    logTest(`Found news: ${news.title}`, 'success');
+                    showTestNewsModal(news);
+                } else {
+                    logTest(`News not found for ID: ${newsId}`, 'error');
+                }
+            } catch (error) {
+                logTest(`Error in testViewNews: ${error.message}`, 'error');
+            }
+        }
+        
+        function showTestNewsModal(news) {
+            logTest('Attempting to show news modal...', 'info');
+            
+            try {
+                // Remove existing modal
+                const existingModal = document.getElementById('news-modal');
+                if (existingModal) {
+                    document.body.removeChild(existingModal);
+                    logTest('Removed existing modal', 'info');
+                }
+                
+                const modal = document.createElement('div');
+                modal.id = 'news-modal';
+                modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+                
+                modal.innerHTML = `
+                    <div class="bg-gray-800 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/10 shadow-2xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <button id="backToNews" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                                    <i data-lucide="arrow-left" class="w-5 h-5 text-white"></i>
+                                </button>
+                                <div>
+                                    <span class="px-3 py-1 rounded-full text-xs bg-teal-600/20 text-teal-400 font-medium">${news.category}</span>
+                                    <span class="text-white/60 text-sm ml-3">${news.time}</span>
+                                </div>
+                            </div>
+                            <button id="closeNewsModal" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                                <i data-lucide="x" class="w-5 h-5 text-white/70 hover:text-white"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-y-auto max-h-[75vh]">
+                            <h1 class="text-2xl font-bold text-white mb-4">${news.title}</h1>
+                            <div class="prose prose-invert max-w-none text-white/90 leading-relaxed">
+                                ${news.content}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                logTest('Modal added to DOM', 'success');
+                
+                // Add event listeners
+                const closeModal = () => {
+                    const modalToRemove = document.getElementById('news-modal');
+                    if (modalToRemove) {
+                        document.body.removeChild(modalToRemove);
+                        logTest('Modal closed', 'info');
+                    }
+                };
+                
+                modal.querySelector('#closeNewsModal').addEventListener('click', closeModal);
+                modal.querySelector('#backToNews').addEventListener('click', closeModal);
+                
+                // Close on escape key
+                const handleKeyPress = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        document.removeEventListener('keydown', handleKeyPress);
+                    }
+                };
+                document.addEventListener('keydown', handleKeyPress);
+                
+                // Close on backdrop click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+                
+                // Render icons
+                setTimeout(() => {
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        window.lucide.createIcons();
+                        logTest('Icons rendered', 'success');
+                    }
+                }, 100);
+                
+                logTest('News modal opened successfully!', 'success');
+                
+            } catch (error) {
+                logTest(`Error showing modal: ${error.message}`, 'error');
+                console.error('Modal error:', error);
+            }
+        }
+        
+        function testViewNewsFunction() {
+            logTest('Testing if viewNews function exists...', 'info');
+            
+            if (typeof window.viewNews === 'function') {
+                logTest('✅ viewNews function exists', 'success');
+                try {
+                    window.viewNews(1);
+                    logTest('Called window.viewNews(1)', 'success');
+                } catch (error) {
+                    logTest(`Error calling viewNews: ${error.message}`, 'error');
+                }
+            } else {
+                logTest('❌ viewNews function not found', 'error');
+                logTest('Available functions: ' + Object.keys(window).filter(key => typeof window[key] === 'function' && key.includes('news')).join(', '), 'info');
+            }
+        }
+        
+        function testShowModalFunction() {
+            logTest('Testing if showNewsModal function exists...', 'info');
+            
+            if (typeof window.showNewsModal === 'function') {
+                logTest('✅ showNewsModal function exists', 'success');
+                try {
+                    window.showNewsModal(testNewsData[0]);
+                    logTest('Called window.showNewsModal with test data', 'success');
+                } catch (error) {
+                    logTest(`Error calling showNewsModal: ${error.message}`, 'error');
+                }
+            } else {
+                logTest('❌ showNewsModal function not found', 'error');
+            }
+        }
+        
+        function checkNewsData() {
+            logTest('Checking news data availability...', 'info');
+            
+            if (typeof window.newsData !== 'undefined') {
+                logTest(`✅ newsData exists with ${window.newsData.length} articles`, 'success');
+                logTest(`First article: ${window.newsData[0]?.title || 'No title'}`, 'info');
+            } else {
+                logTest('❌ newsData not found', 'error');
+            }
+            
+            // Check for other news-related variables
+            const newsVars = ['newsData', 'dailyChallenge', 'newsArticles'];
+            newsVars.forEach(varName => {
+                if (typeof window[varName] !== 'undefined') {
+                    logTest(`Found: ${varName}`, 'success');
+                } else {
+                    logTest(`Missing: ${varName}`, 'warning');
+                }
+            });
+        }
+        
+        // Initialize icons
+        setTimeout(() => {
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+                logTest('Icons initialized', 'success');
+            }
+        }, 500);
+        
+        logTest('Debug page ready - click on articles or buttons to test', 'info');
+    </script>
+</body>
+</html>

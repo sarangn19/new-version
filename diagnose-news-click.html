@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnose News Click Issue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { background: #1F1F1F; color: white; font-family: 'Inter', sans-serif; }
+        .test-card { cursor: pointer; transition: all 0.3s ease; }
+        .test-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">🔍 News Click Diagnosis</h1>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Test News Cards</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="test-grid">
+                <!-- Test cards will be inserted here -->
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Direct Tests</h3>
+            <div class="space-y-2">
+                <button onclick="testDirectClick()" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">
+                    Test Direct Click Handler
+                </button>
+                <button onclick="testModalFunction()" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded">
+                    Test Modal Function
+                </button>
+                <button onclick="checkConsole()" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded">
+                    Check Console Logs
+                </button>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Diagnostic Log</h3>
+            <div id="log" class="bg-black/50 p-4 rounded text-sm font-mono max-h-64 overflow-y-auto">
+                <div class="text-green-400">[INFO] Diagnostic page loaded</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test news data
+        const testNews = [
+            {
+                id: 1,
+                title: "Test Article 1: Supreme Court Digital Rights",
+                category: "Polity",
+                time: "2 hours ago",
+                summary: "This is a test article to verify click functionality works properly."
+            },
+            {
+                id: 2,
+                title: "Test Article 2: Economic Policy Framework",
+                category: "Economy", 
+                time: "1 day ago",
+                summary: "Another test article to ensure multiple articles can be clicked."
+            }
+        ];
+
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'text-blue-400',
+                success: 'text-green-400',
+                warning: 'text-yellow-400',
+                error: 'text-red-400'
+            };
+            
+            logEl.innerHTML += `<div class="${colors[type]}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function createTestCards() {
+            const grid = document.getElementById('test-grid');
+            
+            const html = testNews.map(article => `
+                <div class="test-card bg-gray-700 rounded-lg p-4" data-news-id="${article.id}">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2 py-1 rounded text-xs bg-teal-600/20 text-teal-400">${article.category}</span>
+                        <span class="text-xs text-gray-400">${article.time}</span>
+                    </div>
+                    <h4 class="font-semibold mb-2">${article.title}</h4>
+                    <p class="text-sm text-gray-300 mb-2">${article.summary}</p>
+                    <div class="text-xs text-gray-500">Click to test → ID: ${article.id}</div>
+                </div>
+            `).join('');
+            
+            grid.innerHTML = html;
+            
+            // Add click handlers
+            const cards = grid.querySelectorAll('.test-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const newsId = parseInt(this.getAttribute('data-news-id'));
+                    log(`Card clicked! News ID: ${newsId}`, 'success');
+                    testOpenModal(newsId);
+                });
+            });
+            
+            log(`Created ${cards.length} test cards with click handlers`, 'success');
+        }
+
+        function testOpenModal(newsId) {
+            log(`Opening modal for news ID: ${newsId}`, 'info');
+            
+            const news = testNews.find(n => n.id === newsId);
+            if (!news) {
+                log(`News not found for ID: ${newsId}`, 'error');
+                return;
+            }
+
+            // Remove existing modal
+            const existingModal = document.getElementById('test-modal');
+            if (existingModal) {
+                document.body.removeChild(existingModal);
+            }
+
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'test-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            
+            modal.innerHTML = `
+                <div class="bg-gray-800 rounded-2xl p-6 max-w-2xl w-full border border-white/10">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold">📰 News Article</h2>
+                        <button id="closeModal" class="p-2 rounded-lg hover:bg-white/10">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <span class="px-3 py-1 rounded-full text-xs bg-teal-600/20 text-teal-400">${news.category}</span>
+                        <span class="text-white/60 text-sm ml-3">${news.time}</span>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold mb-3">${news.title}</h3>
+                    <p class="text-white/80 mb-4">${news.summary}</p>
+                    
+                    <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                        <h4 class="text-green-400 font-semibold mb-2">✅ Success!</h4>
+                        <p class="text-sm">The click functionality is working correctly. News ID ${newsId} opened successfully.</p>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Add close handler
+            const closeBtn = modal.querySelector('#closeModal');
+            const closeModal = () => {
+                if (document.body.contains(modal)) {
+                    document.body.removeChild(modal);
+                    log('Modal closed', 'info');
+                }
+            };
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            // Render icons
+            setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 100);
+
+            log('Modal opened successfully!', 'success');
+        }
+
+        function testDirectClick() {
+            log('Testing direct click handler...', 'info');
+            testOpenModal(1);
+        }
+
+        function testModalFunction() {
+            log('Testing modal function directly...', 'info');
+            
+            // Test if we can create a modal
+            try {
+                const testModal = document.createElement('div');
+                testModal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+                testModal.innerHTML = `
+                    <div class="bg-gray-800 p-6 rounded-lg">
+                        <h3 class="text-lg font-bold mb-4">✅ Modal Test Successful</h3>
+                        <p class="mb-4">Modal creation and display is working correctly.</p>
+                        <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-blue-600 rounded">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(testModal);
+                log('Modal function test passed', 'success');
+            } catch (error) {
+                log(`Modal function test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function checkConsole() {
+            log('Checking console for errors...', 'info');
+            
+            // Check if required functions exist
+            const checks = [
+                { name: 'addEventListener', exists: typeof document.addEventListener === 'function' },
+                { name: 'querySelector', exists: typeof document.querySelector === 'function' },
+                { name: 'createElement', exists: typeof document.createElement === 'function' },
+                { name: 'lucide icons', exists: typeof window.lucide !== 'undefined' }
+            ];
+            
+            checks.forEach(check => {
+                if (check.exists) {
+                    log(`✅ ${check.name} is available`, 'success');
+                } else {
+                    log(`❌ ${check.name} is missing`, 'error');
+                }
+            });
+            
+            log('Console check complete', 'info');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            log('DOM loaded, initializing tests...', 'info');
+            createTestCards();
+            
+            setTimeout(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                    log('Lucide icons initialized', 'success');
+                }
+            }, 500);
+            
+            log('Initialization complete - try clicking the test cards above', 'success');
+        });
+    </script>
+</body>
+</html>

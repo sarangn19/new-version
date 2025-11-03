@@ -1,873 +1,912 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>News</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-  <script src="js/profile-manager.js"></script>
-  <script src="js/upsc-news-service-real.js"></script>
-  <script src="js/news-integration-service.js"></script>
-  <script src="js/news-display-interface.js"></script>
-  <script src="js/upsc-news-service.js"></script>
-  <script src="js/news-fixes.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link href="styles/glassmorphism.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <script src="js/auto-news-updater.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="styles/glassmorphism.css" rel="stylesheet">
 
-  <style>
-    :root {
-      --bg-dark-1: #1F1F1F;
-      --bg-dark-2: #1A1A1A;
-      --teal-primary: #2C7A7B;
-      --text-faded: rgba(255, 255, 255, 0.5);
-      --search-bg-glass: rgba(255, 255, 255, 0.02);
-      --search-border-glass: rgba(255, 255, 255, 0.05);
-      --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
+    <style>
+        :root {
+            --bg-dark-1: #1F1F1F;
+            --bg-dark-2: #1A1A1A;
+            --teal-primary: #2C7A7B;
+            --text-faded: rgba(255, 255, 255, 0.5);
+            --search-bg-glass: rgba(255, 255, 255, 0.02);
+            --search-border-glass: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: var(--bg-dark-1);
-      color: white;
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark-1);
+            color: white;
+        }
 
-    .scroll-hidden::-webkit-scrollbar {
-      display: none;
-    }
+        .scroll-hidden::-webkit-scrollbar {
+            display: none;
+        }
 
-    .scroll-hidden {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+        .scroll-hidden {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-    /* Glass Searchbar */
-    .glass-search-container {
-      background-color: var(--search-bg-glass);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      border: 1px solid var(--search-border-glass);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
+        /* Glass Searchbar */
+        .glass-search-container {
+            background-color: var(--search-bg-glass);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid var(--search-border-glass);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
 
-    .arrow-circle-button {
-      width: 44px;
-      height: 44px;
-      background-color: var(--bg-dark-1);
-      border-radius: 9999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      flex-shrink: 0;
-    }
+        .arrow-circle-button {
+            width: 44px;
+            height: 44px;
+            background-color: var(--bg-dark-1);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
 
-    .arrow-circle-button:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
+        .arrow-circle-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
 
-    /* --- GLASSMORPHISM EFFECTS --- */
-    .glass-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-    }
+        /* Enhanced News Cards with iOS Glassmorphism */
+        .news-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .glass-sidebar {
-      background: rgba(26, 26, 26, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
-    }
+        .news-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(44, 122, 123, 0.6), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    /* --- SMOOTH ANIMATIONS --- */
-    .page-transition {
-      animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+        .news-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            transform: translateY(-8px) scale(1.02);
+        }
 
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
+        .news-card:hover::before {
+            opacity: 1;
+        }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        .news-card:active {
+            transform: translateY(-4px) scale(1.01);
+        }
 
-    .nav-item {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
+        /* Category Badge with Glass Effect */
+        .category-badge {
+            background: rgba(44, 122, 123, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(44, 122, 123, 0.3);
+            color: #4FD1C7;
+            font-weight: 500;
+            letter-spacing: 0.025em;
+        }
 
-    .nav-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-      transition: left 0.5s;
-    }
+        /* Reading Time Indicator */
+        .reading-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    .nav-item:hover::before {
-      left: 100%;
-    }
+        /* Bookmark Button Enhancement */
+        .bookmark-btn {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
 
-    .nav-item:hover {
-      transform: translateX(4px);
-      background: rgba(42, 42, 42, 0.8);
-    }
+        .bookmark-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
 
-    .nav-item.active {
-      background: linear-gradient(135deg, rgba(44, 122, 123, 0.2), rgba(42, 42, 42, 0.9));
-      border-left: 3px solid var(--teal-primary);
-    }
+        .bookmark-btn.bookmarked {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #3b82f6;
+        }
 
-    /* Enhanced news card styling */
-    section[aria-label="News cards"] {
-      display: grid;
-      align-items: stretch;
-    }
+        /* UPSC Content Styling */
+        .upsc-content {
+            font-family: 'Inter', sans-serif;
+        }
 
-    section[aria-label="News cards"] article {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 420px;
-      position: relative;
-      overflow: hidden;
-    }
+        .exam-banner {
+            background: linear-gradient(135deg, #059669, #047857);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(5, 150, 105, 0.2);
+        }
 
-    section[aria-label="News cards"] article::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(44, 122, 123, 0.6), transparent);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+        .key-facts {
+            background: rgba(30, 64, 175, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-left: 4px solid #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+        }
 
-    section[aria-label="News cards"] article:hover::before {
-      opacity: 1;
-    }
+        .syllabus-map {
+            background: rgba(124, 45, 18, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-left: 4px solid #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.1);
+        }
 
-    section[aria-label="News cards"] article .p-6 {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+        .exam-questions {
+            background: rgba(146, 64, 14, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-left: 4px solid #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.1);
+        }
 
-    .news-card-title {
-      min-height: 3.5rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+        /* Glass Sidebar Enhancement */
+        .glass-sidebar {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    .news-card-description {
-      flex: 1;
-      min-height: 2.5rem;
-    }
+        /* Navigation Item Enhancement */
+        .nav-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
 
-    .line-clamp-2 {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
 
-    .line-clamp-3 {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+        .nav-item:hover::before {
+            left: 100%;
+        }
 
-    /* Bookmark button styling */
-    .bookmark-btn {
-      transition: all 0.2s ease;
-    }
+        .nav-item:hover {
+            transform: translateX(4px);
+            background: rgba(42, 42, 42, 0.8);
+        }
 
-    .bookmark-btn.bookmarked {
-      background: rgba(59, 130, 246, 0.2) !important;
-      color: #3b82f6 !important;
-    }
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(44, 122, 123, 0.2), rgba(42, 42, 42, 0.9));
+            border-left: 3px solid var(--teal-primary);
+        }
 
-    .bookmark-btn:hover {
-      transform: scale(1.1);
-    }
+        /* Page Transition */
+        .page-transition {
+            animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-    /* News category badges */
-    .category-badge {
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    /* Enhanced hover effects */
-    .news-card {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+        /* Responsive Enhancements */
+        @media (max-width: 768px) {
+            .news-card:hover {
+                transform: translateY(-4px) scale(1.01);
+            }
+        }
 
-    .news-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    }
+        /* Line Clamp Utilities */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
 
-    /* Reading time indicator */
-    .reading-time {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 10px;
-    }
-  </style>
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .news-card,
+            .nav-item {
+                transition: none;
+            }
+            
+            .news-card:hover {
+                transform: none;
+            }
+        }
+    </style>
 </head>
-
-<body class="min-h-screen text-white antialiased scroll-hidden">
-
-  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
-
-    <!-- SIDEBAR -->
-    <aside id="sidebar"
-      class="hidden lg:flex flex-col w-[280px] glass-sidebar p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
-      <!-- Profile and Notifications -->
-      <div class="flex items-center justify-between px-2 mb-10">
-        <div class="flex items-center space-x-4">
-          <div class="relative">
-            <a href="profile.html"
-              class="user-avatar block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
-              <div id="user-initials" class="user-initials text-lg font-medium text-black">JD</div>
-            </a>
-            <!-- Notification badge -->
-            <button id="notification-btn" aria-label="Notifications"
-              class="absolute -right-2 -top-2 w-8 h-8 bg-[var(--bg-dark-1)]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
-              <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
-                <i data-lucide="bell" class="text-white w-4 h-4"></i>
-              </span>
-            </button>
-          </div>
-          <div>
-            <div id="user-name" class="font-normal text-sm">User</div>
-            <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Navigation -->
-      <nav class="space-y-1.5 pt-10">
-        <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
-          <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
-          <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
-        </a>
-        <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
-          <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
-          <span class="font-normal text-sm text-white opacity-50">Learn</span>
-        </a>
-        <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
-          <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
-          <span class="font-normal text-sm text-white opacity-50">Statistics</span>
-        </a>
-        <a href="news.html" class="nav-item active flex items-center space-x-5 px-8 py-2.5 rounded-full">
-          <i data-lucide="newspaper" class="text-white w-5 h-5"></i>
-          <span class="font-normal text-sm">News</span>
-        </a>
-        <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
-          <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
-          <span class="font-normal text-sm text-white opacity-50">Community</span>
-        </a>
-        <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
-          <div
-            class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI
-          </div>
-          <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
-        </a>
-      </nav>
-    </aside>
-
-    <!-- MAIN CONTENT AREA -->
-    <main id="main-content" role="main" tabindex="-1"
-      class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden page-transition">
-      <div class="max-w-7xl mx-auto">
-        <!-- Page Title -->
-        <h1 class="text-2xl lg:text-3xl font-medium mb-6">News</h1>
-
-        <!-- Search -->
-        <div class="mb-2">
-          <form onsubmit="event.preventDefault()"
-            class="glass-search-container flex items-center rounded-[2.5rem] p-1.5 w-full">
-            <i data-lucide="search" class="text-white/70 w-5 h-5 mx-4"></i>
-            <input type="text" id="search-input" placeholder="Search note"
-              class="bg-transparent text-white placeholder-[var(--text-faded)] text-sm font-normal flex-grow focus:outline-none py-2" />
-            <div class="arrow-circle-button">
-              <i data-lucide="arrow-right" class="text-white w-5 h-5"></i>
+<body class="min-h-screen">
+    <div class="flex flex-col lg:flex-row h-screen bg-[#1F1F1F]">
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="hidden lg:flex flex-col w-[280px] glass-sidebar p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
+            <!-- Profile -->
+            <div class="flex items-center justify-between px-2 mb-10">
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <a href="profile.html" class="block w-12 h-12 rounded-full overflow-hidden bg-[#84D0F7] border-2 border-white/50 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+                            <div id="user-initials" class="text-lg font-medium text-black">JD</div>
+                        </a>
+                        <button id="notification-btn" aria-label="Notifications" class="absolute -right-2 -top-2 w-8 h-8 bg-[#1F1F1F]/90 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/10 shadow-sm hover:bg-gray-700">
+                            <span class="w-6 h-6 rounded-full bg-[#111111] flex items-center justify-center">
+                                <i data-lucide="bell" class="text-white w-4 h-4"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div>
+                        <div id="user-name" class="font-normal text-sm">User</div>
+                        <div id="user-email" class="font-light text-xs opacity-70">user@upsc.com</div>
+                    </div>
+                </div>
             </div>
-          </form>
-        </div>
-        <!-- Sort below search -->
-        <div class="flex justify-end mb-6">
-          <div class="relative">
-            <button id="sort-btn"
-              class="flex items-center gap-2 bg-[var(--bg-dark-2)] border border-white/10 rounded-full px-4 py-2.5 text-sm hover:bg-white/10 transition">
-              <span>Sort</span>
-              <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
-            </button>
-            <div id="sort-menu"
-              class="hidden absolute right-0 top-full mt-2 z-20 min-w-[200px] bg-[#111] border border-white/10 rounded-2xl p-2 shadow-xl">
-              <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm"
-                data-sort="date-desc">
-                <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
-                Newest First
-              </button>
-              <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm"
-                data-sort="date-asc">
-                <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
-                Oldest First
-              </button>
-              <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm"
-                data-sort="title-asc">
-                <i data-lucide="type" class="w-4 h-4 inline mr-2"></i>
-                Title A-Z
-              </button>
-              <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm"
-                data-sort="category">
-                <i data-lucide="folder" class="w-4 h-4 inline mr-2"></i>
-                By Category
-              </button>
+
+            <!-- Navigation -->
+            <nav class="space-y-1.5 pt-10">
+                <a href="db.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="layout-dashboard" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Dashboard</span>
+                </a>
+                <a href="learn.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="book-open" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Learn</span>
+                </a>
+                <a href="statistics.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="bar-chart-2" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Statistics</span>
+                </a>
+                <a href="news.html" class="nav-item active flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="newspaper" class="text-white w-5 h-5"></i>
+                    <span class="font-normal text-sm">News</span>
+                </a>
+                <a href="community.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <i data-lucide="users" class="text-white opacity-50 w-5 h-5"></i>
+                    <span class="font-normal text-sm text-white opacity-50">Community</span>
+                </a>
+                <a href="chatbot.html" class="nav-item flex items-center space-x-5 px-8 py-2.5 rounded-full">
+                    <div class="w-6 h-6 bg-[#84D0F7] rounded-full flex items-center justify-center text-xs font-medium text-black">AI</div>
+                    <span class="font-normal text-sm text-white opacity-50">AI Assistant</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main id="main-content" role="main" tabindex="-1" class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden page-transition">
+            <div class="max-w-7xl mx-auto">
+                <!-- Page Title -->
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl lg:text-3xl font-medium">News</h1>
+                    <div class="flex items-center gap-4">
+                        <!-- Auto-update status -->
+                        <div id="update-status" class="flex items-center gap-2 text-sm text-white/60">
+                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span>Auto-updating hourly</span>
+                        </div>
+                        <!-- Last update time -->
+                        <div id="last-update-time" class="text-xs text-white/40">
+                            Updated: Just now
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="mb-2">
+                    <form onsubmit="event.preventDefault()" class="glass-search-container flex items-center rounded-[2.5rem] p-1.5 w-full">
+                        <i data-lucide="search" class="text-white/70 w-5 h-5 mx-4"></i>
+                        <input type="text" id="search-input" placeholder="Search UPSC news..." class="bg-transparent text-white placeholder-[var(--text-faded)] text-sm font-normal flex-grow focus:outline-none py-2" />
+                        <div class="arrow-circle-button">
+                            <i data-lucide="arrow-right" class="text-white w-5 h-5"></i>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sort below search -->
+                <div class="flex justify-end mb-6">
+                    <div class="relative">
+                        <button id="sort-btn" class="flex items-center gap-2 bg-[var(--bg-dark-2)] border border-white/10 rounded-full px-4 py-2.5 text-sm hover:bg-white/10 transition">
+                            <span>Sort</span>
+                            <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="sort-menu" class="hidden absolute right-0 top-full mt-2 z-20 min-w-[200px] bg-[#111] border border-white/10 rounded-2xl p-2 shadow-xl">
+                            <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="date-desc">
+                                <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
+                                Newest First
+                            </button>
+                            <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="date-asc">
+                                <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
+                                Oldest First
+                            </button>
+                            <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="title-asc">
+                                <i data-lucide="type" class="w-4 h-4 inline mr-2"></i>
+                                Title A-Z
+                            </button>
+                            <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="category">
+                                <i data-lucide="folder" class="w-4 h-4 inline mr-2"></i>
+                                By Category
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News Grid -->
+                <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- News will be loaded here -->
+                </div>
             </div>
-          </div>
-        </div>
+        </main>
+    </div>
 
+    <script>
+        // UPSC News Data
+        const newsData = [
+            {
+                id: 1,
+                title: "Supreme Court Landmark Judgment on Digital Rights",
+                category: "Polity & Governance",
+                time: "2 hours ago",
+                summary: "The Supreme Court delivered a significant judgment regarding digital privacy rights and data protection in the digital age.",
+                content: `
+                    <div class="upsc-content">
+                        <div class="exam-banner">
+                            <h2 class="text-white text-xl font-bold mb-2">🎯 UPSC Exam Relevance: HIGH</h2>
+                            <div class="flex gap-2">
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Prelims</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Mains GS-2</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Interview</span>
+                            </div>
+                        </div>
 
+                        <h2 class="text-2xl font-bold mb-4">Supreme Court Delivers Landmark Judgment on Digital Rights</h2>
+                        
+                        <div class="key-facts">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">📋 Key Facts for UPSC</h3>
+                            <ul class="space-y-2">
+                                <li><strong>Constitutional Basis:</strong> Article 21 (Right to Life and Personal Liberty)</li>
+                                <li><strong>Bench:</strong> 9-judge Constitutional Bench</li>
+                                <li><strong>Case:</strong> Justice K.S. Puttaswamy vs Union of India</li>
+                                <li><strong>Significance:</strong> Privacy as fundamental right</li>
+                            </ul>
+                        </div>
 
-        <!-- News Grid -->
-        <section aria-label="News cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr" id="news-grid">
-          <!-- Loading state - will be replaced by real news -->
-          <div class="col-span-full flex flex-col items-center justify-center py-16 text-center" id="news-loading">
-            <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 animate-pulse">
-              <i data-lucide="newspaper" class="w-8 h-8 text-white/50"></i>
-            </div>
-            <h3 class="text-lg font-medium text-white mb-2">Loading UPSC News...</h3>
-            <p class="text-white/60 text-sm max-w-md">Fetching the latest current affairs and exam-relevant updates.</p>
-            <div class="flex items-center gap-2 text-sm text-white/50 mt-4">
-              <div class="w-2 h-2 bg-[var(--teal-primary)] rounded-full animate-bounce"></div>
-              <div class="w-2 h-2 bg-[var(--teal-primary)] rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-              <div class="w-2 h-2 bg-[var(--teal-primary)] rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-            </div>
-          </div>
-        </section>
+                        <h3 class="text-xl font-semibold mb-3">🔍 Detailed Analysis</h3>
+                        <p class="mb-4">The Supreme Court's judgment on digital privacy rights establishes a crucial precedent for India's digital governance framework. This decision directly impacts multiple UPSC syllabus areas including constitutional law, governance, and technology policy.</p>
+                        
+                        <div class="syllabus-map">
+                            <h3 class="text-lg font-semibold mb-3 text-red-400">📚 Syllabus Mapping</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="font-semibold text-red-300 mb-2">Prelims</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Fundamental Rights (Article 21)</li>
+                                        <li>• Supreme Court judgments</li>
+                                        <li>• Digital India initiatives</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-red-300 mb-2">Mains GS-2</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Constitutional provisions</li>
+                                        <li>• Judiciary and its role</li>
+                                        <li>• Government policies</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="exam-questions">
+                            <h3 class="text-lg font-semibold mb-3 text-yellow-400">🤔 Possible Exam Questions</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Prelims Style:</h4>
+                                    <p class="text-sm italic">"The right to privacy was declared a fundamental right by the Supreme Court in which case?"</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Mains Style:</h4>
+                                    <p class="text-sm italic">"Discuss the implications of the Supreme Court's judgment on digital privacy rights for India's digital governance framework. (250 words)"</p>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mt-4">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">🔗 Related Topics to Study</h3>
+                            <ul class="text-sm space-y-1">
+                                <li>• Data Protection Bill 2023</li>
+                                <li>• Digital Personal Data Protection Act</li>
+                                <li>• IT Act 2000 and amendments</li>
+                                <li>• Aadhaar judgment (2018)</li>
+                                <li>• Right to be forgotten</li>
+                            </ul>
+                        </div>
 
+                        <div class="bg-red-900/20 border-2 border-dashed border-red-500/50 rounded-lg p-4 mt-4 text-center">
+                            <h3 class="text-lg font-semibold mb-2 text-red-400">🧠 Memory Aid</h3>
+                            <p><strong>PRIDE:</strong> <strong>P</strong>rivacy as fundamental right, <strong>R</strong>ight to life (Art 21), <strong>I</strong>nformation protection, <strong>D</strong>ata collection guidelines, <strong>E</strong>nhanced citizen rights</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 2,
+                title: "New Economic Policy Framework Announced",
+                category: "Economy",
+                time: "1 day ago",
+                summary: "Government announces comprehensive economic policy framework focusing on sustainable growth and employment generation.",
+                content: `
+                    <div class="upsc-content">
+                        <div class="exam-banner">
+                            <h2 class="text-white text-xl font-bold mb-2">🎯 UPSC Exam Relevance: VERY HIGH</h2>
+                            <div class="flex gap-2">
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Prelims</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Mains GS-3</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Interview</span>
+                            </div>
+                        </div>
 
+                        <h2 class="text-2xl font-bold mb-4">Government Unveils New Economic Policy Framework</h2>
+                        
+                        <div class="key-facts">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">📊 Key Economic Indicators</h3>
+                            <ul class="space-y-2">
+                                <li><strong>GDP Target:</strong> 7.5% growth by 2025</li>
+                                <li><strong>Employment Goal:</strong> 50 million new jobs by 2030</li>
+                                <li><strong>Manufacturing Share:</strong> Increase to 25% of GDP</li>
+                                <li><strong>MSME Credit:</strong> ₹2 lakh crore guarantee scheme</li>
+                            </ul>
+                        </div>
 
+                        <h3 class="text-xl font-semibold mb-3">🏭 Policy Framework Analysis</h3>
+                        <p class="mb-4">The new economic policy framework represents a paradigm shift towards sustainable and inclusive growth, with specific focus on manufacturing sector enhancement and employment generation through targeted interventions.</p>
+                        
+                        <div class="exam-questions">
+                            <h3 class="text-lg font-semibold mb-3 text-yellow-400">📝 Probable Exam Questions</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Prelims MCQ:</h4>
+                                    <p class="text-sm italic">"Which of the following sectors is NOT covered under the Production Linked Incentive (PLI) scheme?"</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Mains Question:</h4>
+                                    <p class="text-sm italic">"Critically analyze the new Economic Policy Framework's potential to achieve the target of making India a $5 trillion economy. (250 words)"</p>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mt-4">
+                            <h3 class="text-lg font-semibold mb-3 text-green-400">🔗 Must Study Related Topics</h3>
+                            <ul class="text-sm space-y-1">
+                                <li>• Economic Survey 2024 highlights</li>
+                                <li>• Atmanirbhar Bharat Abhiyan</li>
+                                <li>• National Manufacturing Policy 2011</li>
+                                <li>• MSME Development Act 2006</li>
+                                <li>• Industrial Policy Resolution 1991</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 3,
+                title: "Climate Change Action Plan 2024",
+                category: "Environment",
+                time: "2 days ago",
+                summary: "India launches ambitious climate action plan with focus on renewable energy and carbon neutrality goals.",
+                content: `
+                    <div class="upsc-content">
+                        <div class="exam-banner">
+                            <h2 class="text-white text-xl font-bold mb-2">🎯 UPSC Exam Relevance: HIGH</h2>
+                            <div class="flex gap-2">
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Prelims</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Mains GS-3</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Interview</span>
+                            </div>
+                        </div>
 
+                        <h2 class="text-2xl font-bold mb-4">India Launches Ambitious Climate Action Plan 2024</h2>
+                        
+                        <div class="key-facts">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">🌱 Key Climate Targets</h3>
+                            <ul class="space-y-2">
+                                <li><strong>Renewable Energy:</strong> 50% capacity by 2030</li>
+                                <li><strong>Net-Zero Target:</strong> 2070</li>
+                                <li><strong>Forest Cover:</strong> 33% of geographical area</li>
+                                <li><strong>Green Hydrogen:</strong> 5 MMT production by 2030</li>
+                            </ul>
+                        </div>
 
+                        <h3 class="text-xl font-semibold mb-3">🔍 Environmental Policy Analysis</h3>
+                        <p class="mb-4">India's Climate Action Plan 2024 represents a comprehensive approach to addressing climate change while maintaining economic development priorities and international commitments under the Paris Agreement.</p>
+                        
+                        <div class="exam-questions">
+                            <h3 class="text-lg font-semibold mb-3 text-yellow-400">🤔 Possible Exam Questions</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Prelims Style:</h4>
+                                    <p class="text-sm italic">"India's net-zero emission target is set for which year?"</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Mains Style:</h4>
+                                    <p class="text-sm italic">"Evaluate India's Climate Action Plan 2024 in the context of global climate commitments and domestic development needs. (250 words)"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 4,
+                title: "India's G20 Presidency Achievements",
+                category: "International Relations",
+                time: "3 days ago",
+                summary: "Comprehensive review of India's successful G20 presidency and its impact on global governance.",
+                content: `
+                    <div class="upsc-content">
+                        <div class="exam-banner">
+                            <h2 class="text-white text-xl font-bold mb-2">🎯 UPSC Exam Relevance: HIGH</h2>
+                            <div class="flex gap-2">
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Prelims</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Mains GS-2</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Interview</span>
+                            </div>
+                        </div>
 
+                        <h2 class="text-2xl font-bold mb-4">India's G20 Presidency: A Year of Global Leadership</h2>
+                        
+                        <div class="key-facts">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">🌍 G20 Presidency Highlights</h3>
+                            <ul class="space-y-2">
+                                <li><strong>Theme:</strong> "Vasudhaiva Kutumbakam" - One Earth, One Family, One Future</li>
+                                <li><strong>Duration:</strong> December 2022 - November 2023</li>
+                                <li><strong>Major Outcomes:</strong> New Delhi Leaders' Declaration</li>
+                                <li><strong>Focus Areas:</strong> Digital transformation, sustainable development</li>
+                            </ul>
+                        </div>
 
+                        <h3 class="text-xl font-semibold mb-3">🔍 Diplomatic Achievement Analysis</h3>
+                        <p class="mb-4">India's G20 presidency has been marked by significant achievements in global governance, multilateral cooperation, and consensus building on critical global issues including climate change, digital transformation, and sustainable development.</p>
+                    </div>
+                `
+            }
+        ];
 
-      </div>
-    </main>
-  </div>
+        // Function to render news
+        function renderNews() {
+            console.log('📰 Rendering news articles...');
+            const grid = document.getElementById('news-grid');
+            
+            const html = newsData.map(article => `
+                <article class="news-card rounded-2xl overflow-hidden" data-id="${article.id}">
+                    <div class="p-6 flex flex-col h-full">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="category-badge px-3 py-1 rounded-full text-xs font-medium">
+                                    ${article.category}
+                                </span>
+                                <span class="reading-time text-white/50">
+                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                    4 min read
+                                </span>
+                            </div>
+                            <button onclick="event.stopPropagation(); toggleBookmark(${article.id})" 
+                                    class="bookmark-btn p-2 rounded-lg transition-colors"
+                                    aria-label="Bookmark this article">
+                                <i data-lucide="bookmark" class="w-4 h-4 text-white/60"></i>
+                            </button>
+                        </div>
+                        
+                        <h3 class="text-lg font-semibold text-white mb-3 leading-tight line-clamp-2">
+                            ${article.title}
+                        </h3>
+                        
+                        <p class="text-white/70 text-sm leading-relaxed mb-4 flex-1 line-clamp-3">
+                            ${article.summary}
+                        </p>
+                        
+                        <div class="flex items-center justify-between text-xs text-white/50 mt-auto">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="target" class="w-3 h-3"></i>
+                                UPSC Relevant
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="eye" class="w-3 h-3"></i>
+                                Read Analysis
+                            </span>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+            
+            grid.innerHTML = html;
+            
+            // Add click handlers
+            const cards = grid.querySelectorAll('.news-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    console.log('📰 Opening news:', id);
+                    openNewsModal(id);
+                });
+            });
+            
+            // Render icons
+            setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 100);
+            
+            console.log(`✅ Rendered ${newsData.length} articles`);
+        }
 
-  <script>
-    // News data
-    const newsData = [
-      {
-        id: 1,
-        title: "Supreme Court Landmark Judgment on Digital Rights",
-        category: "Polity",
-        date: "2024-10-22",
-        time: "2 hours ago",
-        summary: "The Supreme Court delivered a significant judgment regarding digital privacy rights and data protection in the digital age.",
-        content: `
-          <h2>Supreme Court Delivers Landmark Judgment on Digital Rights</h2>
-          <p>In a groundbreaking decision that will reshape India's digital landscape, the Supreme Court today delivered a comprehensive judgment on digital privacy rights and data protection.</p>
-          
-          <h3>Key Highlights</h3>
-          <ul>
-            <li>Right to digital privacy recognized as a fundamental right under Article 21</li>
-            <li>Stricter guidelines for data collection by government agencies</li>
-            <li>Enhanced protection for citizens' digital footprint</li>
-            <li>Mandatory consent requirements for data processing</li>
-          </ul>
-          
-          <h3>Impact on Citizens</h3>
-          <p>This judgment will significantly impact how personal data is collected, processed, and stored by both government and private entities. Citizens now have stronger legal recourse against unauthorized data collection.</p>
-          
-          <h3>Legal Implications</h3>
-          <p>The judgment establishes important precedents for future cases involving digital rights and privacy. It aligns India's legal framework with international standards on data protection.</p>
-          
-          <h3>Expert Opinion</h3>
-          <p>Legal experts have hailed this as a progressive step towards protecting citizens' digital rights in an increasingly connected world. The judgment is expected to influence policy-making in the digital governance sector.</p>
-        `,
-        image: "image/polity.png"
-      },
-      {
-        id: 2,
-        title: "New Economic Policy Framework Announced",
-        category: "Economy",
-        date: "2024-10-21",
-        time: "1 day ago",
-        summary: "Government announces comprehensive economic policy framework focusing on sustainable growth and employment generation.",
-        content: `
-          <h2>Government Unveils New Economic Policy Framework</h2>
-          <p>The government today announced a comprehensive economic policy framework aimed at achieving sustainable growth while addressing employment challenges.</p>
-          
-          <h3>Policy Highlights</h3>
-          <ul>
-            <li>Focus on manufacturing sector growth</li>
-            <li>Enhanced support for MSMEs</li>
-            <li>Green economy initiatives</li>
-            <li>Digital infrastructure development</li>
-          </ul>
-          
-          <h3>Employment Generation</h3>
-          <p>The policy framework includes specific measures to generate employment opportunities across various sectors, with particular emphasis on skill development and vocational training.</p>
-          
-          <h3>Sustainable Development Goals</h3>
-          <p>The framework aligns with India's commitment to achieving Sustainable Development Goals while maintaining economic growth momentum.</p>
-        `,
-        image: "image/economics.png"
-      },
-      {
-        id: 3,
-        title: "Climate Change Action Plan 2024",
-        category: "Environment",
-        date: "2024-10-20",
-        time: "2 days ago",
-        summary: "India launches ambitious climate action plan with focus on renewable energy and carbon neutrality goals.",
-        content: `
-          <h2>India Launches Ambitious Climate Action Plan 2024</h2>
-          <p>India today unveiled its comprehensive Climate Action Plan 2024, setting ambitious targets for renewable energy adoption and carbon neutrality.</p>
-          
-          <h3>Key Targets</h3>
-          <ul>
-            <li>50% renewable energy capacity by 2030</li>
-            <li>Net-zero emissions by 2070</li>
-            <li>Massive afforestation drive</li>
-            <li>Green hydrogen mission expansion</li>
-          </ul>
-          
-          <h3>International Cooperation</h3>
-          <p>The plan emphasizes international cooperation and technology transfer to achieve climate goals while maintaining economic development.</p>
-        `,
-        image: "image/environment.png"
-      },
-      {
-        id: 4,
-        title: "India's G20 Presidency Achievements",
-        category: "International Relations",
-        date: "2024-10-19",
-        time: "3 days ago",
-        summary: "Comprehensive review of India's successful G20 presidency and its impact on global governance.",
-        content: `
-          <h2>India's G20 Presidency: A Year of Global Leadership</h2>
-          <p>India's G20 presidency has been marked by significant achievements in global governance and multilateral cooperation.</p>
-          
-          <h3>Major Achievements</h3>
-          <ul>
-            <li>Consensus on global economic recovery</li>
-            <li>Digital transformation initiatives</li>
-            <li>Climate action commitments</li>
-            <li>Sustainable development partnerships</li>
-          </ul>
-        `,
-        image: "image/history.png"
-      },
-      {
-        id: 5,
-        title: "Digital India 2.0: Next Phase of Transformation",
-        category: "Technology",
-        date: "2024-10-18",
-        time: "4 days ago",
-        summary: "Government launches Digital India 2.0 with focus on AI, blockchain, and quantum computing initiatives.",
-        content: `
-          <h2>Digital India 2.0: Embracing Emerging Technologies</h2>
-          <p>The government today launched Digital India 2.0, marking the next phase of India's digital transformation journey.</p>
-          
-          <h3>Technology Focus Areas</h3>
-          <ul>
-            <li>Artificial Intelligence integration</li>
-            <li>Blockchain for governance</li>
-            <li>Quantum computing research</li>
-            <li>5G infrastructure expansion</li>
-          </ul>
-        `,
-        image: "image/geography.png"
-      },
-      {
-        id: 6,
-        title: "National Education Policy Implementation Update",
-        category: "Education",
-        date: "2024-10-17",
-        time: "5 days ago",
-        summary: "Progress report on National Education Policy implementation across states and union territories.",
-        content: `
-          <h2>NEP 2020: Implementation Progress Across India</h2>
-          <p>The Ministry of Education released a comprehensive progress report on the implementation of the National Education Policy 2020.</p>
-          
-          <h3>Implementation Highlights</h3>
-          <ul>
-            <li>Curriculum reforms in 15 states</li>
-            <li>Teacher training programs launched</li>
-            <li>Digital learning infrastructure</li>
-            <li>Multilingual education initiatives</li>
-          </ul>
-        `,
-        image: "image/mock-test.png"
-      }
-    ];
+        // Function to open modal
+        function openNewsModal(id) {
+            const article = newsData.find(a => a.id === id);
+            if (!article) return;
 
-    let currentSort = 'date-desc';
-    let sortedNews = [...newsData];
+            // Remove existing modal
+            const existing = document.getElementById('news-modal');
+            if (existing) existing.remove();
 
-    // Sort functionality
-    function initSort() {
-      const sortBtn = document.getElementById('sort-btn');
-      const sortMenu = document.getElementById('sort-menu');
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'news-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            
+            modal.innerHTML = `
+                <div class="glass-modal-content rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <button id="back-btn" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                                <i data-lucide="arrow-left" class="w-5 h-5 text-white"></i>
+                            </button>
+                            <div>
+                                <span class="category-badge px-3 py-1 rounded-full text-xs font-medium">${article.category}</span>
+                                <span class="text-white/60 text-sm ml-3">${article.time}</span>
+                            </div>
+                        </div>
+                        <button id="close-btn" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5 text-white/70 hover:text-white"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-y-auto max-h-[75vh] custom-scrollbar">
+                        <h1 class="text-2xl font-bold text-white mb-4">${article.title}</h1>
+                        <div class="prose prose-invert max-w-none text-white/90 leading-relaxed">
+                            ${article.content}
+                        </div>
+                    </div>
+                </div>
+            `;
 
-      if (sortBtn && sortMenu) {
-        sortBtn.addEventListener('click', () => {
-          sortMenu.classList.toggle('hidden');
+            document.body.appendChild(modal);
+
+            // Add handlers
+            const close = () => modal.remove();
+            modal.querySelector('#close-btn').onclick = close;
+            modal.querySelector('#back-btn').onclick = close;
+            modal.onclick = (e) => e.target === modal && close();
+            
+            // Escape key
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') {
+                    close();
+                    document.removeEventListener('keydown', handleEsc);
+                }
+            };
+            document.addEventListener('keydown', handleEsc);
+
+            // Render icons
+            setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 100);
+
+            console.log('✅ Modal opened for:', article.title);
+        }
+
+        // Bookmark function
+        function toggleBookmark(newsId) {
+            console.log('Bookmark toggled for news ID:', newsId);
+            
+            const bookmarkBtn = event.target.closest('button');
+            const icon = bookmarkBtn.querySelector('i');
+            
+            if (bookmarkBtn.classList.contains('bookmarked')) {
+                // Remove bookmark
+                bookmarkBtn.classList.remove('bookmarked');
+                icon.classList.remove('text-blue-400');
+                icon.classList.add('text-white/60');
+                showToast('Bookmark removed');
+            } else {
+                // Add bookmark
+                bookmarkBtn.classList.add('bookmarked');
+                icon.classList.remove('text-white/60');
+                icon.classList.add('text-blue-400');
+                showToast('News bookmarked successfully!');
+            }
+        }
+
+        // Toast notification function
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 glass-card text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Sort functionality
+        function initSort() {
+            const sortBtn = document.getElementById('sort-btn');
+            const sortMenu = document.getElementById('sort-menu');
+
+            if (sortBtn && sortMenu) {
+                sortBtn.addEventListener('click', () => {
+                    sortMenu.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!sortMenu.classList.contains('hidden') && !e.target.closest('#sort-btn') && !e.target.closest('#sort-menu')) {
+                        sortMenu.classList.add('hidden');
+                    }
+                });
+
+                document.querySelectorAll('.sort-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        const sortType = option.dataset.sort;
+                        sortNews(sortType);
+                        sortMenu.classList.add('hidden');
+                    });
+                });
+            }
+        }
+
+        function sortNews(sortType) {
+            // Sort the news data based on type
+            let sorted = [...newsData];
+            
+            switch (sortType) {
+                case 'date-desc':
+                    sorted.sort((a, b) => new Date(b.date || '2024-11-04') - new Date(a.date || '2024-11-04'));
+                    break;
+                case 'date-asc':
+                    sorted.sort((a, b) => new Date(a.date || '2024-11-04') - new Date(b.date || '2024-11-04'));
+                    break;
+                case 'title-asc':
+                    sorted.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                case 'category':
+                    sorted.sort((a, b) => a.category.localeCompare(b.category));
+                    break;
+            }
+            
+            // Update the global newsData and re-render
+            window.newsData = sorted;
+            renderNews();
+            showToast(`Sorted by ${sortType.replace('-', ' ')}`);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📰 Initializing UPSC News...');
+            
+            // Initialize sort functionality
+            initSort();
+            
+            // Render news
+            renderNews();
+            
+            // Initialize icons
+            setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 500);
+            
+            console.log('✅ News page ready');
         });
-
-        document.addEventListener('click', (e) => {
-          if (!sortMenu.classList.contains('hidden') && !e.target.closest('#sort-btn') && !e.target.closest('#sort-menu')) {
-            sortMenu.classList.add('hidden');
-          }
-        });
-
-        document.querySelectorAll('.sort-option').forEach(option => {
-          option.addEventListener('click', () => {
-            currentSort = option.dataset.sort;
-            sortNews();
-            sortMenu.classList.add('hidden');
-          });
-        });
-      }
-    }
-
-    function sortNews() {
-      switch (currentSort) {
-        case 'date-desc':
-          sortedNews.sort((a, b) => new Date(b.date) - new Date(a.date));
-          break;
-        case 'date-asc':
-          sortedNews.sort((a, b) => new Date(a.date) - new Date(b.date));
-          break;
-        case 'title-asc':
-          sortedNews.sort((a, b) => a.title.localeCompare(b.title));
-          break;
-        case 'category':
-          sortedNews.sort((a, b) => a.category.localeCompare(b.category));
-          break;
-      }
-      renderNews();
-    }
-
-    function renderNews() {
-      // Simple render function - just show a toast for now
-      showToast(`News sorted by ${currentSort.replace('-', ' ')}`);
-    }
-
-    // Bookmark management functions
-    function getBookmarks() {
-      const bookmarks = localStorage.getItem('userBookmarks');
-      return bookmarks ? JSON.parse(bookmarks) : [];
-    }
-
-    function saveBookmarks(bookmarks) {
-      localStorage.setItem('userBookmarks', JSON.stringify(bookmarks));
-    }
-
-    function addBookmark(newsId) {
-      const bookmarks = getBookmarks();
-      const news = newsData.find(n => n.id === newsId);
-
-      if (news && !bookmarks.find(b => b.id === newsId && b.type === 'News')) {
-        const bookmark = {
-          id: newsId,
-          title: news.title,
-          type: 'News',
-          date: 'Just now',
-          category: news.category,
-          originalData: news
-        };
-        bookmarks.push(bookmark);
-        saveBookmarks(bookmarks);
-        return true;
-      }
-      return false;
-    }
-
-    function removeBookmark(newsId) {
-      const bookmarks = getBookmarks();
-      const filteredBookmarks = bookmarks.filter(b => !(b.id === newsId && b.type === 'News'));
-      saveBookmarks(filteredBookmarks);
-      return filteredBookmarks.length !== bookmarks.length;
-    }
-
-    function isBookmarked(newsId) {
-      const bookmarks = getBookmarks();
-      return bookmarks.some(b => b.id === newsId && b.type === 'News');
-    }
-
-    function toggleBookmark(newsId) {
-      console.log('Bookmark clicked for news ID:', newsId);
-
-      // Get the bookmark button that was clicked
-      const bookmarkBtn = event.target.closest('button');
-      if (!bookmarkBtn) {
-        console.error('Bookmark button not found');
-        return;
-      }
-
-      const icon = bookmarkBtn.querySelector('i');
-      if (!icon) {
-        console.error('Icon not found in bookmark button');
-        return;
-      }
-
-      // Get news data
-      const news = newsData.find(n => n.id === newsId);
-      if (!news) {
-        showToast('News article not found');
-        return;
-      }
-
-      // Check if already bookmarked
-      const bookmarks = profileManager.getBookmarks();
-      const existingBookmark = bookmarks.find(b => b.title === news.title);
-
-      if (existingBookmark) {
-        // Remove bookmark
-        profileManager.removeBookmark(existingBookmark.id);
-        icon.classList.remove('text-yellow-400');
-        icon.classList.add('text-white/80');
-        bookmarkBtn.classList.remove('bookmarked');
-        showToast('Bookmark removed');
-      } else {
-        // Add bookmark
-        const bookmarkData = {
-          title: news.title,
-          category: news.category,
-          type: 'news',
-          url: `news.html?openNews=${newsId}`
-        };
-
-        profileManager.addBookmark(bookmarkData);
-        icon.classList.remove('text-white/80');
-        icon.classList.add('text-yellow-400');
-        bookmarkBtn.classList.add('bookmarked');
-        showToast('News bookmarked successfully!');
-      }
-    }
-
-    function viewNews(newsId) {
-      console.log('View news clicked for ID:', newsId);
-
-      const news = newsData.find(n => n.id === newsId);
-      if (news) {
-        console.log('Found news:', news.title);
-        showNewsModal(news);
-      } else {
-        console.error('News not found for ID:', newsId);
-        showToast('News article not found');
-      }
-    }
-
-    function showNewsModal(news) {
-      // Remove any existing modals first
-      const existingModal = document.getElementById('news-modal');
-      if (existingModal) {
-        document.body.removeChild(existingModal);
-      }
-
-      const modal = document.createElement('div');
-      modal.id = 'news-modal';
-      modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
-      modal.innerHTML = `
-        <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/10">
-          <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-              <button id="backToNews" class="p-2 rounded-lg hover:bg-white/10 transition">
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-              </button>
-              <div>
-                <span class="px-2 py-1 rounded-full text-xs bg-[var(--teal-primary)]/20 text-[var(--teal-primary)]">${news.category}</span>
-                <span class="text-white/60 text-sm ml-2">${news.time}</span>
-              </div>
-            </div>
-            <button id="closeNewsModal" class="text-white/50 hover:text-white">
-              <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-          </div>
-          
-          <div class="overflow-y-auto max-h-[75vh] prose prose-invert max-w-none">
-            <img src="${news.image}" alt="${news.title}" class="w-full h-64 object-cover rounded-lg mb-6">
-            <div class="text-white">
-              ${news.content}
-            </div>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(modal);
-
-      // Add event listeners
-      let isClosing = false;
-      const closeModal = () => {
-        if (isClosing) return;
-        isClosing = true;
-
-        const modalToRemove = document.getElementById('news-modal');
-        if (modalToRemove && document.body.contains(modalToRemove)) {
-          document.body.removeChild(modalToRemove);
-        }
-
-        setTimeout(() => {
-          isClosing = false;
-        }, 100);
-      };
-
-      modal.querySelector('#closeNewsModal').addEventListener('click', closeModal);
-      modal.querySelector('#backToNews').addEventListener('click', closeModal);
-
-      // Add keyboard escape handler
-      const handleKeyPress = (e) => {
-        if (e.key === 'Escape') {
-          closeModal();
-          document.removeEventListener('keydown', handleKeyPress);
-        }
-      };
-      document.addEventListener('keydown', handleKeyPress);
-
-      // Close on backdrop click
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          closeModal();
-        }
-      });
-
-      // Re-render icons for the modal
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
-        window.if (window.iconManager) window.iconManager.refresh();
-      }
-    }
-
-    function showToast(message) {
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
-      toast.textContent = message;
-      document.body.appendChild(toast);
-
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => {
-          document.body.removeChild(toast);
-        }, 300);
-      }, 3000);
-    }
-
-    // Initialize bookmark states on page load
-    function initializeBookmarkStates() {
-      // Update bookmark icons based on stored bookmarks
-      for (let i = 1; i <= 6; i++) {
-        const bookmarkBtn = document.querySelector(`article[onclick="viewNews(${i})"] button[onclick*="toggleBookmark(${i})"]`);
-        if (bookmarkBtn) {
-          const icon = bookmarkBtn.querySelector('i');
-          if (icon && isBookmarked(i)) {
-            icon.classList.remove('text-white/80');
-            icon.classList.add('text-yellow-400');
-          }
-        }
-      }
-    }
-
-    // Add click handlers to news articles
-    document.addEventListener('DOMContentLoaded', () => {
-      // Load saved profile picture
-      const savedDP = localStorage.getItem('selectedDP');
-      const userInitialsEl = document.getElementById('user-initials');
-
-      if (savedDP && userInitialsEl) {
-        const parentDiv = userInitialsEl.parentElement;
-        parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
-      }
-
-      // Initialize bookmark states
-      initializeBookmarkStates();
-
-      // Check URL parameters for auto-opening news
-      const urlParams = new URLSearchParams(window.location.search);
-      const openNewsId = urlParams.get('openNews');
-      if (openNewsId) {
-        const newsId = parseInt(openNewsId);
-        if (newsId >= 1 && newsId <= 6) {
-          // Small delay to ensure page is fully loaded
-          setTimeout(() => {
-            viewNews(newsId);
-          }, 500);
-        }
-      }
-
-      // Add click handlers to existing news articles
-      const newsArticles = document.querySelectorAll('article');
-      newsArticles.forEach((article, index) => {
-        article.addEventListener('click', () => {
-          viewNews(index + 1); // Using index + 1 as news ID
-        });
-      });
-
-      // Initialize sort functionality
-      initSort();
-    });
-
-    // Make functions globally accessible
-    window.viewNews = viewNews;
-    window.toggleBookmark = toggleBookmark;
-
-    // Initialize profile manager for cross-page synchronization
-    if (typeof ProfileManager !== 'undefined') {
-      window.profileManager = new ProfileManager();
-    }
-
-    // Initialize news display interface
-    if (typeof NewsDisplayInterface !== 'undefined') {
-      window.newsDisplayInterface = new NewsDisplayInterface({
-        containerId: 'main-content',
-        autoRefresh: true,
-        refreshInterval: 300000, // 5 minutes
-        itemsPerPage: 12
-      });
-    }
-
-    if (window.iconManager) window.iconManager.refresh();
-  </script>
+    </script>
 </body>
-
 </html>

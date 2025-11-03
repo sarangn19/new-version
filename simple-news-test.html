@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple News Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">📰 Simple News Test</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- News Article 1 -->
+            <article class="bg-gray-800 rounded-lg p-6 cursor-pointer hover:bg-gray-700 transition-colors border border-white/10" onclick="openNews(1)">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-full text-xs bg-teal-600/20 text-teal-400">Polity</span>
+                    <button onclick="event.stopPropagation(); alert('Bookmark clicked')" class="p-2 rounded hover:bg-white/10">
+                        <i data-lucide="bookmark" class="w-4 h-4 text-white/60"></i>
+                    </button>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Supreme Court Digital Rights Judgment</h3>
+                <p class="text-white/70 text-sm mb-4">The Supreme Court delivered a significant judgment regarding digital privacy rights and data protection in the digital age.</p>
+                <div class="text-xs text-white/50">2 hours ago • Click to read</div>
+            </article>
+            
+            <!-- News Article 2 -->
+            <article class="bg-gray-800 rounded-lg p-6 cursor-pointer hover:bg-gray-700 transition-colors border border-white/10" onclick="openNews(2)">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-full text-xs bg-blue-600/20 text-blue-400">Economy</span>
+                    <button onclick="event.stopPropagation(); alert('Bookmark clicked')" class="p-2 rounded hover:bg-white/10">
+                        <i data-lucide="bookmark" class="w-4 h-4 text-white/60"></i>
+                    </button>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">New Economic Policy Framework</h3>
+                <p class="text-white/70 text-sm mb-4">Government announces comprehensive economic policy framework focusing on sustainable growth and employment generation.</p>
+                <div class="text-xs text-white/50">1 day ago • Click to read</div>
+            </article>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Instructions</h3>
+            <p class="text-white/70 mb-4">Click on any news article above to test the modal functionality. This is a simplified version to isolate the news opening issue.</p>
+            <div class="space-y-2 text-sm">
+                <div class="text-green-400">✅ Articles have onclick handlers</div>
+                <div class="text-green-400">✅ Modal will open with full content</div>
+                <div class="text-green-400">✅ Close with X button, back button, or ESC key</div>
+                <div class="text-green-400">✅ Click outside modal to close</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple news data
+        const newsArticles = {
+            1: {
+                title: "Supreme Court Digital Rights Judgment",
+                category: "Polity",
+                time: "2 hours ago",
+                content: `
+                    <h2>Supreme Court Delivers Landmark Judgment on Digital Rights</h2>
+                    <p>In a groundbreaking decision that will reshape India's digital landscape, the Supreme Court today delivered a comprehensive judgment on digital privacy rights and data protection.</p>
+                    
+                    <h3>Key Highlights</h3>
+                    <ul>
+                        <li>Right to digital privacy recognized as a fundamental right under Article 21</li>
+                        <li>Stricter guidelines for data collection by government agencies</li>
+                        <li>Enhanced protection for citizens' digital footprint</li>
+                        <li>Mandatory consent requirements for data processing</li>
+                    </ul>
+                    
+                    <h3>Impact on Citizens</h3>
+                    <p>This judgment will significantly impact how personal data is collected, processed, and stored by both government and private entities. Citizens now have stronger legal recourse against unauthorized data collection.</p>
+                    
+                    <h3>Legal Implications</h3>
+                    <p>The judgment establishes important precedents for future cases involving digital rights and privacy. It aligns India's legal framework with international standards on data protection.</p>
+                `
+            },
+            2: {
+                title: "New Economic Policy Framework",
+                category: "Economy", 
+                time: "1 day ago",
+                content: `
+                    <h2>Government Unveils New Economic Policy Framework</h2>
+                    <p>The government today announced a comprehensive economic policy framework aimed at achieving sustainable growth while addressing employment challenges.</p>
+                    
+                    <h3>Policy Highlights</h3>
+                    <ul>
+                        <li>Focus on manufacturing sector growth</li>
+                        <li>Enhanced support for MSMEs</li>
+                        <li>Green economy initiatives</li>
+                        <li>Digital infrastructure development</li>
+                    </ul>
+                    
+                    <h3>Employment Generation</h3>
+                    <p>The policy framework includes specific measures to generate employment opportunities across various sectors, with particular emphasis on skill development and vocational training.</p>
+                    
+                    <h3>Economic Impact</h3>
+                    <p>Experts predict this framework will boost GDP growth by 1.5-2% over the next fiscal year, while creating millions of new jobs across different sectors.</p>
+                `
+            }
+        };
+        
+        function openNews(newsId) {
+            console.log('Opening news:', newsId);
+            
+            const article = newsArticles[newsId];
+            if (!article) {
+                alert('Article not found!');
+                return;
+            }
+            
+            showModal(article);
+        }
+        
+        function showModal(article) {
+            // Remove existing modal
+            const existingModal = document.getElementById('news-modal');
+            if (existingModal) {
+                document.body.removeChild(existingModal);
+            }
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'news-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            
+            modal.innerHTML = `
+                <div class="bg-gray-800 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/10 shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <button id="back-btn" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                                <i data-lucide="arrow-left" class="w-5 h-5 text-white"></i>
+                            </button>
+                            <div>
+                                <span class="px-3 py-1 rounded-full text-xs bg-teal-600/20 text-teal-400 font-medium">${article.category}</span>
+                                <span class="text-white/60 text-sm ml-3">${article.time}</span>
+                            </div>
+                        </div>
+                        <button id="close-btn" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5 text-white/70 hover:text-white"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-y-auto max-h-[75vh] pr-2">
+                        <h1 class="text-2xl font-bold text-white mb-4">${article.title}</h1>
+                        <div class="prose prose-invert max-w-none text-white/90 leading-relaxed">
+                            ${article.content}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add event listeners
+            const closeModal = () => {
+                const modalToRemove = document.getElementById('news-modal');
+                if (modalToRemove) {
+                    document.body.removeChild(modalToRemove);
+                }
+            };
+            
+            modal.querySelector('#close-btn').addEventListener('click', closeModal);
+            modal.querySelector('#back-btn').addEventListener('click', closeModal);
+            
+            // Close on escape
+            const handleKeyPress = (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.removeEventListener('keydown', handleKeyPress);
+                }
+            };
+            document.addEventListener('keydown', handleKeyPress);
+            
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Render icons
+            setTimeout(() => {
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                }
+            }, 100);
+            
+            console.log('Modal opened successfully');
+        }
+        
+        // Initialize icons
+        setTimeout(() => {
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
+        }, 500);
+    </script>
+</body>
+</html>

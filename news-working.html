@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPSC News - Working Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #1F1F1F;
+            color: white;
+        }
+        .news-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .news-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        .upsc-content {
+            font-family: 'Inter', sans-serif;
+        }
+        .exam-banner {
+            background: linear-gradient(135deg, #059669, #047857);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .key-facts {
+            background: #1e40af20;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+        }
+        .syllabus-map {
+            background: #7c2d1220;
+            border-left: 4px solid #dc2626;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+        }
+        .exam-questions {
+            background: #92400e20;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-900 border-b border-gray-700 p-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="db.html" class="text-white/60 hover:text-white">← Dashboard</a>
+                <h1 class="text-2xl font-bold">📰 UPSC News</h1>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-green-400">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span>Auto-updating hourly</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-6">
+        <!-- Search Bar -->
+        <div class="mb-8">
+            <div class="relative">
+                <input type="text" placeholder="Search UPSC news..." 
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 pl-12 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500">
+                <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- News Grid -->
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- News will be loaded here -->
+        </div>
+    </main>
+
+    <script>
+        // UPSC News Data
+        const newsData = [
+            {
+                id: 1,
+                title: "Supreme Court Landmark Judgment on Digital Rights",
+                category: "Polity & Governance",
+                time: "2 hours ago",
+                summary: "The Supreme Court delivered a significant judgment regarding digital privacy rights and data protection in the digital age.",
+                content: `
+                    <div class="upsc-content">
+                        <div class="exam-banner">
+                            <h2 class="text-white text-xl font-bold mb-2">🎯 UPSC Exam Relevance: HIGH</h2>
+                            <div class="flex gap-2">
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Prelims</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Mains GS-2</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Interview</span>
+                            </div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-4">Supreme Court Delivers Landmark Judgment on Digital Rights</h2>
+                        
+                        <div class="key-facts">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">📋 Key Facts for UPSC</h3>
+                            <ul class="space-y-2">
+                                <li><strong>Constitutional Basis:</strong> Article 21 (Right to Life and Personal Liberty)</li>
+                                <li><strong>Bench:</strong> 9-judge Constitutional Bench</li>
+                                <li><strong>Case:</strong> Justice K.S. Puttaswamy vs Union of India</li>
+                                <li><strong>Significance:</strong> Privacy as fundamental right</li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-3">🔍 Detailed Analysis</h3>
+                        <p class="mb-4">The Supreme Court's judgment on digital privacy rights establishes a crucial precedent for India's digital governance framework. This decision directly impacts multiple UPSC syllabus areas including constitutional law, governance, and technology policy.</p>
+                        
+                        <div class="syllabus-map">
+                            <h3 class="text-lg font-semibold mb-3 text-red-400">📚 Syllabus Mapping</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="font-semibold text-red-300 mb-2">Prelims</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Fundamental Rights (Article 21)</li>
+                                        <li>• Supreme Court judgments</li>
+                                        <li>• Digital India initiatives</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-red-300 mb-2">Mains GS-2</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Constitutional provisions</li>
+                                        <li>• Judiciary and its role</li>
+                                        <li>• Government policies</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-questions">
+                            <h3 class="text-lg font-semibold mb-3 text-yellow-400">🤔 Possible Exam Questions</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Prelims Style:</h4>
+                                    <p class="text-sm italic">"The right to privacy was declared a fundamental right by the Supreme Court in which case?"</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Mains Style:</h4>
+                                    <p class="text-sm italic">"Discuss the implications of the Supreme Court's judgment on digital privacy rights for India's digital governance framework. (250 words)"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mt-4">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">🔗 Related Topics to Study</h3>
+                            <ul class="text-sm space-y-1">
+                                <li>• Data Protection Bill 2023</li>
+                                <li>• Digital Personal Data Protection Act</li>
+                                <li>• IT Act 2000 and amendments</li>
+                                <li>• Aadhaar judgment (2018)</li>
+                                <li>• Right to be forgotten</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-red-900/20 border-2 border-dashed border-red-500/50 rounded-lg p-4 mt-4 text-center">
+                            <h3 class="text-lg font-semibold mb-2 text-red-400">🧠 Memory Aid</h3>
+                            <p><strong>PRIDE:</strong> <strong>P</strong>rivacy as fundamental right, <strong>R</strong>ight to life (Art 21), <strong>I</strong>nformation protection, <strong>D</strong>ata collection guidelines, <strong>E</strong>nhanced citizen rights</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 2,
+                title: "New Economic Policy Framework Announced",
+                category: "Economy",
+                time: "1 day ago",
+                summary: "Government announces comprehensive economic policy framework focusing on sustainable growth and employment generation.",
+                content: `
+                    <div class="upsc-content">
+                        <div class="exam-banner">
+                            <h2 class="text-white text-xl font-bold mb-2">🎯 UPSC Exam Relevance: VERY HIGH</h2>
+                            <div class="flex gap-2">
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Prelims</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Mains GS-3</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Interview</span>
+                            </div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-4">Government Unveils New Economic Policy Framework</h2>
+                        
+                        <div class="key-facts">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">📊 Key Economic Indicators</h3>
+                            <ul class="space-y-2">
+                                <li><strong>GDP Target:</strong> 7.5% growth by 2025</li>
+                                <li><strong>Employment Goal:</strong> 50 million new jobs by 2030</li>
+                                <li><strong>Manufacturing Share:</strong> Increase to 25% of GDP</li>
+                                <li><strong>MSME Credit:</strong> ₹2 lakh crore guarantee scheme</li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-3">🏭 Policy Framework Analysis</h3>
+                        <p class="mb-4">The new economic policy framework represents a paradigm shift towards sustainable and inclusive growth, with specific focus on manufacturing sector enhancement and employment generation through targeted interventions.</p>
+                        
+                        <div class="exam-questions">
+                            <h3 class="text-lg font-semibold mb-3 text-yellow-400">📝 Probable Exam Questions</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Prelims MCQ:</h4>
+                                    <p class="text-sm italic">"Which of the following sectors is NOT covered under the Production Linked Incentive (PLI) scheme?"</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Mains Question:</h4>
+                                    <p class="text-sm italic">"Critically analyze the new Economic Policy Framework's potential to achieve the target of making India a $5 trillion economy. (250 words)"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mt-4">
+                            <h3 class="text-lg font-semibold mb-3 text-green-400">🔗 Must Study Related Topics</h3>
+                            <ul class="text-sm space-y-1">
+                                <li>• Economic Survey 2024 highlights</li>
+                                <li>• Atmanirbhar Bharat Abhiyan</li>
+                                <li>• National Manufacturing Policy 2011</li>
+                                <li>• MSME Development Act 2006</li>
+                                <li>• Industrial Policy Resolution 1991</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 3,
+                title: "Climate Change Action Plan 2024",
+                category: "Environment",
+                time: "2 days ago",
+                summary: "India launches ambitious climate action plan with focus on renewable energy and carbon neutrality goals.",
+                content: `
+                    <div class="upsc-content">
+                        <div class="exam-banner">
+                            <h2 class="text-white text-xl font-bold mb-2">🎯 UPSC Exam Relevance: HIGH</h2>
+                            <div class="flex gap-2">
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Prelims</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Mains GS-3</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Interview</span>
+                            </div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-4">India Launches Ambitious Climate Action Plan 2024</h2>
+                        
+                        <div class="key-facts">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">🌱 Key Climate Targets</h3>
+                            <ul class="space-y-2">
+                                <li><strong>Renewable Energy:</strong> 50% capacity by 2030</li>
+                                <li><strong>Net-Zero Target:</strong> 2070</li>
+                                <li><strong>Forest Cover:</strong> 33% of geographical area</li>
+                                <li><strong>Green Hydrogen:</strong> 5 MMT production by 2030</li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-3">🔍 Environmental Policy Analysis</h3>
+                        <p class="mb-4">India's Climate Action Plan 2024 represents a comprehensive approach to addressing climate change while maintaining economic development priorities and international commitments under the Paris Agreement.</p>
+                        
+                        <div class="exam-questions">
+                            <h3 class="text-lg font-semibold mb-3 text-yellow-400">🤔 Possible Exam Questions</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Prelims Style:</h4>
+                                    <p class="text-sm italic">"India's net-zero emission target is set for which year?"</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-yellow-300">Mains Style:</h4>
+                                    <p class="text-sm italic">"Evaluate India's Climate Action Plan 2024 in the context of global climate commitments and domestic development needs. (250 words)"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 4,
+                title: "India's G20 Presidency Achievements",
+                category: "International Relations",
+                time: "3 days ago",
+                summary: "Comprehensive review of India's successful G20 presidency and its impact on global governance.",
+                content: `
+                    <div class="upsc-content">
+                        <div class="exam-banner">
+                            <h2 class="text-white text-xl font-bold mb-2">🎯 UPSC Exam Relevance: HIGH</h2>
+                            <div class="flex gap-2">
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Prelims</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Mains GS-2</span>
+                                <span class="bg-white/20 text-white px-2 py-1 rounded text-sm">Interview</span>
+                            </div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-4">India's G20 Presidency: A Year of Global Leadership</h2>
+                        
+                        <div class="key-facts">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-400">🌍 G20 Presidency Highlights</h3>
+                            <ul class="space-y-2">
+                                <li><strong>Theme:</strong> "Vasudhaiva Kutumbakam" - One Earth, One Family, One Future</li>
+                                <li><strong>Duration:</strong> December 2022 - November 2023</li>
+                                <li><strong>Major Outcomes:</strong> New Delhi Leaders' Declaration</li>
+                                <li><strong>Focus Areas:</strong> Digital transformation, sustainable development</li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-3">🔍 Diplomatic Achievement Analysis</h3>
+                        <p class="mb-4">India's G20 presidency has been marked by significant achievements in global governance, multilateral cooperation, and consensus building on critical global issues including climate change, digital transformation, and sustainable development.</p>
+                    </div>
+                `
+            }
+        ];
+
+        // Function to render news
+        function renderNews() {
+            console.log('📰 Rendering news articles...');
+            const grid = document.getElementById('news-grid');
+            
+            const html = newsData.map(article => `
+                <div class="news-card bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-teal-500" data-id="${article.id}">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-teal-600/20 text-teal-400">
+                            ${article.category}
+                        </span>
+                        <span class="text-xs text-gray-400">${article.time}</span>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold mb-3 leading-tight">
+                        ${article.title}
+                    </h3>
+                    
+                    <p class="text-gray-300 text-sm mb-4 leading-relaxed">
+                        ${article.summary}
+                    </p>
+                    
+                    <div class="flex items-center justify-between text-xs text-gray-400">
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="target" class="w-3 h-3"></i>
+                            UPSC Relevant
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="eye" class="w-3 h-3"></i>
+                            Read Analysis
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            
+            grid.innerHTML = html;
+            
+            // Add click handlers
+            const cards = grid.querySelectorAll('.news-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    console.log('📰 Opening news:', id);
+                    openNewsModal(id);
+                });
+            });
+            
+            // Render icons
+            setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 100);
+            
+            console.log(`✅ Rendered ${newsData.length} articles`);
+        }
+
+        // Function to open modal
+        function openNewsModal(id) {
+            const article = newsData.find(a => a.id === id);
+            if (!article) return;
+
+            // Remove existing modal
+            const existing = document.getElementById('news-modal');
+            if (existing) existing.remove();
+
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'news-modal';
+            modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            
+            modal.innerHTML = `
+                <div class="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-gray-700">
+                    <div class="flex items-center justify-between p-6 border-b border-gray-700">
+                        <div class="flex items-center gap-3">
+                            <button id="back-btn" class="p-2 rounded-lg hover:bg-gray-700">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+                            <div>
+                                <span class="px-3 py-1 rounded-full text-xs bg-teal-600/20 text-teal-400">${article.category}</span>
+                                <span class="text-gray-400 text-sm ml-3">${article.time}</span>
+                            </div>
+                        </div>
+                        <button id="close-btn" class="p-2 rounded-lg hover:bg-gray-700">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+                        <h1 class="text-2xl font-bold mb-4">${article.title}</h1>
+                        <div class="prose prose-invert max-w-none">
+                            ${article.content}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Add handlers
+            const close = () => modal.remove();
+            modal.querySelector('#close-btn').onclick = close;
+            modal.querySelector('#back-btn').onclick = close;
+            modal.onclick = (e) => e.target === modal && close();
+            
+            // Escape key
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') {
+                    close();
+                    document.removeEventListener('keydown', handleEsc);
+                }
+            };
+            document.addEventListener('keydown', handleEsc);
+
+            // Render icons
+            setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 100);
+
+            console.log('✅ Modal opened for:', article.title);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📰 Initializing UPSC News...');
+            renderNews();
+            
+            setTimeout(() => {
+                if (window.lucide) window.lucide.createIcons();
+            }, 500);
+            
+            console.log('✅ News page ready');
+        });
+    </script>
+</body>
+</html>

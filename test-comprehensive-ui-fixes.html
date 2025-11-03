@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive UI Fixes Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">🔧 Comprehensive UI Fixes Test</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Save Button Test -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Save Button Test</h3>
+                <div class="bg-gray-700 p-4 rounded mb-4">
+                    <div class="prose prose-invert">
+                        <p>This is a sample AI response that should be saveable as a note.</p>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button class="save-btn px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs hover:bg-blue-500/30 transition-colors" data-type="note">
+                            📄 Save to Notes
+                        </button>
+                        <button class="copy-btn px-3 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs hover:bg-gray-500/30 transition-colors">
+                            📋 Copy Response
+                        </button>
+                    </div>
+                </div>
+                <div id="save-test-result" class="text-sm text-gray-400"></div>
+            </div>
+            
+            <!-- Statistics Test -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Statistics Test</h3>
+                <div class="space-y-2">
+                    <div>Total Notes: <span id="total-notes" class="text-blue-400">0</span></div>
+                    <div>Total Flashcards: <span id="total-flashcards" class="text-green-400">0</span></div>
+                    <div>Total MCQs: <span id="total-mcqs" class="text-purple-400">0</span></div>
+                    <div>Study Sessions: <span id="study-sessions" class="text-yellow-400">0</span></div>
+                    <div>Total Study Time: <span id="total-study-time" class="text-red-400">0m</span></div>
+                    <div>Average Score: <span id="average-score" class="text-teal-400">0%</span></div>
+                </div>
+                <button onclick="testStatisticsUpdate()" class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm">
+                    Update Statistics
+                </button>
+            </div>
+            
+            <!-- News Test -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">News Reading Test</h3>
+                <button onclick="testNewsReading()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-sm">
+                    Test Open News Article
+                </button>
+                <div id="news-test-result" class="mt-4 text-sm text-gray-400"></div>
+            </div>
+            
+            <!-- Group Deletion Test -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Group Deletion Test</h3>
+                <button onclick="testGroupDeletion()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm">
+                    Test Delete Group
+                </button>
+                <div id="group-test-result" class="mt-4 text-sm text-gray-400"></div>
+            </div>
+        </div>
+        
+        <div class="mt-8 bg-gray-800 rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Test Log</h3>
+            <div id="test-log" class="space-y-1 text-sm font-mono max-h-64 overflow-y-auto">
+                <div class="text-yellow-400">⏳ Loading fixes...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the comprehensive fixes -->
+    <script src="js/comprehensive-ui-fixes.js"></script>
+    
+    <script>
+        // Mock functions for testing
+        window.showToast = function(message, type) {
+            logTest(`Toast: ${message} (${type})`, type);
+        };
+        
+        window.showNotification = function(message, type) {
+            logTest(`Notification: ${message} (${type})`, type);
+        };
+        
+        window.showConfirmModal = function(title, message, callback) {
+            logTest(`Confirm Modal: ${title} - ${message}`, 'info');
+            if (confirm(`${title}\n\n${message}`)) {
+                callback();
+            }
+        };
+        
+        window.getCurrentGroupId = function() {
+            return 'test-group-123';
+        };
+        
+        function logTest(message, type = 'info') {
+            const log = document.getElementById('test-log');
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            const color = type === 'success' ? 'text-green-400' : 
+                         type === 'error' ? 'text-red-400' : 
+                         type === 'warning' ? 'text-yellow-400' : 'text-blue-400';
+            log.innerHTML += `<div class="${color}">${icon} ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function testStatisticsUpdate() {
+            // Create some sample data
+            const sampleNotes = Array.from({length: 15}, (_, i) => ({
+                id: i,
+                title: `Note ${i + 1}`,
+                content: `Content for note ${i + 1}`,
+                date: new Date().toISOString()
+            }));
+            
+            const sampleFlashcards = Array.from({length: 8}, (_, i) => ({
+                id: i,
+                front: `Question ${i + 1}`,
+                back: `Answer ${i + 1}`
+            }));
+            
+            const sampleMCQs = Array.from({length: 12}, (_, i) => ({
+                id: i,
+                question: `MCQ ${i + 1}`,
+                options: ['A', 'B', 'C', 'D'],
+                correct: 0
+            }));
+            
+            const sampleSessions = Array.from({length: 5}, (_, i) => ({
+                id: i,
+                duration: Math.floor(Math.random() * 60) + 15,
+                score: Math.floor(Math.random() * 40) + 60,
+                date: new Date().toISOString()
+            }));
+            
+            // Save to localStorage
+            localStorage.setItem('userNotes', JSON.stringify(sampleNotes));
+            localStorage.setItem('flashcards', JSON.stringify(sampleFlashcards));
+            localStorage.setItem('mcqs', JSON.stringify(sampleMCQs));
+            localStorage.setItem('studySessions', JSON.stringify(sampleSessions));
+            
+            // Trigger update
+            if (window.comprehensiveUIFixes) {
+                logTest('Sample data created, updating statistics...', 'info');
+                setTimeout(() => {
+                    // Manually trigger the statistics update
+                    const updateEvent = new CustomEvent('updateStatistics');
+                    document.dispatchEvent(updateEvent);
+                    logTest('Statistics update triggered', 'success');
+                }, 500);
+            }
+        }
+        
+        function testNewsReading() {
+            logTest('Testing news reading functionality...', 'info');
+            
+            if (window.comprehensiveUIFixes && window.comprehensiveUIFixes.getNewsArticle) {
+                const article = window.comprehensiveUIFixes.getNewsArticle(1);
+                document.getElementById('news-test-result').innerHTML = `
+                    <div class="bg-gray-700 p-3 rounded">
+                        <h4 class="font-semibold">${article.title}</h4>
+                        <p class="text-xs text-gray-400">${article.date} • ${article.category}</p>
+                        <p class="text-sm mt-2">${article.content.substring(0, 100)}...</p>
+                    </div>
+                `;
+                logTest('News article loaded successfully', 'success');
+            } else {
+                logTest('News reading function not available', 'error');
+            }
+        }
+        
+        function testGroupDeletion() {
+            logTest('Testing group deletion functionality...', 'info');
+            
+            // Create a test group
+            const testGroups = [
+                { id: 'general', name: 'General' },
+                { id: 'test-group-123', name: 'Test Group' }
+            ];
+            localStorage.setItem('studyGroups', JSON.stringify(testGroups));
+            
+            if (typeof deleteGroup === 'function') {
+                logTest('Group deletion function available', 'success');
+                document.getElementById('group-test-result').innerHTML = `
+                    <div class="text-green-400">✅ Group deletion function is available and ready to use</div>
+                `;
+            } else {
+                logTest('Group deletion function not available', 'error');
+                document.getElementById('group-test-result').innerHTML = `
+                    <div class="text-red-400">❌ Group deletion function not found</div>
+                `;
+            }
+        }
+        
+        // Check if fixes loaded
+        setTimeout(() => {
+            if (window.comprehensiveUIFixes) {
+                logTest('Comprehensive UI fixes loaded successfully', 'success');
+                logTest('Available functions: ' + Object.keys(window.comprehensiveUIFixes).join(', '), 'info');
+            } else {
+                logTest('Comprehensive UI fixes failed to load', 'error');
+            }
+        }, 1000);
+        
+        // Test statistics update on load
+        setTimeout(() => {
+            testStatisticsUpdate();
+        }, 2000);
+    </script>
+</body>
+</html>

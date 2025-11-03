@@ -98,10 +98,10 @@ class NewsDisplayInterface {
             this.initializeSearchInput();
         }
         
-        // Create filter controls if enabled
-        if (this.config.enableFilters) {
-            this.initializeFilterControls();
-        }
+        // Filter controls disabled
+        // if (this.config.enableFilters) {
+        //     this.initializeFilterControls();
+        // }
         
         // Create sort controls
         this.initializeSortControls();
@@ -203,33 +203,8 @@ class NewsDisplayInterface {
      * Create relevance filter slider
      */
     createRelevanceFilter() {
-        const relevanceContainer = document.createElement('div');
-        relevanceContainer.className = 'flex items-center gap-4 mb-4 p-3 bg-white/5 rounded-lg';
-        relevanceContainer.innerHTML = `
-            <span class="text-sm text-white/70 whitespace-nowrap">Min Relevance:</span>
-            <input type="range" id="relevance-slider" min="1" max="10" value="3" 
-                class="flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
-            <span id="relevance-value" class="text-sm text-white font-medium w-8">3</span>
-        `;
-        
-        const slider = relevanceContainer.querySelector('#relevance-slider');
-        const valueDisplay = relevanceContainer.querySelector('#relevance-value');
-        
-        slider.addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            valueDisplay.textContent = value;
-            this.currentFilters.relevanceThreshold = value;
-            this.applyFilters();
-        });
-        
-        // Insert into main content
-        const mainContent = document.querySelector('#main-content .max-w-7xl');
-        if (mainContent) {
-            const existingFilters = mainContent.querySelector('.flex.flex-wrap.gap-2.mb-4');
-            if (existingFilters) {
-                existingFilters.parentNode.insertBefore(relevanceContainer, existingFilters.nextSibling);
-            }
-        }
+        // Relevance filter disabled - no UI element created
+        console.log('📰 Relevance filter disabled');
     }
 
     /**
@@ -302,10 +277,6 @@ class NewsDisplayInterface {
         if (sortBtn && sortMenu) {
             // Update sort options for news-specific sorting
             sortMenu.innerHTML = `
-                <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="relevance">
-                    <i data-lucide="star" class="w-4 h-4 inline mr-2"></i>
-                    By Relevance
-                </button>
                 <button class="sort-option w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition text-sm" data-sort="date">
                     <i data-lucide="calendar" class="w-4 h-4 inline mr-2"></i>
                     By Date
@@ -448,10 +419,10 @@ class NewsDisplayInterface {
                 );
             }
             
-            // Apply relevance threshold
-            filtered = filtered.filter(article => 
-                (article.upscRelevance?.score || 0) >= this.currentFilters.relevanceThreshold
-            );
+            // Relevance threshold filtering disabled
+            // filtered = filtered.filter(article => 
+            //     (article.upscRelevance?.score || 0) >= this.currentFilters.relevanceThreshold
+            // );
             
             // Apply date range filter
             if (this.currentFilters.dateRange) {

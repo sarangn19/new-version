@@ -478,7 +478,6 @@ class NewsFixes {
                     <div class="flex items-center gap-2">
                         ${importanceIcon ? `<span class="text-sm">${importanceIcon}</span>` : ''}
                         <span class="text-xs px-2 py-1 bg-teal-600/20 text-teal-400 rounded-full">${article.category}</span>
-                        <span class="text-xs ${relevanceColor} font-medium">UPSC: ${article.upscRelevance}%</span>
                     </div>
                 </div>
                 
@@ -547,7 +546,7 @@ class NewsFixes {
                         <h4 class="text-sm font-medium text-white line-clamp-2">${article.title}</h4>
                         <div class="flex items-center gap-2 mt-1">
                             <span class="text-xs text-white/60">${this.getTimeAgo(new Date(article.publishedAt))}</span>
-                            <span class="text-xs px-1 py-0.5 bg-teal-600/20 text-teal-400 rounded">${article.upscRelevance}%</span>
+
                         </div>
                     </div>
                 </div>
@@ -572,7 +571,7 @@ class NewsFixes {
                     <div class="category-news-item p-3 border border-white/10 rounded-lg hover:border-white/20 cursor-pointer transition-colors"
                          onclick="openNewsDetailFixed('${article.id}')">
                         <h5 class="text-sm font-medium text-white mb-1 line-clamp-2">${article.title}</h5>
-                        <p class="text-xs text-white/60">${this.getTimeAgo(new Date(article.publishedAt))} • ${article.upscRelevance}% relevant</p>
+                        <p class="text-xs text-white/60">${this.getTimeAgo(new Date(article.publishedAt))}</p>
                     </div>
                 `).join('');
                 
@@ -736,7 +735,7 @@ class NewsFixes {
                         <span class="text-xs text-white/50">${article.source}</span>
                         <span class="text-xs text-white/50">•</span>
                         <span class="text-xs text-white/50">${this.getTimeAgo(new Date(article.publishedAt))}</span>
-                        <span class="text-xs px-2 py-1 bg-green-600/20 text-green-400 rounded-full">UPSC: ${article.upscRelevance}%</span>
+
                     </div>
                     <button onclick="this.closest('.fixed').remove()" class="text-white/50 hover:text-white">
                         <i data-lucide="x" class="w-5 h-5"></i>

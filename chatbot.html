@@ -18,6 +18,7 @@
     <script src="js/ai-config.js"></script>
     <script src="js/conversation-fix.js"></script>
     <script src="js/conversation-manager-fix.js"></script>
+    <script src="js/comprehensive-ui-fixes.js"></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1551,11 +1552,24 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
                                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                                     .replace(/\*(.*?)\*/g, '<em>$1</em>')
                                     .replace(/\n/g, '<br>');
+                                
+                                // Add save buttons for AI responses
+                                const saveButtons = `
+                                    <div class="flex flex-wrap gap-2 mt-3">
+                                        <button class="save-btn px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs hover:bg-blue-500/30 transition-colors" data-type="note">
+                                            📄 Save to Notes
+                                        </button>
+                                        <button class="copy-btn px-3 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs hover:bg-gray-500/30 transition-colors">
+                                            📋 Copy Response
+                                        </button>
+                                    </div>
+                                `;
                                     
                                 messageDiv.innerHTML = `
                                     <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
                                     <div class="text-sm text-white/90 leading-6">
                                         <div class="prose prose-invert max-w-none text-sm leading-relaxed">${cleanContent}</div>
+                                        ${saveButtons}
                                     </div>
                                 `;
                             }
@@ -1566,10 +1580,21 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
                         // Fallback to lastMessage if messages array not available
                         const aiResponse = document.createElement('div');
                         aiResponse.className = 'flex items-start gap-3 mt-4';
+                        const saveButtons = `
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <button class="save-btn px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs hover:bg-blue-500/30 transition-colors" data-type="note">
+                                    📄 Save to Notes
+                                </button>
+                                <button class="copy-btn px-3 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs hover:bg-gray-500/30 transition-colors">
+                                    📋 Copy Response
+                                </button>
+                            </div>
+                        `;
                         aiResponse.innerHTML = `
                             <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">🤖</div>
                             <div class="text-sm text-white/90 leading-6">
                                 <div class="prose prose-invert max-w-none text-sm leading-relaxed">${conversation.lastMessage.substring(0, 300)}${conversation.lastMessage.length > 300 ? '...' : ''}</div>
+                                ${saveButtons}
                             </div>
                         `;
                         feed.appendChild(aiResponse);
