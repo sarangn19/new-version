@@ -52,9 +52,9 @@ class AIServiceManager {
                 responseFormat: "flashcard_format"
             },
             answer_evaluation: {
-                systemPrompt: "You are an expert answer evaluator for UPSC Mains preparation. Provide detailed evaluation with scoring, feedback, and improvement suggestions.",
+                systemPrompt: "You are an expert answer evaluator for UPSC Mains preparation. When provided with an answer image, analyze the handwritten content and provide detailed evaluation with scoring (out of 10), specific feedback on content quality, structure, presentation, and actionable improvement suggestions. If no image is provided, ask the user to upload their answer image or provide the text content.",
                 temperature: 0.3,
-                maxOutputTokens: 2000,
+                maxOutputTokens: 4096,
                 responseFormat: "evaluation_format"
             },
             essay: {
@@ -125,6 +125,11 @@ class AIServiceManager {
                 maxOutputTokens: modeConfig.maxOutputTokens,
                 ...options.apiOptions
             };
+
+            // Add image if provided
+            if (options.image) {
+                apiOptions.image = options.image;
+            }
             
             // Check cache first if enabled
             let apiResponse, processingTime, fromCache = false;

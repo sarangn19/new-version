@@ -83,7 +83,17 @@
         }
     </script>
     <script src="js/profile-manager.js"></script>
+    <script src="js/folder-based-storage.js"></script>
+    <script src="js/ai-response-cache.js"></script>
+    <script src="js/background-processor.js"></script>
+    <script src="js/gemini-api-client.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <script src="js/ai-daily-challenge.js"></script>
+    <script src="js/real-time-data-manager.js"></script>
+
     <script src="js/dashboard-fixes.js"></script>
+    <script src="js/daily-challenge-immediate-fix.js"></script>
+    <script src="js/daily-challenge-fix.js"></script>
     <link href="styles/glassmorphism.css" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Montserrat:wght@400&family=Roboto:wght@300&display=swap"
@@ -527,8 +537,8 @@
             }
         ];
 
-        // Daily Challenge Data - will be generated based on user progress
-        const dailyChallenge = {
+        // Daily Challenge Data - will be loaded from AI generator or fallback
+        let dailyChallenge = {
             mcqs: [
                 {
                     question: "Which Article of the Indian Constitution deals with the Right to Equality?",
@@ -553,6 +563,32 @@
             currentMCQ: 0,
             currentFlashcard: 0
         };
+
+        // Load AI-generated daily challenge if available
+        function loadAIDailyChallenge() {
+            try {
+                const aiChallenge = localStorage.getItem('dailyChallenge');
+                if (aiChallenge) {
+                    const challenge = JSON.parse(aiChallenge);
+                    console.log('🎯 Loading AI daily challenge:', challenge);
+                    
+                    // Convert AI format to dashboard format
+                    if (challenge.questions && Array.isArray(challenge.questions)) {
+                        dailyChallenge.mcqs = challenge.questions.map(q => ({
+                            question: q.question,
+                            options: q.options,
+                            answerIndex: q.correct,
+                            explanation: q.explanation
+                        }));
+                        dailyChallenge.title = challenge.title;
+                        dailyChallenge.subject = challenge.subject;
+                        console.log('✅ AI challenge loaded successfully');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading AI challenge:', error);
+            }
+        }
 
         // --- GLOBAL STATE ---
         const skeletonCount = 4;
@@ -841,7 +877,7 @@
                 }
 
                 return `
-                    <button role="radio" tabindex="0" aria-checked="${ariaChecked}" class="${classes}" onclick="selectQuizOption(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); selectQuizOption(${index}); }">
+                    <button role="radio" tabindex="0" aria-checked="${ariaChecked}" class="${classes}" onclick="selectQuizOptionFixed(${index})" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); selectQuizOptionFixed(${index}); }">
                         <span class="text-sm">${String.fromCharCode(65 + index)}. ${option}</span>
                     </button>
                 `;
@@ -875,19 +911,34 @@
         }
 
         function selectQuizOption(index) {
-            if (quizAttempted) return;
+            console.log('🎯 Option selected:', index);
+            if (quizAttempted) {
+                console.log('⚠️ Quiz already attempted, ignoring selection');
+                return;
+            }
             selectedOptionIndex = index;
+            console.log('✅ Selected option index set to:', selectedOptionIndex);
             renderQuiz();
         }
 
+        // Make functions globally accessible
+        window.selectQuizOption = selectQuizOption;
+        window.checkQuizAnswer = checkQuizAnswer;
+        window.nextQuestion = nextQuestion;
+        window.resetQuiz = resetQuiz;
+
         function checkQuizAnswer() {
-            if (selectedOptionIndex === null) {
+            console.log('🔍 Checking answer. Selected option:', selectedOptionIndex);
+            if (selectedOptionIndex === null || selectedOptionIndex === undefined) {
+                console.log('❌ No option selected');
                 showToast("Please select an option first!", 'error');
                 return;
             }
 
             quizAttempted = true;
-            quizCorrect = selectedOptionIndex === dailyChallenge.mcqs[dailyChallenge.currentMCQ].answerIndex;
+            const currentQuestion = dailyChallenge.mcqs[dailyChallenge.currentMCQ];
+            quizCorrect = selectedOptionIndex === currentQuestion.answerIndex;
+            console.log('🎯 Correct answer index:', currentQuestion.answerIndex, 'Selected:', selectedOptionIndex, 'Correct:', quizCorrect);
 
             if (quizCorrect) {
                 showToast("You nailed the daily challenge!", 'success');
@@ -1058,6 +1109,9 @@
                 userInitialsEl.textContent = profileManager.generateInitials(profileManager.profileData.name);
             }
 
+            // Load AI-generated daily challenge
+            loadAIDailyChallenge();
+            
             // Initial Render Calls
             renderContent(); // Show skeletons initially
             renderFilterChips();
@@ -1655,15 +1709,15 @@
                             <!-- Feedback rendered by JS -->
                         </div>
                         <div id="quiz-actions" class="pt-3">
-                            <button id="check-answer-btn" onclick="checkQuizAnswer()"
+                            <button id="check-answer-btn" onclick="checkQuizAnswerFixed()"
                                 class="btn-primary-gradient btn-unified w-full px-4 py-1.5 text-white font-medium text-sm">
                                 Check Answer
                             </button>
-                            <button id="next-question-btn" onclick="nextQuestion()"
+                            <button id="next-question-btn" onclick="nextQuestionFixed()"
                                 class="btn-primary-gradient btn-unified w-full px-4 py-1.5 text-white font-medium text-sm hidden mt-2">
                                 Next Question
                             </button>
-                            <button id="retry-quiz-btn" onclick="resetQuiz()"
+                            <button id="retry-quiz-btn" onclick="resetQuizFixed()"
                                 class="btn-secondary-subtle btn-unified w-full px-4 py-1.5 text-white font-medium text-sm hidden mt-2">
                                 Restart Challenge
                             </button>
@@ -1740,6 +1794,8 @@
                             </div>
                         </div>
                     </div>
+
+
 
                 </div>
             </div>

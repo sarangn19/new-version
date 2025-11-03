@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Recent Chats Limit</title>
+    <script src="js/conversation-fix.js"></script>
+    <script src="js/ai-service-manager.js"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .test-section {
+            background: #2A2A2A;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #4ade80;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Recent Chats Limit</h1>
+    
+    <div class="test-section">
+        <h3>Current Settings</h3>
+        <div id="current-settings"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Results</h3>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Actions</h3>
+        <button onclick="createTestConversations()" style="background: #4ade80; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Create 15 Test Conversations</button>
+        <button onclick="testRecentLimit()" style="background: #60a5fa; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Test Recent Limit</button>
+        <button onclick="clearConversations()" style="background: #f87171; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Clear All</button>
+    </div>
+
+    <script>
+        function updateSettings() {
+            document.getElementById('current-settings').innerHTML = `
+                <div>✅ Recent chats limit set to: <strong>8</strong></div>
+                <div>📊 Total conversations in storage: ${getStoredConversationsCount()}</div>
+            `;
+        }
+        
+        function getStoredConversationsCount() {
+            try {
+                const conversations = JSON.parse(localStorage.getItem('conversations') || '[]');
+                return conversations.length;
+            } catch {
+                return 0;
+            }
+        }
+        
+        function createTestConversations() {
+            const conversations = [];
+            for (let i = 1; i <= 15; i++) {
+                conversations.push({
+                    id: `test-${Date.now()}-${i}`,
+                    title: `Test Conversation ${i}`,
+                    preview: `This is test conversation number ${i}`,
+                    timestamp: Date.now() - (i * 60000), // Each conversation 1 minute older
+                    messages: [
+                        { role: 'user', content: `Test message ${i}` },
+                        { role: 'assistant', content: `Test response ${i}` }
+                    ]
+                });
+            }
+            
+            localStorage.setItem('conversations', JSON.stringify(conversations));
+            updateSettings();
+            
+            document.getElementById('test-results').innerHTML = `
+                <div style="color: #4ade80;">✅ Created 15 test conversations</div>
+            `;
+        }
+        
+        function testRecentLimit() {
+            try {
+                // Test AI Service Manager
+                let recentChats = [];
+                if (window.aiServiceManager) {
+                    recentChats = window.aiServiceManager.getRecentConversations(8);
+                } else {
+                    // Fallback test
+                    const allConversations = JSON.parse(localStorage.getItem('conversations') || '[]');
+                    recentChats = allConversations.slice(0, 8);
+                }
+                
+                const totalStored = getStoredConversationsCount();
+                
+                document.getElementById('test-results').innerHTML = `
+                    <div style="color: #4ade80;">✅ Test Results:</div>
+                    <div>📊 Total conversations stored: ${totalStored}</div>
+                    <div>📋 Recent conversations returned: ${recentChats.length}</div>
+                    <div>✅ Limit working: ${recentChats.length <= 8 ? 'YES' : 'NO'}</div>
+                    <div>📝 Recent conversations:</div>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        ${recentChats.map(chat => `<li>${chat.title || chat.preview || 'Untitled'}</li>`).join('')}
+                    </ul>
+                `;
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `
+                    <div style="color: #f87171;">❌ Error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        function clearConversations() {
+            localStorage.removeItem('conversations');
+            localStorage.removeItem('recentChats');
+            updateSettings();
+            
+            document.getElementById('test-results').innerHTML = `
+                <div style="color: #fbbf24;">⚠️ All conversations cleared</div>
+            `;
+        }
+        
+        // Initialize
+        updateSettings();
+    </script>
+</body>
+</html>

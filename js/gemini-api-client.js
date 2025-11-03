@@ -6,7 +6,7 @@ class GeminiAPIClient {
     constructor(apiKey, config = {}) {
         this.apiKey = apiKey;
         this.baseURL = 'https://generativelanguage.googleapis.com/v1beta/models';
-        this.model = config.model || 'gemini-2.5-flash-preview-05-20';
+        this.model = config.model || 'gemini-1.5-flash';
         this.maxRetries = config.maxRetries || 3;
         this.retryDelay = config.retryDelay || 1000;
         this.timeout = config.timeout || 30000;
@@ -55,11 +55,34 @@ class GeminiAPIClient {
      * @returns {Object} Formatted request payload
      */
     formatRequest(prompt, options = {}) {
+        const parts = [{
+            text: prompt
+        }];
+
+        // Add image if provided
+        if (options.image) {
+            try {
+                // Convert base64 image to the format Gemini expects
+                const imageData = options.image.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+                const mimeType = options.image.split(';')[0].split(':')[1]; // Extract mime type
+                
+                console.log('📸 Adding image to request:', { mimeType, dataLength: imageData.length });
+                
+                parts.push({
+                    inline_data: {
+                        mime_type: mimeType,
+                        data: imageData
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Error processing image for API:', error);
+                // Continue without image if there's an error
+            }
+        }
+
         return {
             contents: [{
-                parts: [{
-                    text: prompt
-                }]
+                parts: parts
             }],
             generationConfig: {
                 temperature: options.temperature || 0.7,

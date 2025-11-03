@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="js/profile-manager.js"></script>
+    <script src="js/folder-based-storage.js"></script>
     <script src="js/ai-response-cache.js"></script>
     <script src="js/background-processor.js"></script>
     <script src="js/gemini-api-client.js"></script>
@@ -349,22 +350,13 @@
                             <span id="quantity-label" class="text-white/60 text-xs">questions</span>
                         </div>
 
-                        <!-- Image Upload for Answer Evaluation -->
-                        <div id="image-upload-area"
-                            class="hidden mt-3 p-4 border-2 border-dashed border-gray-600 rounded-lg text-center">
-                            <div class="flex flex-col items-center gap-2">
-                                <i data-lucide="image" class="w-8 h-8 text-gray-400"></i>
-                                <p class="text-sm text-gray-400">Upload your answer image for evaluation</p>
-                                <input type="file" id="answer-image-input" accept="image/*" class="hidden">
-                                <button type="button" id="upload-answer-btn"
-                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm">
-                                    Choose Image
-                                </button>
-                                <div id="uploaded-image-preview" class="hidden mt-2">
-                                    <img id="preview-img" class="max-w-xs max-h-32 rounded border">
-                                    <p class="text-xs text-green-400 mt-1">Image uploaded successfully</p>
-                                </div>
-                            </div>
+                        <!-- Compact Image Upload Button -->
+                        <div id="image-upload-area" class="hidden mt-2">
+                            <button type="button" id="upload-answer-btn"
+                                class="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-sm text-blue-300 transition-all">
+                                <i data-lucide="image" class="w-4 h-4"></i>
+                                <span id="upload-status">Upload Answer Image</span>
+                            </button>
                         </div>
 
                         <!-- Attach menu -->
@@ -382,6 +374,61 @@
 
             </div>
         </main>
+
+        <!-- Image Upload Popup Modal -->
+        <div id="image-upload-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-[var(--bg-dark-2)] rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-medium text-white">Upload Answer Image</h3>
+                    <button id="close-upload-modal" class="text-white/50 hover:text-white transition">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- Drop Zone -->
+                    <div id="drop-zone" class="border-2 border-dashed border-gray-600 hover:border-blue-500 rounded-lg p-8 text-center transition-colors cursor-pointer">
+                        <div class="flex flex-col items-center gap-3">
+                            <i data-lucide="upload" class="w-12 h-12 text-gray-400"></i>
+                            <div>
+                                <p class="text-white font-medium">Drop your image here</p>
+                                <p class="text-gray-400 text-sm">or click to browse</p>
+                            </div>
+                            <p class="text-xs text-gray-500">Supports: JPG, PNG, GIF (Max: 10MB)</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden File Input -->
+                    <input type="file" id="answer-image-input" accept="image/*" class="hidden">
+                    
+                    <!-- Image Preview -->
+                    <div id="uploaded-image-preview" class="hidden">
+                        <div class="bg-gray-800 rounded-lg p-4">
+                            <img id="preview-img" class="max-w-full max-h-48 mx-auto rounded border">
+                            <div class="flex items-center justify-between mt-3">
+                                <p class="text-xs text-green-400 flex items-center gap-1">
+                                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                    Image uploaded successfully
+                                </p>
+                                <button id="remove-image" class="text-red-400 hover:text-red-300 text-xs">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex items-center justify-end gap-3 pt-4">
+                        <button id="cancel-upload" class="px-4 py-2 text-white/70 hover:text-white transition">
+                            Cancel
+                        </button>
+                        <button id="confirm-upload" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Use Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- RIGHT SIDEBAR (New Chat + Recent) -->
         <aside class="hidden xl:flex flex-col w-[320px] bg-[var(--bg-dark-2)] border-l border-white/10 p-6 gap-6">
@@ -565,26 +612,113 @@
             });
 
             // Image upload functionality for answer evaluation
+            // Image Upload Modal Elements
             const uploadAnswerBtn = document.getElementById('upload-answer-btn');
+            const imageUploadModal = document.getElementById('image-upload-modal');
+            const closeUploadModal = document.getElementById('close-upload-modal');
+            const dropZone = document.getElementById('drop-zone');
             const answerImageInput = document.getElementById('answer-image-input');
             const uploadedImagePreview = document.getElementById('uploaded-image-preview');
             const previewImg = document.getElementById('preview-img');
+            const confirmUpload = document.getElementById('confirm-upload');
+            const cancelUpload = document.getElementById('cancel-upload');
+            const removeImage = document.getElementById('remove-image');
+            const uploadStatus = document.getElementById('upload-status');
             let uploadedAnswerImage = null;
 
+            // Open upload modal
             uploadAnswerBtn?.addEventListener('click', () => {
+                imageUploadModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            });
+
+            // Close modal functions
+            function closeModal() {
+                imageUploadModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            closeUploadModal?.addEventListener('click', closeModal);
+            cancelUpload?.addEventListener('click', closeModal);
+
+            // Close on backdrop click
+            imageUploadModal?.addEventListener('click', (e) => {
+                if (e.target === imageUploadModal) {
+                    closeModal();
+                }
+            });
+
+            // Drop zone click to open file picker
+            dropZone?.addEventListener('click', () => {
                 answerImageInput.click();
             });
 
+            // Drag and drop functionality
+            dropZone?.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-blue-500', 'bg-blue-500/5');
+            });
+
+            dropZone?.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'bg-blue-500/5');
+            });
+
+            dropZone?.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-blue-500', 'bg-blue-500/5');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleImageFile(files[0]);
+                }
+            });
+
+            // File input change
             answerImageInput?.addEventListener('change', (e) => {
                 const file = e.target.files[0];
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        previewImg.src = e.target.result;
-                        uploadedImagePreview.classList.remove('hidden');
-                        uploadedAnswerImage = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
+                if (file) {
+                    handleImageFile(file);
+                }
+            });
+
+            // Handle image file
+            function handleImageFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file (JPG, PNG, GIF)');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    alert('File size must be less than 10MB');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    uploadedImagePreview.classList.remove('hidden');
+                    confirmUpload.disabled = false;
+                    uploadedAnswerImage = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Remove image
+            removeImage?.addEventListener('click', () => {
+                uploadedImagePreview.classList.add('hidden');
+                confirmUpload.disabled = true;
+                uploadedAnswerImage = null;
+                answerImageInput.value = '';
+            });
+
+            // Confirm upload
+            confirmUpload?.addEventListener('click', () => {
+                if (uploadedAnswerImage) {
+                    uploadStatus.textContent = 'Image Ready ✓';
+                    uploadAnswerBtn.classList.remove('bg-blue-600/20', 'border-blue-500/30', 'text-blue-300');
+                    uploadAnswerBtn.classList.add('bg-green-600/20', 'border-green-500/30', 'text-green-300');
+                    closeModal();
                 }
             });
 
@@ -696,14 +830,24 @@
                         }
                     }
 
-                    // Get AI response
-                    const response = await window.aiServiceManager.sendMessage(text, {
+                    // Prepare request options
+                    const requestOptions = {
                         conversationId: currentConversationId,
                         context: {
                             selectedMode: selectedMode,
                             timestamp: new Date().toISOString()
                         }
-                    });
+                    };
+
+                    // Include uploaded image if available (for Answer Evaluation mode)
+                    if (uploadedAnswerImage && selectedMode === 'answer_evaluation') {
+                        requestOptions.image = uploadedAnswerImage;
+                        requestOptions.context.hasImage = true;
+                        console.log('📸 Including uploaded image in AI request');
+                    }
+
+                    // Get AI response
+                    const response = await window.aiServiceManager.sendMessage(text, requestOptions);
 
                     // Store conversation ID for continuity and save to Firebase
                     if (response.conversationId && !currentConversationId) {
@@ -759,6 +903,11 @@
                     saveButtons += `<button class="copy-btn px-3 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs hover:bg-gray-500/30 transition-colors">
                         📋 Copy Response
                     </button>`;
+
+                    // Debug: Log the raw response content
+                    console.log('🐛 Raw response content:', response.content);
+                    console.log('🐛 Response length:', response.content.length);
+                    console.log('🐛 Response ends with:', response.content.slice(-50));
 
                     // Clean up response content - remove markdown symbols and format properly
                     const cleanContent = response.content
@@ -825,6 +974,17 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
                     submitBtn.innerHTML = originalSubmitHTML;
                     if (typeof lucide !== 'undefined') {
                         lucide.createIcons(submitBtn);
+                    }
+
+                    // Reset uploaded image after processing
+                    if (uploadedAnswerImage && selectedMode === 'answer_evaluation') {
+                        uploadedAnswerImage = null;
+                        uploadStatus.textContent = 'Upload Answer Image';
+                        uploadAnswerBtn.classList.remove('bg-green-600/20', 'border-green-500/30', 'text-green-300');
+                        uploadAnswerBtn.classList.add('bg-blue-600/20', 'border-blue-500/30', 'text-blue-300');
+                        uploadedImagePreview.classList.add('hidden');
+                        answerImageInput.value = '';
+                        console.log('🔄 Reset uploaded image after processing');
                     }
                 }
 
@@ -1155,7 +1315,7 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
                 // Try to get conversations from Firebase first
                 if (window.firebaseManager?.isReady()) {
                     try {
-                        recentChats = await window.firebaseManager.getConversations(15);
+                        recentChats = await window.firebaseManager.getConversations(8);
                         console.log('📥 Loaded conversations from Firebase:', recentChats.length);
                     } catch (firebaseError) {
                         console.warn('Firebase load failed, using localStorage:', firebaseError);
@@ -1164,7 +1324,7 @@ ${response.usage?.totalTokenCount ? ` • ${response.usage.totalTokenCount} toke
 
                 // Fallback to AI service manager if Firebase failed or no data
                 if (recentChats.length === 0 && window.aiServiceManager) {
-                    recentChats = window.aiServiceManager.getRecentConversations(15);
+                    recentChats = window.aiServiceManager.getRecentConversations(8);
                     console.log('📥 Loaded conversations from localStorage:', recentChats.length);
                 }
 

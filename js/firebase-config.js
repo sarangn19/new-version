@@ -231,7 +231,7 @@ class FirebaseManager {
     /**
      * Get user conversations
      */
-    async getConversations(limitCount = 20) {
+    async getConversations(limitCount = 8) {
         try {
             const userId = this.getCurrentUserId();
             const q = query(

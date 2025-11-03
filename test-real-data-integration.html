@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Real Data Integration</title>
+    <script src="js/folder-based-storage.js"></script>
+    <script src="js/real-time-data-manager.js"></script>
+    <script src="js/upsc-news-service-real.js"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .test-section {
+            background: #2A2A2A;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #4ade80;
+        }
+        .success { border-left-color: #4ade80; }
+        .error { border-left-color: #f87171; }
+        .warning { border-left-color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Real Data Integration Test</h1>
+    
+    <div class="test-section">
+        <h3>System Status</h3>
+        <div id="system-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Real-Time Statistics</h3>
+        <div id="stats-display"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>News Service Test</h3>
+        <div id="news-container"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Actions</h3>
+        <button onclick="testDataCreation()" style="background: #4ade80; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Create Test Data</button>
+        <button onclick="refreshStats()" style="background: #60a5fa; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Refresh Stats</button>
+        <button onclick="testNews()" style="background: #8b5cf6; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Test News</button>
+    </div>
+
+    <script>
+        function updateSystemStatus() {
+            const status = {
+                folderStorage: !!window.folderStorage,
+                realTimeDataManager: !!window.realTimeDataManager,
+                newsService: !!window.upscNewsServiceReal,
+                aiService: !!window.aiServiceManager
+            };
+            
+            document.getElementById('system-status').innerHTML = Object.entries(status)
+                .map(([key, value]) => `<div>${key}: ${value ? '✅' : '❌'}</div>`)
+                .join('');
+        }
+        
+        function refreshStats() {
+            if (window.realTimeDataManager) {
+                const stats = window.realTimeDataManager.getRealTimeStats();
+                document.getElementById('stats-display').innerHTML = `
+                    <div><strong>Content:</strong></div>
+                    <div>Notes: ${stats.content.notes}</div>
+                    <div>Flashcards: ${stats.content.flashcards}</div>
+                    <div>MCQs: ${stats.content.mcqs}</div>
+                    <div><strong>Activity:</strong></div>
+                    <div>Study Streak: ${stats.activity.streak} days</div>
+                    <div>Total Study Time: ${stats.activity.totalStudyTime} min</div>
+                    <div><strong>Performance:</strong></div>
+                    <div>Accuracy: ${stats.performance.accuracy}%</div>
+                    <div>Questions Answered: ${stats.performance.totalQuestions}</div>
+                `;
+            } else {
+                document.getElementById('stats-display').innerHTML = '❌ Real-time data manager not available';
+            }
+        }
+        
+        function testDataCreation() {
+            if (window.folderStorage) {
+                // Create test note
+                window.folderStorage.saveNote({
+                    title: 'Test Note ' + Date.now(),
+                    content: 'This is a test note for integration testing',
+                    subject: 'Testing'
+                });
+                
+                // Create test flashcard
+                window.folderStorage.saveFlashcard({
+                    front: 'Test Question?',
+                    back: 'Test Answer',
+                    category: 'Testing'
+                });
+                
+                // Create test MCQ
+                window.folderStorage.saveMCQ({
+                    question: 'What is this test for?',
+                    options: ['A', 'B', 'C', 'D'],
+                    correctAnswer: 'Integration testing',
+                    category: 'Testing'
+                });
+                
+                alert('✅ Test data created! Refresh stats to see changes.');
+            } else {
+                alert('❌ Folder storage not available');
+            }
+        }
+        
+        function testNews() {
+            if (window.upscNewsServiceReal) {
+                window.upscNewsServiceReal.displayFallbackNews();
+                alert('✅ News test completed! Check the news container above.');
+            } else {
+                alert('❌ News service not available');
+            }
+        }
+        
+        // Initialize
+        setTimeout(() => {
+            updateSystemStatus();
+            refreshStats();
+        }, 2000);
+        
+        // Listen for stats updates
+        window.addEventListener('statsUpdated', () => {
+            refreshStats();
+        });
+    </script>
+</body>
+</html>

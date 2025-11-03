@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Challenge Diagnostic Tool</title>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .diagnostic-section {
+            background: #2A2A2A;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #60a5fa;
+        }
+        .status-good { border-left-color: #10b981; }
+        .status-warning { border-left-color: #f59e0b; }
+        .status-error { border-left-color: #ef4444; }
+        .code-block {
+            background: #1A1A1A;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .test-btn {
+            background: #2C7A7B;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover {
+            background: #285e61;
+        }
+        .result {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .result.pass { background: #065f46; }
+        .result.fail { background: #7f1d1d; }
+        .result.warn { background: #78350f; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Daily Challenge Diagnostic Tool</h1>
+    <p>This tool helps identify issues with the daily challenge option selection functionality.</p>
+
+    <div class="diagnostic-section">
+        <h3>🔧 Environment Check</h3>
+        <div id="env-check">Running checks...</div>
+    </div>
+
+    <div class="diagnostic-section">
+        <h3>📋 Function Availability</h3>
+        <div id="function-check">Checking functions...</div>
+    </div>
+
+    <div class="diagnostic-section">
+        <h3>🎯 DOM Elements</h3>
+        <div id="dom-check">Checking DOM elements...</div>
+    </div>
+
+    <div class="diagnostic-section">
+        <h3>🧪 Interactive Tests</h3>
+        <button class="test-btn" onclick="testOriginalFunction()">Test Original selectQuizOption</button>
+        <button class="test-btn" onclick="testFixedFunction()">Test Fixed selectQuizOptionFixed</button>
+        <button class="test-btn" onclick="testVariableScope()">Test Variable Scope</button>
+        <button class="test-btn" onclick="simulateUserFlow()">Simulate User Flow</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="diagnostic-section">
+        <h3>📊 Current State</h3>
+        <div id="state-monitor">
+            <button class="test-btn" onclick="updateStateMonitor()">Refresh State</button>
+            <div id="state-display"></div>
+        </div>
+    </div>
+
+    <div class="diagnostic-section">
+        <h3>🐛 Issue Analysis</h3>
+        <div id="issue-analysis">Click "Run Full Diagnosis" to analyze issues.</div>
+        <button class="test-btn" onclick="runFullDiagnosis()">Run Full Diagnosis</button>
+    </div>
+
+    <script>
+        let diagnosticResults = [];
+
+        function addResult(test, status, message, details = '') {
+            diagnosticResults.push({ test, status, message, details, timestamp: Date.now() });
+            console.log(`[${status.toUpperCase()}] ${test}: ${message}`);
+        }
+
+        function displayResult(containerId, test, status, message, details = '') {
+            const container = document.getElementById(containerId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${status}`;
+            resultDiv.innerHTML = `
+                <strong>${test}:</strong> ${message}
+                ${details ? `<div class="code-block">${details}</div>` : ''}
+            `;
+            container.appendChild(resultDiv);
+        }
+
+        function checkEnvironment() {
+            const container = document.getElementById('env-check');
+            container.innerHTML = '';
+
+            // Check if we're in the right context
+            const isMainDashboard = window.location.pathname.includes('db.html');
+            displayResult('env-check', 'Page Context', isMainDashboard ? 'pass' : 'warn', 
+                isMainDashboard ? 'Running on main dashboard' : 'Not on main dashboard (db.html)');
+
+            // Check for jQuery or other dependencies
+            const hasJQuery = typeof $ !== 'undefined';
+            displayResult('env-check', 'jQuery', hasJQuery ? 'pass' : 'warn', 
+                hasJQuery ? 'jQuery available' : 'jQuery not detected');
+
+            // Check console for errors
+            displayResult('env-check', 'Console', 'pass', 'Check browser console for JavaScript errors');
+        }
+
+        function checkFunctions() {
+            const container = document.getElementById('function-check');
+            container.innerHTML = '';
+
+            const functions = [
+                'selectQuizOption',
+                'selectQuizOptionFixed', 
+                'checkQuizAnswer',
+                'checkQuizAnswerFixed',
+                'nextQuestion',
+                'nextQuestionFixed',
+                'resetQuiz',
+                'resetQuizFixed'
+            ];
+
+            functions.forEach(funcName => {
+                const exists = typeof window[funcName] === 'function';
+                displayResult('function-check', funcName, exists ? 'pass' : 'fail',
+                    exists ? 'Available' : 'Not found',
+                    exists ? `Type: ${typeof window[funcName]}` : 'Function not defined in global scope');
+            });
+
+            // Check for fix class
+            const fixExists = typeof window.dailyChallengeOptionFix !== 'undefined';
+            displayResult('function-check', 'DailyChallengeOptionFix', fixExists ? 'pass' : 'fail',
+                fixExists ? 'Fix class loaded' : 'Fix class not found');
+        }
+
+        function checkDOM() {
+            const container = document.getElementById('dom-check');
+            container.innerHTML = '';
+
+            const elements = [
+                'quiz-options',
+                'daily-quiz-question',
+                'check-answer-btn',
+                'next-question-btn',
+                'retry-quiz-btn',
+                'quiz-feedback'
+            ];
+
+            elements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                displayResult('dom-check', elementId, element ? 'pass' : 'fail',
+                    element ? 'Found' : 'Not found',
+                    element ? `Tag: ${element.tagName}, Classes: ${element.className}` : 'Element missing from DOM');
+            });
+        }
+
+        function testOriginalFunction() {
+            const container = document.getElementById('test-results');
+            
+            if (typeof window.selectQuizOption === 'function') {
+                try {
+                    // Mock the function call
+                    console.log('Testing original selectQuizOption...');
+                    
+                    // Check if selectedOptionIndex exists in global scope
+                    const hasGlobalVar = 'selectedOptionIndex' in window;
+                    displayResult('test-results', 'Original Function Test', hasGlobalVar ? 'warn' : 'fail',
+                        hasGlobalVar ? 'Global variable exists but may have scope issues' : 'Global selectedOptionIndex not found');
+                        
+                } catch (error) {
+                    displayResult('test-results', 'Original Function Test', 'fail', 
+                        `Error: ${error.message}`);
+                }
+            } else {
+                displayResult('test-results', 'Original Function Test', 'fail', 
+                    'selectQuizOption function not found');
+            }
+        }
+
+        function testFixedFunction() {
+            const container = document.getElementById('test-results');
+            
+            if (typeof window.selectQuizOptionFixed === 'function') {
+                try {
+                    // Test the fixed function
+                    console.log('Testing fixed selectQuizOptionFixed...');
+                    
+                    // Check if fix instance exists
+                    if (window.dailyChallengeOptionFix) {
+                        const state = window.dailyChallengeOptionFix.getState();
+                        displayResult('test-results', 'Fixed Function Test', 'pass',
+                            'Fixed function available and fix instance exists',
+                            `Current state: ${JSON.stringify(state, null, 2)}`);
+                    } else {
+                        displayResult('test-results', 'Fixed Function Test', 'warn',
+                            'Fixed function exists but fix instance not found');
+                    }
+                } catch (error) {
+                    displayResult('test-results', 'Fixed Function Test', 'fail',
+                        `Error: ${error.message}`);
+                }
+            } else {
+                displayResult('test-results', 'Fixed Function Test', 'fail',
+                    'selectQuizOptionFixed function not found');
+            }
+        }
+
+        function testVariableScope() {
+            const container = document.getElementById('test-results');
+            
+            // Check various scopes for selectedOptionIndex
+            const scopes = {
+                'window.selectedOptionIndex': window.selectedOptionIndex,
+                'Global selectedOptionIndex': typeof selectedOptionIndex !== 'undefined' ? selectedOptionIndex : 'undefined',
+                'Fix instance state': window.dailyChallengeOptionFix ? window.dailyChallengeOptionFix.getState().selectedOptionIndex : 'no fix instance'
+            };
+
+            Object.entries(scopes).forEach(([scope, value]) => {
+                displayResult('test-results', `Variable Scope: ${scope}`, 
+                    value !== undefined && value !== 'undefined' ? 'pass' : 'fail',
+                    `Value: ${value}`,
+                    `Type: ${typeof value}`);
+            });
+        }
+
+        function simulateUserFlow() {
+            const container = document.getElementById('test-results');
+            
+            displayResult('test-results', 'User Flow Simulation', 'pass', 'Starting simulation...');
+            
+            // Step 1: Check if quiz is ready
+            const quizReady = document.getElementById('quiz-options') && window.dailyChallenge;
+            displayResult('test-results', 'Step 1: Quiz Ready', quizReady ? 'pass' : 'fail',
+                quizReady ? 'Quiz container and data available' : 'Quiz not ready');
+            
+            if (!quizReady) return;
+            
+            // Step 2: Try to select an option
+            setTimeout(() => {
+                if (window.selectQuizOptionFixed) {
+                    try {
+                        window.selectQuizOptionFixed(1);
+                        displayResult('test-results', 'Step 2: Option Selection', 'pass', 'Option selected via fixed function');
+                        
+                        // Step 3: Check if selection is visible
+                        setTimeout(() => {
+                            const selectedButton = document.querySelector('#quiz-options button:nth-child(2)');
+                            const hasSelection = selectedButton && selectedButton.classList.contains('border-teal-primary');
+                            displayResult('test-results', 'Step 3: Visual Feedback', hasSelection ? 'pass' : 'fail',
+                                hasSelection ? 'Selection styling applied' : 'No visual feedback');
+                        }, 100);
+                        
+                    } catch (error) {
+                        displayResult('test-results', 'Step 2: Option Selection', 'fail', `Error: ${error.message}`);
+                    }
+                } else {
+                    displayResult('test-results', 'Step 2: Option Selection', 'fail', 'Fixed function not available');
+                }
+            }, 500);
+        }
+
+        function updateStateMonitor() {
+            const container = document.getElementById('state-display');
+            
+            const state = {
+                'Current URL': window.location.href,
+                'Daily Challenge Data': window.dailyChallenge ? 'Available' : 'Not found',
+                'Fix Instance': window.dailyChallengeOptionFix ? 'Loaded' : 'Not loaded',
+                'Quiz Options Container': document.getElementById('quiz-options') ? 'Present' : 'Missing',
+                'Global selectedOptionIndex': window.selectedOptionIndex,
+                'Fix State': window.dailyChallengeOptionFix ? JSON.stringify(window.dailyChallengeOptionFix.getState()) : 'N/A'
+            };
+
+            container.innerHTML = `<div class="code-block">${JSON.stringify(state, null, 2)}</div>`;
+        }
+
+        function runFullDiagnosis() {
+            const container = document.getElementById('issue-analysis');
+            container.innerHTML = '<h4>🔍 Running comprehensive analysis...</h4>';
+            
+            // Clear previous results
+            diagnosticResults = [];
+            
+            // Run all checks
+            checkEnvironment();
+            checkFunctions();
+            checkDOM();
+            updateStateMonitor();
+            
+            // Analyze results
+            setTimeout(() => {
+                analyzeIssues();
+            }, 1000);
+        }
+
+        function analyzeIssues() {
+            const container = document.getElementById('issue-analysis');
+            
+            let analysis = '<h4>📋 Analysis Results:</h4>';
+            
+            // Check for common issues
+            const hasFixedFunctions = typeof window.selectQuizOptionFixed === 'function';
+            const hasOriginalFunctions = typeof window.selectQuizOption === 'function';
+            const hasQuizData = window.dailyChallenge !== undefined;
+            const hasQuizContainer = document.getElementById('quiz-options') !== null;
+            const hasFixInstance = window.dailyChallengeOptionFix !== undefined;
+            
+            if (!hasQuizContainer) {
+                analysis += '<div class="result fail">❌ <strong>Critical:</strong> Quiz container (#quiz-options) not found. Are you on the correct page?</div>';
+            }
+            
+            if (!hasQuizData) {
+                analysis += '<div class="result fail">❌ <strong>Critical:</strong> Daily challenge data not loaded. Check if AI daily challenge generator is working.</div>';
+            }
+            
+            if (!hasFixedFunctions && !hasOriginalFunctions) {
+                analysis += '<div class="result fail">❌ <strong>Critical:</strong> No quiz functions found. Scripts may not be loading properly.</div>';
+            } else if (!hasFixedFunctions && hasOriginalFunctions) {
+                analysis += '<div class="result warn">⚠️ <strong>Issue Found:</strong> Only original functions available. The fix script may not be loaded or initialized.</div>';
+            } else if (hasFixedFunctions && !hasFixInstance) {
+                analysis += '<div class="result warn">⚠️ <strong>Issue Found:</strong> Fixed functions exist but fix instance not created. Check initialization timing.</div>';
+            } else if (hasFixedFunctions && hasFixInstance) {
+                analysis += '<div class="result pass">✅ <strong>Good:</strong> Fix is properly loaded and initialized.</div>';
+            }
+            
+            // Recommendations
+            analysis += '<h4>💡 Recommendations:</h4>';
+            
+            if (!hasQuizContainer) {
+                analysis += '<div class="result warn">1. Navigate to the main dashboard (db.html) to test the daily challenge.</div>';
+            }
+            
+            if (!hasFixedFunctions) {
+                analysis += '<div class="result warn">2. Ensure js/daily-challenge-fix.js is included in the page and loading properly.</div>';
+            }
+            
+            if (!hasQuizData) {
+                analysis += '<div class="result warn">3. Check if the AI daily challenge generator is working and has generated today\'s challenge.</div>';
+            }
+            
+            analysis += '<div class="result pass">4. Use the fixed functions (selectQuizOptionFixed, etc.) instead of the original ones.</div>';
+            analysis += '<div class="result pass">5. Check the browser console for any JavaScript errors that might be preventing proper initialization.</div>';
+            
+            container.innerHTML = analysis;
+        }
+
+        // Initialize diagnostic
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔍 Daily Challenge Diagnostic Tool loaded');
+            
+            setTimeout(() => {
+                checkEnvironment();
+                checkFunctions();
+                checkDOM();
+                updateStateMonitor();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -18,11 +18,19 @@ class EnhancedNoteManager {
   }
 
   loadNotes() {
+    // Use folder-based storage if available, fallback to legacy
+    if (window.folderStorage) {
+      return window.folderStorage.getFromFolder('notes');
+    }
     return JSON.parse(localStorage.getItem('userNotes') || '[]');
   }
 
   saveNotes() {
+    // Save to both folder structure and legacy for compatibility
     localStorage.setItem('userNotes', JSON.stringify(this.notes));
+    if (window.folderStorage) {
+      window.folderStorage.saveToFolder('notes', this.notes);
+    }
   }
 
   loadAttachments() {
@@ -544,9 +552,14 @@ class EnhancedNoteManager {
       isArchived: false
     };
 
-    this.notes.unshift(note);
-    this.saveNotes();
-    return note;
+    // Use folder-based storage if available
+    if (window.folderStorage) {
+      return window.folderStorage.saveNote(note);
+    } else {
+      this.notes.unshift(note);
+      this.saveNotes();
+      return note;
+    }
   }
 
   updateNote(id, updates) {

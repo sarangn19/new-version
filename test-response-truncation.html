@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Response Truncation</title>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .test-section {
+            background: #2A2A2A;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #60a5fa;
+        }
+        .response-content {
+            background: #1A1A1A;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Test Response Truncation</h1>
+    
+    <div class="test-section">
+        <h3>Response Analysis</h3>
+        <div id="response-analysis"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Raw Response Content</h3>
+        <div id="raw-response" class="response-content"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Processed Response Content</h3>
+        <div id="processed-response" class="response-content"></div>
+    </div>
+
+    <script>
+        // Listen for console logs from the main chatbot
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            
+            // Capture response debugging logs
+            if (args[0] && args[0].includes('🐛 Raw response content:')) {
+                const responseContent = args[1];
+                document.getElementById('raw-response').textContent = responseContent;
+                
+                // Analyze the response
+                const analysis = {
+                    length: responseContent.length,
+                    endsWithPunctuation: /[.!?]$/.test(responseContent.trim()),
+                    lastWords: responseContent.trim().split(' ').slice(-10).join(' '),
+                    hasMarkdown: /\*\*|\*|#/.test(responseContent),
+                    lineBreaks: (responseContent.match(/\n/g) || []).length
+                };
+                
+                document.getElementById('response-analysis').innerHTML = `
+                    <div><strong>Length:</strong> ${analysis.length} characters</div>
+                    <div><strong>Ends with punctuation:</strong> ${analysis.endsWithPunctuation ? 'Yes' : 'No'}</div>
+                    <div><strong>Last 10 words:</strong> "${analysis.lastWords}"</div>
+                    <div><strong>Has markdown:</strong> ${analysis.hasMarkdown ? 'Yes' : 'No'}</div>
+                    <div><strong>Line breaks:</strong> ${analysis.lineBreaks}</div>
+                    <div><strong>Likely truncated:</strong> ${!analysis.endsWithPunctuation && analysis.length > 100 ? 'YES' : 'No'}</div>
+                `;
+                
+                // Process the response like the chatbot does
+                const cleanContent = responseContent
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/•/g, '•')
+                    .replace(/#{1,6}\s/g, '')
+                    .replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 rounded">$1</code>');
+                
+                document.getElementById('processed-response').innerHTML = cleanContent;
+            }
+        };
+        
+        // Instructions
+        document.getElementById('response-analysis').innerHTML = `
+            <div style="color: #fbbf24;">⚠️ Waiting for response data...</div>
+            <div style="font-size: 12px; margin-top: 10px;">
+                Open the chatbot in another tab and send a message.<br>
+                This page will automatically capture and analyze the response.
+            </div>
+        `;
+    </script>
+</body>
+</html>

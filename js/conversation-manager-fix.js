@@ -37,7 +37,7 @@ class ConversationManagerFix {
         // Try Firebase first
         if (window.firebaseManager?.isReady()) {
             try {
-                const firebaseConversations = await window.firebaseManager.getConversations(50);
+                const firebaseConversations = await window.firebaseManager.getConversations(8);
                 allConversations = allConversations.concat(firebaseConversations);
                 console.log('📥 Loaded from Firebase:', firebaseConversations.length);
             } catch (error) {
@@ -62,7 +62,7 @@ class ConversationManagerFix {
         // Load from AI service manager
         if (window.aiServiceManager) {
             try {
-                const aiConversations = window.aiServiceManager.getRecentConversations(50);
+                const aiConversations = window.aiServiceManager.getRecentConversations(8);
                 aiConversations.forEach(aiConv => {
                     if (!allConversations.find(conv => conv.id === aiConv.id)) {
                         allConversations.push(aiConv);
@@ -127,7 +127,7 @@ class ConversationManagerFix {
             return;
         }
 
-        const recentConversations = this.conversations.slice(0, 15);
+        const recentConversations = this.conversations.slice(0, 8);
         recentChatsList.innerHTML = recentConversations.map(chat => {
             const title = this.getConversationTitle(chat);
             const timeAgo = this.formatChatTime(chat.lastMessageAt || chat.updatedAt || chat.timestamp);

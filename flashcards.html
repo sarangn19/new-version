@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/folder-based-storage.js"></script>
+  <script src="js/real-time-data-manager.js"></script>
   <script src="js/study-tools.js"></script>
   <script src="js/performance-analyzer.js"></script>
   <script src="js/loading-state-manager.js"></script>
@@ -187,8 +189,77 @@
   </div>
 
   <script>
-    // Chapter-wise Flashcard Data
-    const FLASHCARD_CHAPTERS = [
+    // Load real Flashcard data from folder storage
+    let FLASHCARD_CHAPTERS = [];
+    
+    // Initialize with real data
+    function loadRealFlashcardData() {
+        if (window.realTimeDataManager) {
+            const realFlashcards = window.realTimeDataManager.getRealFlashcardData();
+            
+            // Group flashcards by subject/category
+            const groupedFlashcards = {};
+            realFlashcards.forEach(flashcard => {
+                const category = flashcard.category || flashcard.subject || 'General';
+                if (!groupedFlashcards[category]) {
+                    groupedFlashcards[category] = [];
+                }
+                groupedFlashcards[category].push(flashcard);
+            });
+            
+            // Convert to chapter format
+            FLASHCARD_CHAPTERS = Object.entries(groupedFlashcards).map(([category, flashcards]) => ({
+                id: category.toLowerCase().replace(/\s+/g, '-'),
+                name: category,
+                subject: category,
+                description: `Study flashcards for ${category}`,
+                totalCards: flashcards.length,
+                estimatedTime: Math.ceil(flashcards.length * 0.5) + ' mins',
+                topics: [...new Set(flashcards.flatMap(f => f.tags || []))].slice(0, 4),
+                icon: getSubjectIcon(category),
+                color: getSubjectColor(category)
+            }));
+            
+            // Add fallback chapters if no real data
+            if (FLASHCARD_CHAPTERS.length === 0) {
+                FLASHCARD_CHAPTERS = getFallbackFlashcardChapters();
+            }
+            
+            console.log('🃏 Loaded real flashcard data:', FLASHCARD_CHAPTERS.length, 'chapters');
+        } else {
+            FLASHCARD_CHAPTERS = getFallbackFlashcardChapters();
+        }
+    }
+    
+    // Get subject icon
+    function getSubjectIcon(subject) {
+        const icons = {
+            'Constitutional Law': 'book-open',
+            'Economics': 'trending-up',
+            'Geography': 'mountain',
+            'History': 'landmark',
+            'Current Affairs': 'newspaper',
+            'General': 'book'
+        };
+        return icons[subject] || 'book';
+    }
+    
+    // Get subject color
+    function getSubjectColor(subject) {
+        const colors = {
+            'Constitutional Law': 'blue',
+            'Economics': 'green',
+            'Geography': 'teal',
+            'History': 'orange',
+            'Current Affairs': 'purple',
+            'General': 'gray'
+        };
+        return colors[subject] || 'gray';
+    }
+    
+    // Fallback chapters if no real data
+    function getFallbackFlashcardChapters() {
+        return [
       {
         id: 'polity-basics',
         name: 'Constitutional Basics',
@@ -256,6 +327,13 @@
         color: 'red'
       }
     ];
+    }
+
+    // Listen for real data updates
+    window.addEventListener('realDataLoaded', (event) => {
+        loadRealFlashcardData();
+        renderChapters();
+    });
 
     // State
     let searchQuery = '';
@@ -500,7 +578,12 @@
     lucide.createIcons();
     initSearch();
     initSort();
-    renderChapters();
+    
+    // Load real data when available
+    setTimeout(() => {
+        loadRealFlashcardData();
+        renderChapters();
+    }, 1000);
   </script>
 </body>
 </html>

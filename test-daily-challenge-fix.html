@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Daily Challenge Fix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .test-section {
+            background: #2A2A2A;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #60a5fa;
+        }
+        .quiz-container {
+            background: #333333;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .option-btn {
+            background: #374151;
+            border: 2px solid #4B5563;
+            color: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .option-btn:hover {
+            background: #4B5563;
+        }
+        .option-btn.selected {
+            border-color: #2C7A7B;
+            background: #2C7A7B;
+            box-shadow: 0 0 0 2px #2C7A7B;
+        }
+        .option-btn.correct {
+            background: #065f46;
+            border-color: #10b981;
+        }
+        .option-btn.incorrect {
+            background: #7f1d1d;
+            border-color: #ef4444;
+        }
+        .control-btn {
+            background: #2C7A7B;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        .control-btn:hover {
+            background: #285e61;
+        }
+        .control-btn:disabled {
+            background: #6B7280;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .hidden {
+            display: none;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #10b981; }
+        .status-error { background: #ef4444; }
+        .status-warning { background: #f59e0b; }
+        .status-info { background: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-6 max-w-4xl">
+        <h1 class="text-3xl font-bold mb-6">🔧 Daily Challenge Option Selection Fix Test</h1>
+        
+        <div class="test-section">
+            <h3 class="text-xl font-semibold mb-4">Fix Status</h3>
+            <div id="fix-status" class="space-y-2">
+                <div><span class="status-indicator status-warning"></span>Loading fix...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3 class="text-xl font-semibold mb-4">Test Quiz</h3>
+            <div class="quiz-container">
+                <div id="question-counter" class="text-sm text-gray-400 mb-2">Question 1 of 3</div>
+                <p id="daily-quiz-question" class="text-lg font-medium mb-4">
+                    Which Article of the Indian Constitution deals with the Right to Equality?
+                </p>
+                
+                <div id="quiz-options" class="space-y-2 mb-4">
+                    <!-- Options will be rendered here -->
+                </div>
+                
+                <div class="flex gap-2 mb-4">
+                    <button id="check-answer-btn" class="control-btn" onclick="checkQuizAnswerFixed()" disabled>
+                        Check Answer
+                    </button>
+                    <button id="next-question-btn" class="control-btn hidden" onclick="nextQuestionFixed()">
+                        Next Question
+                    </button>
+                    <button id="retry-quiz-btn" class="control-btn hidden" onclick="resetQuizFixed()">
+                        Retry Quiz
+                    </button>
+                </div>
+                
+                <div id="quiz-feedback" class="hidden">
+                    <!-- Feedback will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3 class="text-xl font-semibold mb-4">Debug Information</h3>
+            <div id="debug-info" class="bg-black p-4 rounded font-mono text-sm">
+                <div>Waiting for fix to initialize...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3 class="text-xl font-semibold mb-4">Test Controls</h3>
+            <div class="flex gap-2 flex-wrap">
+                <button onclick="testOptionSelection()" class="control-btn">Test Option Selection</button>
+                <button onclick="testQuizFlow()" class="control-btn">Test Full Quiz Flow</button>
+                <button onclick="showDebugState()" class="control-btn">Show Debug State</button>
+                <button onclick="resetTest()" class="control-btn">Reset Test</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3 class="text-xl font-semibold mb-4">Event Log</h3>
+            <div id="event-log" class="bg-black p-4 rounded font-mono text-sm max-h-64 overflow-y-auto">
+                <!-- Event log will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Include the fix -->
+    <script src="js/daily-challenge-fix.js"></script>
+
+    <script>
+        // Test data
+        window.dailyChallenge = {
+            mcqs: [
+                {
+                    question: "Which Article of the Indian Constitution deals with the Right to Equality?",
+                    options: ["Article 14", "Article 15", "Article 16", "All of the above"],
+                    answerIndex: 3,
+                    explanation: "Articles 14, 15, and 16 all deal with different aspects of the Right to Equality."
+                },
+                {
+                    question: "Who is known as the Father of the Indian Constitution?",
+                    options: ["Mahatma Gandhi", "Dr. B.R. Ambedkar", "Jawaharlal Nehru", "Sardar Patel"],
+                    answerIndex: 1,
+                    explanation: "Dr. B.R. Ambedkar is known as the Father of the Indian Constitution for his role as the chairman of the drafting committee."
+                },
+                {
+                    question: "In which year was the Indian Constitution adopted?",
+                    options: ["1947", "1948", "1949", "1950"],
+                    answerIndex: 2,
+                    explanation: "The Indian Constitution was adopted on November 26, 1949, and came into effect on January 26, 1950."
+                }
+            ]
+        };
+
+        let eventLog = [];
+        let testStartTime = Date.now();
+
+        function logEvent(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const elapsed = ((Date.now() - testStartTime) / 1000).toFixed(1);
+            eventLog.push({ timestamp, elapsed, message, type });
+            updateEventLog();
+            console.log(`[${elapsed}s] ${message}`);
+        }
+
+        function updateEventLog() {
+            const logContainer = document.getElementById('event-log');
+            const recent = eventLog.slice(-20); // Show last 20 events
+            logContainer.innerHTML = recent.map(event => 
+                `<div class="text-${getLogColor(event.type)}-400">[${event.elapsed}s] ${event.message}</div>`
+            ).join('');
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function getLogColor(type) {
+            switch(type) {
+                case 'success': return 'green';
+                case 'error': return 'red';
+                case 'warning': return 'yellow';
+                default: return 'blue';
+            }
+        }
+
+        function updateFixStatus() {
+            const statusContainer = document.getElementById('fix-status');
+            const isFixLoaded = window.dailyChallengeOptionFix !== undefined;
+            const areFixedFunctionsAvailable = window.selectQuizOptionFixed !== undefined;
+            
+            statusContainer.innerHTML = `
+                <div><span class="status-indicator ${isFixLoaded ? 'status-success' : 'status-error'}"></span>Fix Class: ${isFixLoaded ? 'Loaded' : 'Not Loaded'}</div>
+                <div><span class="status-indicator ${areFixedFunctionsAvailable ? 'status-success' : 'status-error'}"></span>Fixed Functions: ${areFixedFunctionsAvailable ? 'Available' : 'Not Available'}</div>
+            `;
+        }
+
+        function showDebugState() {
+            const debugContainer = document.getElementById('debug-info');
+            
+            if (window.dailyChallengeOptionFix) {
+                const state = window.dailyChallengeOptionFix.getState();
+                debugContainer.innerHTML = `
+                    <div><strong>Fix State:</strong></div>
+                    <div>Selected Option: ${state.selectedOptionIndex}</div>
+                    <div>Quiz Attempted: ${state.quizAttempted}</div>
+                    <div>Quiz Correct: ${state.quizCorrect}</div>
+                    <div>Current MCQ: ${state.currentMCQ}</div>
+                    <div>Total Questions: ${window.dailyChallenge.mcqs.length}</div>
+                `;
+            } else {
+                debugContainer.innerHTML = '<div class="text-red-400">Fix not initialized</div>';
+            }
+        }
+
+        function testOptionSelection() {
+            logEvent('🧪 Testing option selection...', 'info');
+            
+            if (window.selectQuizOptionFixed) {
+                // Test selecting option 2
+                window.selectQuizOptionFixed(2);
+                logEvent('✅ Option 2 selected via fixed function', 'success');
+                
+                setTimeout(() => {
+                    const selectedButton = document.querySelector('#quiz-options button:nth-child(3)');
+                    if (selectedButton && selectedButton.classList.contains('border-teal-primary')) {
+                        logEvent('✅ Option styling applied correctly', 'success');
+                    } else {
+                        logEvent('❌ Option styling not applied', 'error');
+                    }
+                    showDebugState();
+                }, 100);
+            } else {
+                logEvent('❌ Fixed function not available', 'error');
+            }
+        }
+
+        function testQuizFlow() {
+            logEvent('🧪 Testing full quiz flow...', 'info');
+            
+            // Reset first
+            if (window.resetQuizFixed) {
+                window.resetQuizFixed();
+                logEvent('🔄 Quiz reset', 'info');
+            }
+            
+            setTimeout(() => {
+                // Select an option
+                if (window.selectQuizOptionFixed) {
+                    window.selectQuizOptionFixed(3); // Correct answer
+                    logEvent('✅ Selected correct option (D)', 'success');
+                    
+                    setTimeout(() => {
+                        // Check answer
+                        if (window.checkQuizAnswerFixed) {
+                            window.checkQuizAnswerFixed();
+                            logEvent('🔍 Answer checked', 'info');
+                            showDebugState();
+                        }
+                    }, 500);
+                }
+            }, 500);
+        }
+
+        function resetTest() {
+            logEvent('🔄 Resetting test...', 'info');
+            if (window.resetQuizFixed) {
+                window.resetQuizFixed();
+            }
+            eventLog = [];
+            testStartTime = Date.now();
+            updateEventLog();
+            showDebugState();
+        }
+
+        // Initialize test
+        function initializeTest() {
+            logEvent('🚀 Test initialized', 'info');
+            updateFixStatus();
+            
+            // Wait for fix to load
+            let checkCount = 0;
+            const checkInterval = setInterval(() => {
+                checkCount++;
+                if (window.dailyChallengeOptionFix) {
+                    clearInterval(checkInterval);
+                    logEvent('✅ Fix loaded successfully', 'success');
+                    updateFixStatus();
+                    
+                    // Initialize the quiz
+                    if (window.dailyChallengeOptionFix.renderQuiz) {
+                        window.dailyChallengeOptionFix.renderQuiz();
+                        logEvent('🎯 Quiz rendered with fix', 'success');
+                    }
+                    
+                    showDebugState();
+                } else if (checkCount > 10) {
+                    clearInterval(checkInterval);
+                    logEvent('❌ Fix failed to load after 5 seconds', 'error');
+                    updateFixStatus();
+                }
+            }, 500);
+        }
+
+        // Start test when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initializeTest, 1000);
+        });
+
+        // Update status periodically
+        setInterval(updateFixStatus, 2000);
+    </script>
+</body>
+</html>

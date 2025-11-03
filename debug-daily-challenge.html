@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Daily Challenge</title>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .debug-section {
+            background: #2A2A2A;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #60a5fa;
+        }
+        .option-btn {
+            background: #374151;
+            border: 2px solid #4B5563;
+            color: white;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .option-btn.selected {
+            border-color: #2C7A7B;
+            background: #2C7A7B;
+        }
+        .check-btn {
+            background: #2C7A7B;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .check-btn:disabled {
+            background: #6B7280;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Debug Daily Challenge</h1>
+    
+    <div class="debug-section">
+        <h3>Variable State</h3>
+        <div id="variable-state"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Test Quiz</h3>
+        <p><strong>Which Article of the Indian Constitution deals with the Right to Equality?</strong></p>
+        
+        <button class="option-btn" onclick="testSelectOption(0)" id="option-0">
+            A. Article 14
+        </button>
+        <button class="option-btn" onclick="testSelectOption(1)" id="option-1">
+            B. Article 15
+        </button>
+        <button class="option-btn" onclick="testSelectOption(2)" id="option-2">
+            C. Article 16
+        </button>
+        <button class="option-btn" onclick="testSelectOption(3)" id="option-3">
+            D. All of the above
+        </button>
+        
+        <button class="check-btn" onclick="testCheckAnswer()" id="check-btn">
+            Check Answer
+        </button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Event Log</h3>
+        <div id="event-log" style="max-height: 200px; overflow-y: auto; background: #1A1A1A; padding: 10px; border-radius: 5px;"></div>
+    </div>
+
+    <script>
+        let selectedOptionIndex = null;
+        let quizAttempted = false;
+        let eventLog = [];
+        
+        function logEvent(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.push(`[${timestamp}] ${message}`);
+            updateEventLog();
+            updateVariableState();
+        }
+        
+        function updateEventLog() {
+            document.getElementById('event-log').innerHTML = eventLog.slice(-10).join('<br>');
+        }
+        
+        function updateVariableState() {
+            document.getElementById('variable-state').innerHTML = `
+                <div><strong>selectedOptionIndex:</strong> ${selectedOptionIndex}</div>
+                <div><strong>quizAttempted:</strong> ${quizAttempted}</div>
+                <div><strong>Type of selectedOptionIndex:</strong> ${typeof selectedOptionIndex}</div>
+                <div><strong>Is null check:</strong> ${selectedOptionIndex === null}</div>
+                <div><strong>Is undefined check:</strong> ${selectedOptionIndex === undefined}</div>
+            `;
+        }
+        
+        function testSelectOption(index) {
+            logEvent(`🎯 Option ${index} clicked`);
+            
+            if (quizAttempted) {
+                logEvent('⚠️ Quiz already attempted, ignoring');
+                return;
+            }
+            
+            // Clear previous selection
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Select new option
+            selectedOptionIndex = index;
+            document.getElementById(`option-${index}`).classList.add('selected');
+            
+            logEvent(`✅ Selected option index set to: ${selectedOptionIndex}`);
+        }
+        
+        function testCheckAnswer() {
+            logEvent(`🔍 Check answer clicked. Selected: ${selectedOptionIndex}`);
+            
+            if (selectedOptionIndex === null || selectedOptionIndex === undefined) {
+                logEvent('❌ No option selected - showing error');
+                alert("Please select an option first!");
+                return;
+            }
+            
+            quizAttempted = true;
+            const correctAnswer = 3; // "All of the above"
+            const isCorrect = selectedOptionIndex === correctAnswer;
+            
+            logEvent(`🎯 Correct answer: ${correctAnswer}, Selected: ${selectedOptionIndex}, Result: ${isCorrect ? 'CORRECT' : 'INCORRECT'}`);
+            
+            alert(isCorrect ? '✅ Correct!' : '❌ Incorrect. The answer is D. All of the above');
+        }
+        
+        // Initialize
+        updateVariableState();
+        logEvent('🚀 Debug test initialized');
+    </script>
+</body>
+</html>

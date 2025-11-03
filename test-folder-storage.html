@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder-Based Storage Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/folder-based-storage.js"></script>
+    <style>
+        body {
+            background-color: #1F1F1F;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .test-section {
+            background: #2A2A2A;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .info { color: #60a5fa; }
+        .warning { color: #fbbf24; }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">📁 Folder-Based Storage Test</h1>
+        
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🧪 Test Results</h2>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">📊 Storage Statistics</h2>
+            <div id="storage-stats"></div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">🔧 Test Actions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="testNotesSaving()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                    Test Notes Saving
+                </button>
+                <button onclick="testFlashcardsSaving()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                    Test Flashcards Saving
+                </button>
+                <button onclick="testMCQsSaving()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                    Test MCQs Saving
+                </button>
+                <button onclick="testMigration()" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded">
+                    Test Migration
+                </button>
+                <button onclick="testSearch()" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded">
+                    Test Search
+                </button>
+                <button onclick="clearAllData()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+                    Clear All Data
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">📋 Folder Contents</h2>
+            <div id="folder-contents"></div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        function logResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push({ message, type, timestamp });
+            updateTestResults();
+        }
+
+        function updateTestResults() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = testResults.map(result => 
+                `<div class="${result.type} mb-2">
+                    <span class="opacity-60">[${result.timestamp}]</span> ${result.message}
+                </div>`
+            ).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateStats() {
+            if (!window.folderStorage) {
+                logResult('❌ Folder storage not initialized', 'error');
+                return;
+            }
+
+            const stats = window.folderStorage.getFolderStats();
+            document.getElementById('storage-stats').innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="bg-blue-600/20 p-4 rounded">
+                        <div class="text-2xl font-bold">${stats.notes}</div>
+                        <div class="text-sm opacity-70">Notes</div>
+                    </div>
+                    <div class="bg-green-600/20 p-4 rounded">
+                        <div class="text-2xl font-bold">${stats.flashcards}</div>
+                        <div class="text-sm opacity-70">Flashcards</div>
+                    </div>
+                    <div class="bg-purple-600/20 p-4 rounded">
+                        <div class="text-2xl font-bold">${stats.mcqs}</div>
+                        <div class="text-sm opacity-70">MCQs</div>
+                    </div>
+                    <div class="bg-yellow-600/20 p-4 rounded">
+                        <div class="text-2xl font-bold">${stats.bookmarks}</div>
+                        <div class="text-sm opacity-70">Bookmarks</div>
+                    </div>
+                    <div class="bg-gray-600/20 p-4 rounded">
+                        <div class="text-2xl font-bold">${stats.total}</div>
+                        <div class="text-sm opacity-70">Total</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateFolderContents() {
+            if (!window.folderStorage) return;
+
+            const folders = ['notes', 'flashcards', 'mcqs', 'bookmarks'];
+            const contents = folders.map(folder => {
+                const data = window.folderStorage.getFromFolder(folder);
+                return `
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold mb-2">📁 ${folder.charAt(0).toUpperCase() + folder.slice(1)} (${data.length})</h3>
+                        <div class="bg-gray-800 p-3 rounded max-h-40 overflow-y-auto">
+                            ${data.length > 0 ? 
+                                data.slice(0, 5).map(item => 
+                                    `<div class="text-sm mb-1">• ${item.title || item.question || item.front || 'Untitled'}</div>`
+                                ).join('') + 
+                                (data.length > 5 ? `<div class="text-xs opacity-60">... and ${data.length - 5} more</div>` : '')
+                                : '<div class="text-sm opacity-60">No items</div>'
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('folder-contents').innerHTML = contents;
+        }
+
+        function testNotesSaving() {
+            try {
+                const testNote = {
+                    title: 'Test Note ' + Date.now(),
+                    content: 'This is a test note created at ' + new Date().toLocaleString(),
+                    subject: 'Testing',
+                    tags: ['test', 'folder-storage']
+                };
+
+                const savedNote = window.folderStorage.saveNote(testNote);
+                logResult(`✅ Note saved successfully: ${savedNote.title}`, 'success');
+                
+                // Verify it's in the correct folder
+                const notesInFolder = window.folderStorage.getFromFolder('notes');
+                const foundNote = notesInFolder.find(n => n.id === savedNote.id);
+                
+                if (foundNote) {
+                    logResult(`✅ Note found in notes folder`, 'success');
+                } else {
+                    logResult(`❌ Note not found in notes folder`, 'error');
+                }
+                
+                updateStats();
+                updateFolderContents();
+            } catch (error) {
+                logResult(`❌ Error saving note: ${error.message}`, 'error');
+            }
+        }
+
+        function testFlashcardsSaving() {
+            try {
+                const testFlashcard = {
+                    title: 'Test Flashcard ' + Date.now(),
+                    front: 'What is the capital of India?',
+                    back: 'New Delhi',
+                    category: 'Geography',
+                    tags: ['test', 'geography']
+                };
+
+                const savedFlashcard = window.folderStorage.saveFlashcard(testFlashcard);
+                logResult(`✅ Flashcard saved successfully: ${savedFlashcard.title}`, 'success');
+                
+                // Verify it's in the correct folder
+                const flashcardsInFolder = window.folderStorage.getFromFolder('flashcards');
+                const foundFlashcard = flashcardsInFolder.find(f => f.id === savedFlashcard.id);
+                
+                if (foundFlashcard) {
+                    logResult(`✅ Flashcard found in flashcards folder`, 'success');
+                } else {
+                    logResult(`❌ Flashcard not found in flashcards folder`, 'error');
+                }
+                
+                updateStats();
+                updateFolderContents();
+            } catch (error) {
+                logResult(`❌ Error saving flashcard: ${error.message}`, 'error');
+            }
+        }
+
+        function testMCQsSaving() {
+            try {
+                const testMCQ = {
+                    title: 'Test MCQ ' + Date.now(),
+                    question: 'Which article of the Indian Constitution deals with Right to Education?',
+                    options: ['Article 19', 'Article 21A', 'Article 25', 'Article 32'],
+                    correctAnswer: 'Article 21A',
+                    explanation: 'Article 21A was inserted by the 86th Constitutional Amendment Act, 2002.',
+                    category: 'Constitutional Law',
+                    tags: ['test', 'constitution']
+                };
+
+                const savedMCQ = window.folderStorage.saveMCQ(testMCQ);
+                logResult(`✅ MCQ saved successfully: ${savedMCQ.title}`, 'success');
+                
+                // Verify it's in the correct folder
+                const mcqsInFolder = window.folderStorage.getFromFolder('mcqs');
+                const foundMCQ = mcqsInFolder.find(m => m.id === savedMCQ.id);
+                
+                if (foundMCQ) {
+                    logResult(`✅ MCQ found in mcqs folder`, 'success');
+                } else {
+                    logResult(`❌ MCQ not found in mcqs folder`, 'error');
+                }
+                
+                updateStats();
+                updateFolderContents();
+            } catch (error) {
+                logResult(`❌ Error saving MCQ: ${error.message}`, 'error');
+            }
+        }
+
+        function testMigration() {
+            try {
+                // Create some legacy data
+                const legacyNotes = [
+                    { id: 1001, title: 'Legacy Note 1', content: 'Old note content' },
+                    { id: 1002, title: 'Legacy Note 2', content: 'Another old note' }
+                ];
+                
+                const legacyBookmarks = [
+                    { 
+                        id: 2001, 
+                        title: 'Legacy Flashcard', 
+                        front: 'Question?', 
+                        back: 'Answer',
+                        metadata: { type: 'flashcard' }
+                    },
+                    { 
+                        id: 2002, 
+                        title: 'Legacy MCQ', 
+                        question: 'Test question?',
+                        metadata: { type: 'mcq' }
+                    }
+                ];
+
+                // Save to legacy storage
+                localStorage.setItem('userNotes', JSON.stringify(legacyNotes));
+                localStorage.setItem('bookmarks', JSON.stringify(legacyBookmarks));
+                
+                logResult(`📦 Created legacy data for migration test`, 'info');
+                
+                // Trigger migration
+                window.folderStorage.migrateExistingData();
+                
+                logResult(`✅ Migration completed`, 'success');
+                
+                updateStats();
+                updateFolderContents();
+            } catch (error) {
+                logResult(`❌ Error during migration: ${error.message}`, 'error');
+            }
+        }
+
+        function testSearch() {
+            try {
+                // Search in notes
+                const noteResults = window.folderStorage.searchInFolder('notes', 'test');
+                logResult(`🔍 Found ${noteResults.length} notes matching 'test'`, 'info');
+                
+                // Search in flashcards
+                const flashcardResults = window.folderStorage.searchInFolder('flashcards', 'capital');
+                logResult(`🔍 Found ${flashcardResults.length} flashcards matching 'capital'`, 'info');
+                
+                // Search in MCQs
+                const mcqResults = window.folderStorage.searchInFolder('mcqs', 'article');
+                logResult(`🔍 Found ${mcqResults.length} MCQs matching 'article'`, 'info');
+                
+            } catch (error) {
+                logResult(`❌ Error during search: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all test data?')) {
+                try {
+                    ['notes', 'flashcards', 'mcqs', 'bookmarks'].forEach(folder => {
+                        localStorage.setItem(`folder_${folder}`, JSON.stringify([]));
+                    });
+                    
+                    // Clear legacy storage too
+                    localStorage.removeItem('userNotes');
+                    localStorage.removeItem('bookmarks');
+                    localStorage.removeItem('flashcards');
+                    localStorage.removeItem('mcqs');
+                    
+                    logResult(`🧹 All test data cleared`, 'warning');
+                    testResults = [];
+                    updateTestResults();
+                    updateStats();
+                    updateFolderContents();
+                } catch (error) {
+                    logResult(`❌ Error clearing data: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            logResult('🚀 Folder-based storage test initialized', 'info');
+            
+            if (window.folderStorage) {
+                logResult('✅ Folder storage system loaded successfully', 'success');
+                updateStats();
+                updateFolderContents();
+            } else {
+                logResult('❌ Folder storage system not loaded', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

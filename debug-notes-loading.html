@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Notes Loading</title>
+    <script src="js/folder-based-storage.js"></script>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .debug-section {
+            background: #2A2A2A;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #4ade80;
+        }
+        .error { border-left-color: #f87171; }
+        .warning { border-left-color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <h1>🐛 Debug Notes Loading</h1>
+    
+    <div class="debug-section">
+        <h3>Folder Storage Status</h3>
+        <div id="folder-status"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Storage Contents</h3>
+        <div id="storage-contents"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Actions</h3>
+        <button onclick="createTestNote()" style="background: #4ade80; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Create Test Note</button>
+        <button onclick="loadNotes()" style="background: #60a5fa; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Load Notes</button>
+        <button onclick="clearStorage()" style="background: #f87171; color: black; padding: 10px; margin: 5px; border: none; border-radius: 3px;">Clear Storage</button>
+    </div>
+
+    <script>
+        function updateStatus() {
+            const statusEl = document.getElementById('folder-status');
+            const contentsEl = document.getElementById('storage-contents');
+            
+            // Check folder storage
+            if (window.folderStorage) {
+                statusEl.innerHTML = `
+                    <div>✅ Folder Storage: Loaded</div>
+                    <div>📊 Stats: ${JSON.stringify(window.folderStorage.getFolderStats())}</div>
+                `;
+            } else {
+                statusEl.innerHTML = `<div>❌ Folder Storage: Not loaded</div>`;
+            }
+            
+            // Check storage contents
+            const legacyNotes = JSON.parse(localStorage.getItem('userNotes') || '[]');
+            const folderNotes = JSON.parse(localStorage.getItem('folder_notes') || '[]');
+            
+            contentsEl.innerHTML = `
+                <div><strong>Legacy Storage (userNotes):</strong> ${legacyNotes.length} items</div>
+                <div><strong>Folder Storage (folder_notes):</strong> ${folderNotes.length} items</div>
+                <div><strong>Legacy Notes:</strong> <pre>${JSON.stringify(legacyNotes.slice(0, 2), null, 2)}</pre></div>
+                <div><strong>Folder Notes:</strong> <pre>${JSON.stringify(folderNotes.slice(0, 2), null, 2)}</pre></div>
+            `;
+        }
+        
+        function createTestNote() {
+            if (window.folderStorage) {
+                const testNote = {
+                    title: 'Debug Test Note ' + Date.now(),
+                    content: 'This is a test note created for debugging purposes.',
+                    subject: 'Debug',
+                    tags: ['debug', 'test']
+                };
+                
+                const saved = window.folderStorage.saveNote(testNote);
+                console.log('Test note created:', saved);
+                updateStatus();
+            } else {
+                alert('Folder storage not available');
+            }
+        }
+        
+        function loadNotes() {
+            if (window.folderStorage) {
+                const notes = window.folderStorage.getFromFolder('notes');
+                console.log('Loaded notes:', notes);
+                alert(`Loaded ${notes.length} notes. Check console for details.`);
+            } else {
+                alert('Folder storage not available');
+            }
+        }
+        
+        function clearStorage() {
+            if (confirm('Clear all storage?')) {
+                localStorage.removeItem('userNotes');
+                localStorage.removeItem('folder_notes');
+                localStorage.removeItem('folder_flashcards');
+                localStorage.removeItem('folder_mcqs');
+                localStorage.removeItem('folder_bookmarks');
+                updateStatus();
+            }
+        }
+        
+        // Initialize
+        setTimeout(() => {
+            updateStatus();
+        }, 500);
+        
+        // Update every 2 seconds
+        setInterval(updateStatus, 2000);
+    </script>
+</body>
+</html>

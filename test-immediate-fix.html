@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Immediate Fix</title>
+    <style>
+        body {
+            background: #1F1F1F;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .test-container {
+            background: #2A2A2A;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .option-btn {
+            background: #374151;
+            border: 2px solid #4B5563;
+            color: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .option-btn:hover {
+            background: #4B5563;
+        }
+        .option-btn.border-teal-primary {
+            border-color: #2C7A7B;
+            box-shadow: 0 0 0 2px #2C7A7B;
+        }
+        .control-btn {
+            background: #2C7A7B;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .control-btn:disabled {
+            background: #6B7280;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Immediate Fix</h1>
+    
+    <div class="test-container">
+        <h3>Daily Challenge Test</h3>
+        <p><strong>Which Article of the Indian Constitution deals with the Right to Equality?</strong></p>
+        
+        <div id="quiz-options">
+            <button class="option-btn" onclick="selectQuizOptionFixed(0)">
+                A. Article 14
+            </button>
+            <button class="option-btn" onclick="selectQuizOptionFixed(1)">
+                B. Article 15
+            </button>
+            <button class="option-btn" onclick="selectQuizOptionFixed(2)">
+                C. Article 16
+            </button>
+            <button class="option-btn" onclick="selectQuizOptionFixed(3)">
+                D. All of the above
+            </button>
+        </div>
+        
+        <button id="check-answer-btn" class="control-btn" onclick="checkQuizAnswerFixed()" disabled>
+            Check Answer
+        </button>
+        
+        <div id="quiz-feedback" class="hidden">
+            <!-- Feedback will appear here -->
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h3>Debug Info</h3>
+        <div id="debug-info">
+            <button onclick="showDebugInfo()" class="control-btn">Show Debug Info</button>
+            <div id="debug-display"></div>
+        </div>
+    </div>
+
+    <!-- Test data -->
+    <script>
+        // Mock daily challenge data
+        window.dailyChallenge = {
+            currentMCQ: 0,
+            mcqs: [
+                {
+                    question: "Which Article of the Indian Constitution deals with the Right to Equality?",
+                    options: ["Article 14", "Article 15", "Article 16", "All of the above"],
+                    answerIndex: 3,
+                    explanation: "Articles 14, 15, and 16 all deal with different aspects of the Right to Equality."
+                }
+            ]
+        };
+
+        // Mock toast function
+        window.showToast = function(message, type) {
+            console.log(`Toast [${type}]: ${message}`);
+            alert(message);
+        };
+
+        function showDebugInfo() {
+            const debugDisplay = document.getElementById('debug-display');
+            debugDisplay.innerHTML = `
+                <div style="background: #1A1A1A; padding: 10px; border-radius: 5px; margin-top: 10px; font-family: monospace; font-size: 12px;">
+                    <div>selectQuizOptionFixed: ${typeof window.selectQuizOptionFixed}</div>
+                    <div>checkQuizAnswerFixed: ${typeof window.checkQuizAnswerFixed}</div>
+                    <div>dailyChallenge: ${window.dailyChallenge ? 'Available' : 'Not found'}</div>
+                    <div>Current MCQ: ${window.dailyChallenge?.currentMCQ}</div>
+                </div>
+            `;
+        }
+    </script>
+
+    <!-- Include the immediate fix -->
+    <script src="js/daily-challenge-immediate-fix.js"></script>
+
+    <script>
+        // Test initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🧪 Test page loaded');
+            setTimeout(() => {
+                showDebugInfo();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

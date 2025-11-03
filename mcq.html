@@ -9,6 +9,8 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="js/icon-manager.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/folder-based-storage.js"></script>
+  <script src="js/real-time-data-manager.js"></script>
   <script src="js/study-tools.js"></script>
   <script src="js/performance-analyzer.js"></script>
   <script src="js/loading-state-manager.js"></script>
@@ -188,8 +190,78 @@
   </div>
 
   <script>
-    // Chapter-wise MCQ Data
-    const MCQ_CHAPTERS = [
+    // Load real MCQ data from folder storage
+    let MCQ_CHAPTERS = [];
+    
+    // Initialize with real data
+    function loadRealMCQData() {
+        if (window.realTimeDataManager) {
+            const realMCQs = window.realTimeDataManager.getRealMCQData();
+            
+            // Group MCQs by subject/category
+            const groupedMCQs = {};
+            realMCQs.forEach(mcq => {
+                const category = mcq.category || mcq.subject || 'General';
+                if (!groupedMCQs[category]) {
+                    groupedMCQs[category] = [];
+                }
+                groupedMCQs[category].push(mcq);
+            });
+            
+            // Convert to chapter format
+            MCQ_CHAPTERS = Object.entries(groupedMCQs).map(([category, mcqs]) => ({
+                id: category.toLowerCase().replace(/\s+/g, '-'),
+                name: category,
+                subject: category,
+                description: `Practice MCQs for ${category}`,
+                totalQuestions: mcqs.length,
+                difficulty: 'Medium',
+                estimatedTime: Math.ceil(mcqs.length * 1.5) + ' mins',
+                topics: [...new Set(mcqs.flatMap(m => m.tags || []))].slice(0, 4),
+                icon: getSubjectIcon(category),
+                color: getSubjectColor(category)
+            }));
+            
+            // Add fallback chapters if no real data
+            if (MCQ_CHAPTERS.length === 0) {
+                MCQ_CHAPTERS = getFallbackChapters();
+            }
+            
+            console.log('📚 Loaded real MCQ data:', MCQ_CHAPTERS.length, 'chapters');
+        } else {
+            MCQ_CHAPTERS = getFallbackChapters();
+        }
+    }
+    
+    // Get subject icon
+    function getSubjectIcon(subject) {
+        const icons = {
+            'Constitutional Law': 'book-open',
+            'Economics': 'trending-up',
+            'Geography': 'mountain',
+            'History': 'landmark',
+            'Current Affairs': 'newspaper',
+            'General': 'book'
+        };
+        return icons[subject] || 'book';
+    }
+    
+    // Get subject color
+    function getSubjectColor(subject) {
+        const colors = {
+            'Constitutional Law': 'blue',
+            'Economics': 'green',
+            'Geography': 'teal',
+            'History': 'orange',
+            'Current Affairs': 'purple',
+            'General': 'gray'
+        };
+        return colors[subject] || 'gray';
+    }
+    
+    // Fallback chapters if no real data
+    function getFallbackChapters() {
+        return [
       {
         id: 'polity-basics',
         name: 'Constitutional Basics',
@@ -263,6 +335,13 @@
         color: 'red'
       }
     ];
+    }
+
+    // Listen for real data updates
+    window.addEventListener('realDataLoaded', (event) => {
+        loadRealMCQData();
+        renderChapters();
+    });
 
     // State
     let searchQuery = '';
@@ -537,7 +616,12 @@
     if (window.iconManager) window.iconManager.refresh();
     initSearch();
     initSort();
-    renderChapters();
+    
+    // Load real data when available
+    setTimeout(() => {
+        loadRealMCQData();
+        renderChapters();
+    }, 1000);
   </script>
 </body>
 </html>

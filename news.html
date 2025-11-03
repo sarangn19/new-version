@@ -9,6 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/upsc-news-service-real.js"></script>
   <script src="js/news-integration-service.js"></script>
   <script src="js/news-display-interface.js"></script>
   <script src="js/upsc-news-service.js"></script>
@@ -363,13 +364,18 @@
 
         <!-- News Grid -->
         <section aria-label="News cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr" id="news-grid">
-          <!-- Empty state - news will be loaded dynamically -->
-          <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
-            <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
+          <!-- Loading state - will be replaced by real news -->
+          <div class="col-span-full flex flex-col items-center justify-center py-16 text-center" id="news-loading">
+            <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 animate-pulse">
               <i data-lucide="newspaper" class="w-8 h-8 text-white/50"></i>
             </div>
-            <h3 class="text-lg font-medium text-white mb-2">No News Available</h3>
-            <p class="text-white/60 text-sm max-w-md">News articles will appear here when available. Check back later for the latest UPSC-relevant updates.</p>
+            <h3 class="text-lg font-medium text-white mb-2">Loading UPSC News...</h3>
+            <p class="text-white/60 text-sm max-w-md">Fetching the latest current affairs and exam-relevant updates.</p>
+            <div class="flex items-center gap-2 text-sm text-white/50 mt-4">
+              <div class="w-2 h-2 bg-[var(--teal-primary)] rounded-full animate-bounce"></div>
+              <div class="w-2 h-2 bg-[var(--teal-primary)] rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+              <div class="w-2 h-2 bg-[var(--teal-primary)] rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
           </div>
         </section>
 

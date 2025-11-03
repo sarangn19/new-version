@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="js/profile-manager.js"></script>
+  <script src="js/folder-based-storage.js"></script>
   <script src="js/enhanced-note-manager.js"></script>
   <script src="js/data-exporter.js"></script>
   <script src="js/backup-manager.js"></script>
@@ -385,11 +386,31 @@
       border-color: rgba(239, 68, 68, 0.3);
       color: rgb(239, 68, 68);
     }
+
+    /* Layout improvements */
+    #main-content {
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+
+    .max-w-7xl {
+      min-height: auto;
+    }
+
+    /* Compact grid layout */
+    #grid-view {
+      min-height: 200px;
+    }
+
+    /* Compact table layout */
+    #table-view {
+      min-height: 200px;
+    }
   </style>
 </head>
 <body class="min-h-screen text-white antialiased scroll-hidden" data-theme="dark" data-color-scheme="default">
 
-  <div class="flex flex-col lg:flex-row h-screen bg-[var(--bg-dark-1)]">
+  <div class="flex flex-col lg:flex-row min-h-screen bg-[var(--bg-dark-1)]">
     
     <!-- SIDEBAR -->
     <aside id="sidebar" class="hidden lg:flex flex-col w-[280px] glass-sidebar p-8 pt-20 flex-shrink-0 overflow-y-auto scroll-hidden">
@@ -451,8 +472,8 @@
       </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA (Only Searchbar) -->
-    <main id="main-content" role="main" tabindex="-1" class="flex-1 p-6 lg:p-8 overflow-y-auto scroll-hidden page-transition">
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content" role="main" tabindex="-1" class="flex-1 p-6 lg:p-8 page-transition">
       <div class="max-w-7xl mx-auto">
         <!-- Page Header -->
         <div class="flex items-center justify-between mb-6">
@@ -609,17 +630,18 @@
           </div>
         </div>
 
-
+        <!-- Footer spacing -->
+        <div class="h-8"></div>
       </div>
     </main>
   </div>
 
   <script>
     // Notes data - will be loaded from user's actual notes
-    const notesData = [];
+    let notesData = [];
 
     let currentView = 'grid';
-    let filteredNotes = [...notesData];
+    let filteredNotes = [];
     let isLoading = false;
     let currentSort = 'date-desc';
 
@@ -655,6 +677,25 @@
     // Render grid view
     function renderGridView() {
       const gridView = document.getElementById('grid-view');
+      
+      if (filteredNotes.length === 0) {
+        gridView.innerHTML = `
+          <div class="col-span-full flex flex-col items-center justify-center py-12 text-center">
+            <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-4">
+              <i data-lucide="file-text" class="w-10 h-10 text-white/50"></i>
+            </div>
+            <h3 class="text-lg font-medium text-white mb-2">No notes yet</h3>
+            <p class="text-white/60 mb-4 max-w-md text-sm">Start creating your first note by clicking the "New Note" button above.</p>
+            <button onclick="document.getElementById('new-note-btn').click()" class="bg-[var(--teal-primary)] hover:bg-[var(--teal-primary)]/80 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              Create Your First Note
+            </button>
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+      }
+      
       gridView.innerHTML = filteredNotes.map(note => {
         const colorMap = {
           black: 'rgba(45, 55, 72, 0.4)',
@@ -700,6 +741,25 @@
     // Render table view
     function renderTableView() {
       const tableBody = document.getElementById('table-body');
+      
+      if (filteredNotes.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-12 text-center">
+              <div class="flex flex-col items-center">
+                <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-3">
+                  <i data-lucide="file-text" class="w-6 h-6 text-white/50"></i>
+                </div>
+                <h3 class="text-base font-medium text-white mb-1">No notes found</h3>
+                <p class="text-white/60 text-sm">Create your first note to get started.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+      }
+      
       tableBody.innerHTML = filteredNotes.map(note => {
         // Format date consistently
         const formattedDate = note.lastEdited;
@@ -929,6 +989,93 @@
       }
     }
 
+    // Load notes from folder-based storage
+    function loadNotesData() {
+      try {
+        if (window.folderStorage) {
+          // Load from folder-based storage
+          const folderNotes = window.folderStorage.getFromFolder('notes');
+          console.log('📁 Loaded notes from folder storage:', folderNotes.length);
+          
+          // Convert to display format
+          notesData = folderNotes.map(note => ({
+            ...note,
+            date: note.createdAt ? new Date(note.createdAt).toLocaleDateString() : 'Unknown',
+            lastEdited: note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : 'Unknown'
+          }));
+        } else {
+          // Fallback to legacy storage
+          notesData = JSON.parse(localStorage.getItem('userNotes') || '[]');
+          console.log('📄 Loaded notes from legacy storage:', notesData.length);
+        }
+        
+        // Update filtered notes
+        filteredNotes = [...notesData];
+        
+        // Add sample notes if no notes exist (for demo purposes)
+        if (notesData.length === 0) {
+          const sampleNotes = [
+            {
+              id: Date.now() - 1000,
+              title: "Constitutional Law Basics",
+              content: "The Indian Constitution is the supreme law of India. It lays down the framework defining fundamental political principles, establishes the structure, procedures, powers, and duties of government institutions.",
+              richContent: "<p>The Indian Constitution is the supreme law of India. It lays down the framework defining fundamental political principles, establishes the structure, procedures, powers, and duties of government institutions.</p>",
+              subject: "Constitutional Law",
+              tags: ["constitution", "law", "basics"],
+              createdAt: new Date(Date.now() - 86400000).toISOString(),
+              updatedAt: new Date(Date.now() - 86400000).toISOString(),
+              color: "blue",
+              date: "Yesterday",
+              lastEdited: new Date(Date.now() - 86400000).toLocaleDateString()
+            },
+            {
+              id: Date.now() - 2000,
+              title: "Economic Survey 2024",
+              content: "Key highlights from the Economic Survey 2024 including GDP growth projections, inflation targets, and fiscal policy measures.",
+              richContent: "<p>Key highlights from the Economic Survey 2024 including GDP growth projections, inflation targets, and fiscal policy measures.</p>",
+              subject: "Economics",
+              tags: ["economics", "survey", "2024"],
+              createdAt: new Date(Date.now() - 172800000).toISOString(),
+              updatedAt: new Date(Date.now() - 172800000).toISOString(),
+              color: "green",
+              date: "2 days ago",
+              lastEdited: new Date(Date.now() - 172800000).toLocaleDateString()
+            },
+            {
+              id: Date.now() - 3000,
+              title: "International Relations - India-US Partnership",
+              content: "Strategic partnership between India and the United States covering defense cooperation, trade relations, and technology transfer agreements.",
+              richContent: "<p>Strategic partnership between India and the United States covering defense cooperation, trade relations, and technology transfer agreements.</p>",
+              subject: "International Relations",
+              tags: ["international", "india", "usa", "partnership"],
+              createdAt: new Date(Date.now() - 259200000).toISOString(),
+              updatedAt: new Date(Date.now() - 259200000).toISOString(),
+              color: "purple",
+              date: "3 days ago",
+              lastEdited: new Date(Date.now() - 259200000).toLocaleDateString()
+            }
+          ];
+          
+          // Save sample notes to folder storage
+          if (window.folderStorage) {
+            sampleNotes.forEach(note => {
+              window.folderStorage.saveNote(note);
+            });
+            notesData = sampleNotes;
+            console.log('📝 Created sample notes for demo:', sampleNotes.length);
+          }
+        }
+        
+        console.log('📝 Total notes loaded:', notesData.length);
+        return notesData;
+      } catch (error) {
+        console.error('Error loading notes:', error);
+        notesData = [];
+        filteredNotes = [];
+        return [];
+      }
+    }
+
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
       // Load saved profile picture
@@ -939,6 +1086,28 @@
           const parentDiv = userInitialsEl.parentElement;
           parentDiv.innerHTML = `<img src="image/${savedDP}.png" alt="Profile Picture" class="w-full h-full object-cover">`;
       }
+      
+      // Load notes data
+      console.log('🚀 Initializing notes page...');
+      
+      // Check if folder storage is available
+      if (window.folderStorage) {
+        console.log('✅ Folder storage available');
+      } else {
+        console.log('⚠️ Folder storage not available, will retry...');
+        // Retry after a short delay
+        setTimeout(() => {
+          if (window.folderStorage) {
+            console.log('✅ Folder storage now available');
+            loadNotesData();
+            renderNotes();
+          } else {
+            console.log('❌ Folder storage still not available');
+          }
+        }, 500);
+      }
+      
+      loadNotesData();
       
       // View toggle event listeners
       document.getElementById('grid-view-btn').addEventListener('click', () => switchView('grid'));
@@ -1109,6 +1278,9 @@
           window.duoAnimations.triggerSuccessPulse(document.getElementById('save-note'));
         }
         
+        // Refresh the notes display
+        loadNotesData();
+        
         // Animate note flying to its position in grid
         animateNoteToGrid(displayNote);
       });
@@ -1194,6 +1366,8 @@
       function renderNotes() {
         // Update filtered notes to include new notes
         filteredNotes = [...notesData];
+        
+        console.log('🎨 Rendering notes:', filteredNotes.length);
         
         // Re-render current view
         if (currentView === 'grid') {
@@ -1339,8 +1513,11 @@
       }
 
       // Initial render
-      switchView('grid');
-      lucide.createIcons();
+      setTimeout(() => {
+        renderNotes();
+        switchView('grid');
+        lucide.createIcons();
+      }, 100); // Small delay to ensure folder storage is initialized
     });
   </script>
 </body>
